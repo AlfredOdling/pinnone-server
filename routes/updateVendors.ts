@@ -76,7 +76,7 @@ export const updateVendors = async ({ encryptedData, userId }: any) => {
       visitedVendors.data.map((vendor) => ({
         vendor_id: vendor.id,
         org_id,
-        status: 'untracked',
+        status: 'not_in_stack',
       })),
       {
         onConflict: 'vendor_id',
