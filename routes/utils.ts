@@ -127,7 +127,8 @@ export const decrypt = (encryptedData) => {
 export const getBrowserHistoryWithVendorId = (
   browserHistory,
   trackedTools,
-  userId
+  userId,
+  org_id
 ) => {
   return browserHistory
     .map((visit) => {
@@ -140,6 +141,7 @@ export const getBrowserHistoryWithVendorId = (
 
       return {
         user_id: userId,
+        org_id,
         vendor_id: matchingTool.vendor_id,
         last_visited: new Date(visit.lastVisitTime).toISOString(),
       }

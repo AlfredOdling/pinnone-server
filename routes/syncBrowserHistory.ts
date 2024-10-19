@@ -23,14 +23,15 @@ export const syncBrowserHistory = async ({
   const tools = await supabase
     .from('tools')
     .select('*, vendors!inner(*)') // Select the vendors associated with the tools
-    .eq('organization_id', org_id) // Filter the tools that the org is tracking
+    .eq('is_tracking', true) // Filter the tools that the org is tracking
+    .eq('organization_id', org_id)
 
   const browserHistoryWithVendorId = getBrowserHistoryWithVendorId(
     browserHistory,
     tools.data,
-    userId
+    userId,
+    org_id
   )
-  console.log('🚀  browserHistoryWithVendorId:', browserHistoryWithVendorId)
 
   try {
     const user_activity = await supabase
