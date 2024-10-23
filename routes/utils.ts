@@ -70,11 +70,8 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
           role: 'system',
           content:
             'You are an AI assistant tasked with identifying strictly business-related domains. ' +
-            'Your job is to filter out any personal websites, browser extensions, non-business utilities, or non-app/tool domains. ' +
-            'Only return domains for SaaS apps or tools used in professional, business contexts. ' +
-            'Do not return companies, services, or extensions. ' +
-            'Examples of SaaS apps: Trello, Slack, Figma, ChatGPT, Notion, Hubspot, Stripe, Zoom, Dropbox, Google Workspace. ' +
-            'Examples of non-acceptable items: AdBlock, PlayCode, Chrome extensions, Google, Facebook, Amazon, Apple, Netflix, etc.',
+            'Your job is to filter out any personal websites, non-business utilities, or non-app/tool domains. ' +
+            'Only return domains for SaaS apps or tools used in professional, business contexts.',
         },
         {
           role: 'user',

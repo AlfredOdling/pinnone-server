@@ -4,6 +4,7 @@ import { inviteAdmins } from './inviteAdmins'
 import { inviteExtensionUsers } from './inviteExtensionUsers'
 import { updateVendors } from './updateVendors'
 import { syncBrowserHistory } from './syncBrowserHistory'
+import { deleteExtensionUser } from './deleteExtensionUser'
 
 const router = Router()
 
@@ -81,6 +82,11 @@ router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
     console.error(error)
     res.status(500).send({ error: 'Failed', msg: error.message })
   }
+})
+
+router.post('/deleteExtensionUser', async (req: Request, res: Response) => {
+  const { id } = req.body
+  await deleteExtensionUser({ id })
 })
 
 export default router
