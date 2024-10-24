@@ -22,7 +22,7 @@ export const inviteExtensionUsers = async ({ emails, organization_id }) => {
             organization_id: organization_id,
             role: 'extension_user',
           },
-          redirectTo: 'http://127.0.0.1:3000/extension', //process.env.NETLIFY_WEB_ADDRESS,
+          redirectTo: process.env.REACT_APP_FE_SERVER_URL + '/extension',
         }
       )
       if (error) throw error
