@@ -9,39 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      departments: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
       organizations: {
         Row: {
           created_at: string
           id: string
           name: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -63,69 +48,104 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          currency: string | null
+          flat_fee_cost: number | null
+          id: number
+          next_renewal_date: string | null
+          number_of_seats: number | null
+          other_cost: number | null
+          price_per_seat: number | null
+          pricing_model: string | null
+          renewal_frequency: string | null
+          starts_at: string | null
+          status: string | null
+          tool_id: number | null
+          updated_at: string
+          usage_based_cost: number | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          flat_fee_cost?: number | null
+          id?: number
+          next_renewal_date?: string | null
+          number_of_seats?: number | null
+          other_cost?: number | null
+          price_per_seat?: number | null
+          pricing_model?: string | null
+          renewal_frequency?: string | null
+          starts_at?: string | null
+          status?: string | null
+          tool_id?: number | null
+          updated_at?: string
+          usage_based_cost?: number | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          flat_fee_cost?: number | null
+          id?: number
+          next_renewal_date?: string | null
+          number_of_seats?: number | null
+          other_cost?: number | null
+          price_per_seat?: number | null
+          pricing_model?: string | null
+          renewal_frequency?: string | null
+          starts_at?: string | null
+          status?: string | null
+          tool_id?: number | null
+          updated_at?: string
+          usage_based_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_subscription_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tools: {
         Row: {
           budget_owner_id: string | null
-          cancelled_at: string | null
-          cost: number | null
           created_at: string
-          currency: string | null
-          department_id: string | null
-          id: string
+          department: string | null
+          file_urls: string | null
+          id: number
           is_tracking: boolean | null
-          name: string
-          next_renewal_date: string | null
-          number_of_units: number | null
           organization_id: string
-          pricing_model: Database["public"]["Enums"]["pricing_model"] | null
-          renewal_frequency:
-            | Database["public"]["Enums"]["renewal_frequency"]
-            | null
-          starts_at: string
-          status: Database["public"]["Enums"]["tool_status"] | null
-          vendor_id: string
+          updated_at: string
+          vendor_id: number
         }
         Insert: {
           budget_owner_id?: string | null
-          cancelled_at?: string | null
-          cost?: number | null
           created_at?: string
-          currency?: string | null
-          department_id?: string | null
-          id?: string
+          department?: string | null
+          file_urls?: string | null
+          id?: number
           is_tracking?: boolean | null
-          name: string
-          next_renewal_date?: string | null
-          number_of_units?: number | null
           organization_id: string
-          pricing_model?: Database["public"]["Enums"]["pricing_model"] | null
-          renewal_frequency?:
-            | Database["public"]["Enums"]["renewal_frequency"]
-            | null
-          starts_at?: string
-          status?: Database["public"]["Enums"]["tool_status"] | null
-          vendor_id: string
+          updated_at?: string
+          vendor_id: number
         }
         Update: {
           budget_owner_id?: string | null
-          cancelled_at?: string | null
-          cost?: number | null
           created_at?: string
-          currency?: string | null
-          department_id?: string | null
-          id?: string
+          department?: string | null
+          file_urls?: string | null
+          id?: number
           is_tracking?: boolean | null
-          name?: string
-          next_renewal_date?: string | null
-          number_of_units?: number | null
           organization_id?: string
-          pricing_model?: Database["public"]["Enums"]["pricing_model"] | null
-          renewal_frequency?:
-            | Database["public"]["Enums"]["renewal_frequency"]
-            | null
-          starts_at?: string
-          status?: Database["public"]["Enums"]["tool_status"] | null
-          vendor_id?: string
+          updated_at?: string
+          vendor_id?: number
         }
         Relationships: [
           {
@@ -133,13 +153,6 @@ export type Database = {
             columns: ["budget_owner_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tools_department_id_fkey"
-            columns: ["department_id"]
-            isOneToOne: false
-            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
           {
@@ -158,69 +171,30 @@ export type Database = {
           },
         ]
       }
-      untracked_tools: {
-        Row: {
-          created_at: string
-          id: number
-          org_id: string | null
-          status: string | null
-          vendor_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          org_id?: string | null
-          status?: string | null
-          vendor_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          org_id?: string | null
-          status?: string | null
-          vendor_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_untracked_tools_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_untracked_tools_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_activity: {
         Row: {
           created_at: string
-          id: string
+          id: number
           last_visited: string
           updated_at: string
           user_id: string
-          vendor_id: string | null
+          vendor_id: number
         }
         Insert: {
           created_at?: string
-          id?: string
-          last_visited?: string
+          id?: number
+          last_visited: string
           updated_at?: string
           user_id: string
-          vendor_id?: string | null
+          vendor_id: number
         }
         Update: {
           created_at?: string
-          id?: string
+          id?: number
           last_visited?: string
           updated_at?: string
           user_id?: string
-          vendor_id?: string | null
+          vendor_id?: number
         }
         Relationships: [
           {
@@ -242,33 +216,33 @@ export type Database = {
       users: {
         Row: {
           completed_onboarding: boolean | null
-          department: string | null
+          created_at: string
           email: string | null
           first_name: string | null
           id: string
           is_tracked: boolean | null
           last_name: string | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           completed_onboarding?: boolean | null
-          department?: string | null
+          created_at?: string
           email?: string | null
           first_name?: string | null
           id?: string
           is_tracked?: boolean | null
           last_name?: string | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           completed_onboarding?: boolean | null
-          department?: string | null
+          created_at?: string
           email?: string | null
           first_name?: string | null
           id?: string
           is_tracked?: boolean | null
           last_name?: string | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -278,6 +252,7 @@ export type Database = {
           id: number
           organization_id: string
           role_id: number
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -285,6 +260,7 @@ export type Database = {
           id?: number
           organization_id: string
           role_id: number
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -292,6 +268,7 @@ export type Database = {
           id?: number
           organization_id?: string
           role_id?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -323,10 +300,10 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
-          id: string
+          id: number
+          link_to_pricing_page: string | null
           logo_url: string | null
           name: string
-          pricing_info: string | null
           root_domain: string | null
           updated_at: string
           url: string | null
@@ -335,10 +312,10 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
-          id?: string
+          id?: number
+          link_to_pricing_page?: string | null
           logo_url?: string | null
           name: string
-          pricing_info?: string | null
           root_domain?: string | null
           updated_at?: string
           url?: string | null
@@ -347,10 +324,10 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
-          id?: string
+          id?: number
+          link_to_pricing_page?: string | null
           logo_url?: string | null
           name?: string
-          pricing_info?: string | null
           root_domain?: string | null
           updated_at?: string
           url?: string | null
@@ -365,9 +342,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      pricing_model: "FLAT_FEE" | "PER_SEAT" | "USAGE_BASED" | "OTHER"
-      renewal_frequency: "MONTHLY" | "QUARTERLY" | "YEARLY"
-      tool_status: "ACTIVE" | "EXPIRED"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never

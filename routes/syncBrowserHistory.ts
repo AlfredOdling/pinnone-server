@@ -29,8 +29,7 @@ export const syncBrowserHistory = async ({
   const browserHistoryWithVendorId = getBrowserHistoryWithVendorId(
     browserHistory,
     tools.data,
-    userId,
-    org_id
+    userId
   )
 
   try {

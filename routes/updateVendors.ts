@@ -72,10 +72,10 @@ export const updateVendors = async ({ encryptedData, userId }: any) => {
       .select('*') // Get all existing vendors
       .in('root_domain', visitedRootDomains) // Filter by visited domains
 
-    await supabase.from('untracked_tools').upsert(
+    await supabase.from('tools').upsert(
       visitedVendors.data.map((vendor) => ({
         vendor_id: vendor.id,
-        org_id,
+        organization_id: org_id,
         status: 'not_in_stack',
       })),
       {
