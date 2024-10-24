@@ -122,6 +122,7 @@ export type Database = {
           id: number
           is_tracking: boolean | null
           organization_id: string
+          status: string | null
           updated_at: string
           vendor_id: number
         }
@@ -133,6 +134,7 @@ export type Database = {
           id?: number
           is_tracking?: boolean | null
           organization_id: string
+          status?: string | null
           updated_at?: string
           vendor_id: number
         }
@@ -144,6 +146,7 @@ export type Database = {
           id?: number
           is_tracking?: boolean | null
           organization_id?: string
+          status?: string | null
           updated_at?: string
           vendor_id?: number
         }
@@ -165,7 +168,7 @@ export type Database = {
           {
             foreignKeyName: "tools_vendor_id_fkey"
             columns: ["vendor_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
@@ -221,6 +224,7 @@ export type Database = {
           first_name: string | null
           id: string
           is_tracked: boolean | null
+          last_active: string | null
           last_name: string | null
           updated_at: string
         }
@@ -231,6 +235,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_tracked?: boolean | null
+          last_active?: string | null
           last_name?: string | null
           updated_at?: string
         }
@@ -241,6 +246,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_tracked?: boolean | null
+          last_active?: string | null
           last_name?: string | null
           updated_at?: string
         }
