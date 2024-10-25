@@ -17,11 +17,14 @@ const supabase = createClient<Database>(
 )
 
 // We get the root domains of the vendors that the user has visited
-export function getVendorRootDomains(historyArray) {
+export function getVendorRootDomains(historyArray: { url: string }[]) {
   return (
     historyArray
       .map((entry) => {
         try {
+          const canParse = URL.canParse(entry.url)
+          if (!canParse) return entry.url
+
           // Get the root domain
           const url = new URL(entry.url)
           const domainParts = url.hostname.split('.')
