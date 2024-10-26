@@ -13,29 +13,18 @@ const supabase = createClient<Database>(
 export const inviteAdmins = async ({ emails, organization_id }) => {
   const emails_ = emails.split(',').map((email) => email.trim())
 
-  try {
-    const invitePromises = emails_.map(async (email) => {
-      const { data, error } = await supabase.auth.admin.inviteUserByEmail(
-        email,
-        {
-          data: {
-            organization_id: organization_id,
-            role: 'admin',
-          },
-          redirectTo: 'http://127.0.0.1:3000', //process.env.NETLIFY_WEB_ADDRESS,
-        }
-      )
-      if (error) throw error
-      return data
+  const invitePromises = emails_.map(async (email) => {
+    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
+      data: {
+        organization_id: organization_id,
+        role: 'admin',
+      },
+      redirectTo: process.env.REACT_APP_FE_SERVER_URL,
     })
 
-    await Promise.all(invitePromises)
-    return { success: true, message: 'All admins invited successfully' }
-  } catch (error) {
-    console.error('Error inviting admins:', error)
-    return {
-      success: false,
-      error: error.message || 'An error occurred while inviting admins',
-    }
-  }
+    if (error) throw error
+    return data
+  })
+
+  await Promise.all(invitePromises)
 }

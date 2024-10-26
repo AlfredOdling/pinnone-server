@@ -32,19 +32,11 @@ export const syncBrowserHistory = async ({
     userId
   )
 
-  try {
-    const user_activity = await supabase
-      .from('user_activity')
-      .upsert(browserHistoryWithVendorId, {
-        onConflict: 'user_id, vendor_id, last_visited',
-        ignoreDuplicates: true,
-      })
-
-    if (user_activity.error) throw new Error(user_activity.error.message)
-
-    console.log('✅ User activity updated successfully')
-  } catch (error) {
-    console.error('Error updating user activity:', error)
-    throw new Error('Failed to update user activity')
-  }
+  await supabase
+    .from('user_activity')
+    .upsert(browserHistoryWithVendorId, {
+      onConflict: 'user_id, vendor_id, last_visited',
+      ignoreDuplicates: true,
+    })
+    .throwOnError()
 }

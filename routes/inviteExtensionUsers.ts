@@ -13,29 +13,20 @@ const supabase = createClient<Database>(
 export const inviteExtensionUsers = async ({ emails, organization_id }) => {
   const emails_ = emails.split(',').map((email) => email.trim())
 
-  try {
-    const invitePromises = emails_.map(async (email) => {
-      const { data, error } = await supabase.auth.admin.inviteUserByEmail(
-        email,
-        {
+  await Promise.all(
+    emails_.map(async (email) => {
+      try {
+        const { data } = await supabase.auth.admin.inviteUserByEmail(email, {
           data: {
             organization_id: organization_id,
             role: 'extension_user',
           },
           redirectTo: process.env.REACT_APP_FE_SERVER_URL + '/extension',
-        }
-      )
-      if (error) throw error
-      return data
+        })
+        return data
+      } catch (error) {
+        throw error
+      }
     })
-
-    await Promise.all(invitePromises)
-    return { success: true, message: 'All admins invited successfully' }
-  } catch (error) {
-    console.error('Error inviting admins:', error)
-    return {
-      success: false,
-      error: error.message || 'An error occurred while inviting admins',
-    }
-  }
+  )
 }

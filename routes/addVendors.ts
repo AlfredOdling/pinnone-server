@@ -61,20 +61,23 @@ export const addVendors = async ({
       }
     )
     .select('*')
+    .throwOnError()
 
-  const res = await supabase.from('tools').upsert(
-    upsertedVendors.data.map((vendor) => ({
-      vendor_id: vendor.id,
-      organization_id,
-      department: vendor.category,
-      budget_owner_id,
-      status: 'in_stack',
-      is_tracking: true,
-    })),
-    {
-      onConflict: 'vendor_id',
-      ignoreDuplicates: true,
-    }
-  )
-  console.log('🚀  res:', res)
+  await supabase
+    .from('tools')
+    .upsert(
+      upsertedVendors.data.map((vendor) => ({
+        vendor_id: vendor.id,
+        organization_id,
+        department: vendor.category,
+        budget_owner_id,
+        status: 'in_stack',
+        is_tracking: true,
+      })),
+      {
+        onConflict: 'vendor_id',
+        ignoreDuplicates: true,
+      }
+    )
+    .throwOnError()
 }

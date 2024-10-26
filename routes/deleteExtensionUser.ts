@@ -11,15 +11,6 @@ const supabase = createClient<Database>(
 )
 
 export const deleteExtensionUser = async ({ id }) => {
-  try {
-    const { data, error } = await supabase.auth.admin.deleteUser(id)
-    if (error) throw error
-    return data
-  } catch (error) {
-    console.error('Error deleting extension user:', error)
-    return {
-      success: false,
-      error: error.message || 'An error occurred while deleting extension user',
-    }
-  }
+  const { error } = await supabase.auth.admin.deleteUser(id)
+  if (error) throw error
 }

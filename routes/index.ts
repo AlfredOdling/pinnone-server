@@ -30,10 +30,10 @@ router.post('/inviteAdmins', async (req: Request, res: Response) => {
 
   try {
     await inviteAdmins({ emails, organization_id })
-    res.status(200).send({ data: 'Invited' })
+    res.status(200).send()
   } catch (error) {
     console.error(error)
-    res.status(500).send({ error: 'Failed', msg: error })
+    res.status(500).send({ error: 'Failed', msg: error.message })
   }
 })
 
@@ -42,10 +42,10 @@ router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
 
   try {
     await inviteExtensionUsers({ emails, organization_id })
-    res.status(200).send({ data: 'Invited' })
+    res.status(200).send()
   } catch (error) {
     console.error(error)
-    res.status(500).send({ error: 'Failed', msg: error })
+    res.status(500).send({ error: 'Failed', msg: error.message })
   }
 })
 
@@ -59,7 +59,7 @@ router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
       userId: data.userId,
     })
 
-    res.status(200).send({ data: 'History retrieved' })
+    res.status(200).send()
   } catch (error) {
     console.error(error)
     res.status(500).send({ error: 'Failed', msg: error.message })
@@ -68,7 +68,13 @@ router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
 
 router.post('/deleteExtensionUser', async (req: Request, res: Response) => {
   const { id } = req.body
-  await deleteExtensionUser({ id })
+  try {
+    await deleteExtensionUser({ id })
+    res.status(200).send()
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ error: 'Failed', msg: error.message })
+  }
 })
 
 router.post('/addVendors', async (req: Request, res: Response) => {
@@ -82,7 +88,7 @@ router.post('/addVendors', async (req: Request, res: Response) => {
       budget_owner_id,
     })
 
-    res.status(200).send({ data: 'History retrieved' })
+    res.status(200).send()
   } catch (error) {
     console.error(error)
     res.status(500).send({ error: 'Failed', msg: error.message })
