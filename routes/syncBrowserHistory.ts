@@ -17,8 +17,10 @@ export const syncBrowserHistory = async ({
   encryptedData: string
   userId: string
 }) => {
+  console.log('🚀  userId:', userId)
   const browserHistory = decrypt(encryptedData)
   const org_id = await getOrgId({ userId })
+  console.log('🚀  org_id:', org_id)
 
   const tools = await supabase
     .from('tools')
