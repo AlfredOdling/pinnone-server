@@ -5,8 +5,20 @@ import { inviteExtensionUsers } from './inviteExtensionUsers'
 import { syncBrowserHistory } from './syncBrowserHistory'
 import { deleteExtensionUser } from './deleteExtensionUser'
 import { addVendors } from './addVendors'
+// import express from 'express'
+// import { handleStripeWebhooks } from './handleStripeWebhooks'
 
 const router = Router()
+
+// router.post(
+//   '/webhook',
+//   express.raw({ type: 'application/json' }),
+//   async (req: Request, res: Response) => {
+//     console.log('🚀  res:', res)
+//     console.log('🚀  req:', req)
+//     await handleStripeWebhooks(req, res)
+//   }
+// )
 
 router.post('/emailEditRequirement', async (req: Request, res: Response) => {
   const { email } = req.body

@@ -6,3 +6,5 @@ build/
 .turbo
 .cache
 *.test.*
+merged_dataset_2.json
+/other/*

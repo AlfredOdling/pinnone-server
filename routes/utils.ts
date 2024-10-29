@@ -16,35 +16,37 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+export function getRootDomain(url: string): string | null {
+  try {
+    const canParse = URL.canParse(url)
+    if (!canParse) return url
+
+    // Get the root domain
+    const urlObj = new URL(url)
+    const domainParts = urlObj.hostname.split('.')
+
+    // Skip '127.0.0.1' and 'localhost'
+    if (urlObj.hostname === '127.0.0.1' || urlObj.hostname === 'localhost') {
+      return null
+    }
+
+    // For domains like 'co.uk', 'github.com', 'linkedin.com'
+    if (domainParts.length > 2) {
+      return domainParts.slice(-2).join('.') // Returns 'domain.ext'
+    }
+
+    return urlObj.hostname // Returns the full hostname if it's not subdomain.ext
+  } catch (error) {
+    console.error('Invalid URL:', url)
+    return null // Handle invalid URLs gracefully
+  }
+}
+
 // We get the root domains of the vendors that the user has visited
 export function getVendorRootDomains(historyArray: { url: string }[]) {
   return (
     historyArray
-      .map((entry) => {
-        try {
-          const canParse = URL.canParse(entry.url)
-          if (!canParse) return entry.url
-
-          // Get the root domain
-          const url = new URL(entry.url)
-          const domainParts = url.hostname.split('.')
-
-          // Skip '127.0.0.1' and 'localhost'
-          if (url.hostname === '127.0.0.1' || url.hostname === 'localhost') {
-            return null
-          }
-
-          // For domains like 'co.uk', 'github.com', 'linkedin.com'
-          if (domainParts.length > 2) {
-            return domainParts.slice(-2).join('.') // Returns 'domain.ext'
-          }
-
-          return url.hostname // Returns the full hostname if it's not subdomain.ext
-        } catch (error) {
-          console.error('Invalid URL:', entry.url)
-          return null // Handle invalid URLs gracefully
-        }
-      })
+      .map((entry) => getRootDomain(entry.url))
       // Remove null values
       .filter((domain) => domain)
       // Remove duplicates
