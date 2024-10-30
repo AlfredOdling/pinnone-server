@@ -125,7 +125,7 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
 
     console.info(
       '\x1b[34m%s\x1b[0m',
-      '✅ Approved domains:',
+      '✅ Approved domains (certaintyScore > 40%):',
       filteredDomains.map((d) => d)
     )
 
