@@ -26,6 +26,18 @@ export const addVendors = async ({
     vendors.map((vendor) => ({ url: vendor }))
   )
 
+  const existingVendors = await supabase
+    .from('vendors')
+    .select('root_domain')
+    .in('root_domain', rootDomains)
+
+  const rootDomainsToFetch = rootDomains.filter(
+    (domain) =>
+      !existingVendors.data.map((vendor) => vendor.root_domain).includes(domain)
+  )
+
+  console.log('🚀 addVendors: rootDomainsToFetch: ', rootDomainsToFetch)
+
   const completion = await openai.beta.chat.completions.parse({
     model: 'gpt-4o-2024-08-06',
     messages: [
@@ -37,7 +49,7 @@ export const addVendors = async ({
       },
       {
         role: 'user',
-        content: JSON.stringify(rootDomains),
+        content: JSON.stringify(rootDomainsToFetch),
       },
     ],
     response_format: zodResponseFormat(NewVendors, 'newVendors'),
@@ -54,7 +66,7 @@ export const addVendors = async ({
         logo_url: vendor.logo_url,
         category: vendor.category,
         link_to_pricing_page: vendor.link_to_pricing_page,
-        organization_id,
+        //organization_id,
       })),
       {
         onConflict: 'root_domain',

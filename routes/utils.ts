@@ -51,16 +51,37 @@ export function getVendorRootDomains(historyArray: { url: string }[]) {
       .filter((domain) => domain)
       // Remove duplicates
       .filter((domain, index, self) => self.indexOf(domain) === index)
+      // Remove local domains
+      .filter((domain) => !domain.includes('localhost'))
+      // Remove 127.0.0.1
+      .filter((domain) => !domain.includes('127.0.0.1'))
+      // Remove personal urls
+      .filter((domain) => !personalUrls.includes(domain))
   )
 }
 
 export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
   console.log('⏳ Getting root domains...')
 
-  const browserHistory = decryptedData.map(({ lastVisitTime, url }) => ({
+  let browserHistory = decryptedData.map(({ lastVisitTime, url }) => ({
     lastVisitTime,
     url,
   }))
+
+  const existingVendors = await supabase
+    .from('vendors')
+    .select('root_domain')
+    .in('root_domain', getVendorRootDomains(browserHistory))
+
+  const notOverlappingVendors = existingVendors.data.map(
+    (vendor) => vendor.root_domain
+  )
+
+  browserHistory = browserHistory
+    .filter(({ url }) => !notOverlappingVendors.includes(getRootDomain(url)))
+    .filter(({ url }) => !url.includes('localhost'))
+    .filter(({ url }) => !url.includes('127.0.0.1'))
+    .filter(({ url }) => !personalUrls.includes(url))
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -78,7 +99,7 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
             'Look for clear indicators like enterprise features, B2B pricing pages, and business-focused marketing language. ' +
             'Also look for cues in the url such as: "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", "console.", "app.", "api.", "dashboard.", "console.", etc. ' +
             'If there is any doubt, score it as 0.' +
-            'Only return one SaaS app for each domain.',
+            'Only return one SaaS app for each domain. No duplicates.',
         },
         {
           role: 'user',
@@ -89,8 +110,11 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
     })
 
     const domains = completion.choices[0].message.parsed.children
-    const filteredDomains = domains.filter((d) => d.certaintyScore > 40)
-    const skippedDomains = domains.filter((d) => d.certaintyScore <= 40)
+    const uniqueDomains = domains.filter(
+      (domain, index, self) => self.indexOf(domain) === index
+    )
+    const filteredDomains = uniqueDomains.filter((d) => d.certaintyScore > 40)
+    const skippedDomains = uniqueDomains.filter((d) => d.certaintyScore <= 40)
 
     console.info('--------------')
     console.info(
