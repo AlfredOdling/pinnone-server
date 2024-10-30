@@ -62,44 +62,56 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
     url,
   }))
 
-  // Get root domains, and manual filtering
-  const visitedDomains = getVendorRootDomains(browserHistory).filter(
-    (domain) => !personalUrls.includes(domain)
-  )
-
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await openai.beta.chat.completions.parse({
       model: 'gpt-4o-2024-08-06',
       messages: [
         {
           role: 'system',
           content:
             'You are an AI assistant tasked with identifying strictly business-related domains. ' +
-            'Your job is to filter out any personal websites, non-business utilities, or non-app/tool domains. ' +
-            'Only return domains for SaaS apps or tools used in professional, business contexts.',
+            'You will be given a list of urls that a user has visited. Use all the information provided to determine if each domain is a B2B SaaS tool or business application. ' +
+            'Your job is to determine if each domain is a B2B SaaS tool or business application. ' +
+            'For each domain, assign a certainty score between 0 and 100: ' +
+            '100 = Definitely a B2B tool (e.g. Salesforce, Workday, business productivity tools) ' +
+            '0 = Not a B2B tool (consumer websites, personal tools, etc). ' +
+            'Look for clear indicators like enterprise features, B2B pricing pages, and business-focused marketing language. ' +
+            'Also look for cues in the url such as: "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", "console.", "app.", "api.", "dashboard.", "console.", etc. ' +
+            'If there is any doubt, score it as 0.' +
+            'Only return one SaaS app for each domain.',
         },
         {
           role: 'user',
-          content: JSON.stringify(visitedDomains),
+          content: JSON.stringify(browserHistory.map(({ url }) => url)),
         },
       ],
       response_format: zodResponseFormat(RootDomains, 'rootDomains'),
     })
 
-    const approvedDomains = JSON.parse(
-      completion.choices[0].message.content
-    )?.children
+    const domains = completion.choices[0].message.parsed.children
+    const filteredDomains = domains.filter((d) => d.certaintyScore > 40)
+    const skippedDomains = domains.filter((d) => d.certaintyScore <= 40)
 
     console.info('--------------')
-    console.info('\x1b[33m%s\x1b[0m', '🔍 Visited domains:', visitedDomains)
+    console.info(
+      '\x1b[33m%s\x1b[0m',
+      '🔍 Visited domains:',
+      domains.map((d) => d.domain)
+    )
+
+    console.info(
+      '\x1b[34m%s\x1b[0m',
+      '✅ Approved domains:',
+      filteredDomains.map((d) => d)
+    )
+
     console.info(
       '\x1b[31m%s\x1b[0m',
       '🚨 Skipped domains:',
-      visitedDomains.filter((domain) => !approvedDomains.includes(domain))
+      skippedDomains.map((d) => d)
     )
-    console.info('\x1b[34m%s\x1b[0m', '✅ Approved domains:', approvedDomains)
 
-    return approvedDomains as string[]
+    return filteredDomains.map((d) => d.domain)
   } catch (error) {
     console.error('Error calling OpenAI API:', error)
     throw new Error('Failed to filter business domains')

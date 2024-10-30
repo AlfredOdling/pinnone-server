@@ -5,6 +5,7 @@ import { inviteExtensionUsers } from './inviteExtensionUsers'
 import { syncBrowserHistory } from './syncBrowserHistory'
 import { deleteExtensionUser } from './deleteExtensionUser'
 import { addVendors } from './addVendors'
+import { updateVendors } from './updateVendors'
 // import express from 'express'
 // import { handleStripeWebhooks } from './handleStripeWebhooks'
 
@@ -101,6 +102,23 @@ router.post('/addVendors', async (req: Request, res: Response) => {
     })
 
     res.status(200).send()
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ error: 'Failed', msg: error.message })
+  }
+})
+
+router.post('/updateVendors', async (req: Request, res: Response) => {
+  const { data } = req.body
+  console.log('⏳ updateVendors loading...')
+
+  try {
+    await updateVendors({
+      encryptedData: data.encryptedData,
+      userId: data.userId,
+    })
+
+    res.status(200).send({ data: 'History retrieved' })
   } catch (error) {
     console.error(error)
     res.status(500).send({ error: 'Failed', msg: error.message })

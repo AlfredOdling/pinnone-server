@@ -30,6 +30,11 @@ export const NewVendors = z.lazy(() =>
 
 export const RootDomains = z.lazy(() =>
   z.object({
-    children: z.array(z.string()),
+    children: z.array(
+      z.object({
+        domain: z.string(),
+        certaintyScore: z.number(),
+      })
+    ),
   })
 )
