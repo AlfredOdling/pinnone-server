@@ -33,7 +33,7 @@ export const inviteExtensionUsers = async ({ emails, organization_id }) => {
           await sendEmail({
             fromEmail: 'info@pinneone.com',
             toEmail: email,
-            emailSubject: 'You have been invited to a PinnOne organization',
+            emailSubject: '(PinnOne) Extension user role added to your account',
             emailText:
               'You are now a part of the organization. If you already have the extension installed, you will are all set.',
           })
