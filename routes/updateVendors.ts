@@ -65,7 +65,7 @@ export const updateVendors = async ({ encryptedData, userId }: any) => {
         }
       )
       .select('id')
-    console.log(`✅ ${vendors.data.length} new vendors added successfully`)
+    console.log(`✅ ${vendors?.data?.length} new vendors added successfully`)
 
     const visitedVendors = await supabase
       .from('vendors')
