@@ -21,23 +21,6 @@ const router = Router()
 //   }
 // )
 
-router.post('/emailEditRequirement', async (req: Request, res: Response) => {
-  const { email } = req.body
-
-  try {
-    const data = await sendEmail({
-      emailSubject: 'Edit Requirement',
-      toEmail: email,
-      emailText: `Hello, you have been invited to edit a requirement. Please login to your account to view the requirement under "My requests".`,
-      fromEmail: '',
-    })
-    res.status(200).send({ data })
-  } catch (error) {
-    console.error(error)
-    res.status(500).send({ error: 'Failed', msg: error })
-  }
-})
-
 router.post('/inviteAdmins', async (req: Request, res: Response) => {
   const { emails, organization_id } = req.body
 
