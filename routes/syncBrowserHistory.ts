@@ -28,7 +28,7 @@ export const syncBrowserHistory = async ({
     organization_id,
   })
 
-  return await pushNewUserActivity({
+  await pushNewUserActivity({
     browserHistory,
     organization_id,
     userId,
@@ -58,7 +58,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     vendors.data.map((v) => v.root_domain)
   )
 
-  const res = await supabase
+  await supabase
     .from('tools')
     .upsert(
       vendors.data.map((vendor) => ({
@@ -69,14 +69,11 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
         is_tracking: false,
       })),
       {
-        onConflict: 'vendor_id',
+        onConflict: 'vendor_id, organization_id',
         ignoreDuplicates: true,
       }
     )
     .throwOnError()
-
-  console.info('🧑🏼‍💻 RES:', res)
-  return res
 }
 
 /**
@@ -100,7 +97,7 @@ const pushNewUserActivity = async ({
     userId
   )
 
-  return await supabase
+  await supabase
     .from('user_activity')
     .upsert(browserHistoryWithVendorId, {
       onConflict: 'user_id, vendor_id, last_visited',
