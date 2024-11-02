@@ -53,6 +53,11 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     .select('*')
     .in('root_domain', detectedRootDomains)
 
+  console.info(
+    '⭐️ Detected vendors:',
+    vendors.data.map((v) => v.root_domain)
+  )
+
   return await supabase
     .from('tools')
     .upsert(
