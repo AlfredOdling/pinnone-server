@@ -80,7 +80,7 @@ export const updateVendors = async ({
       .select('*') // Get all existing vendors
       .in('root_domain', visitedRootDomains) // Filter by visited domains
 
-    await supabase.from('tools').upsert(
+    return await supabase.from('tools').upsert(
       visitedVendors.data.map((vendor) => ({
         vendor_id: vendor.id,
         organization_id: org_id,

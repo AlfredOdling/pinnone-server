@@ -53,7 +53,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     .select('*')
     .in('root_domain', detectedRootDomains)
 
-  await supabase
+  return await supabase
     .from('tools')
     .upsert(
       vendors.data.map((vendor) => ({
@@ -92,7 +92,7 @@ const pushNewUserActivity = async ({
     userId
   )
 
-  await supabase
+  return await supabase
     .from('user_activity')
     .upsert(browserHistoryWithVendorId, {
       onConflict: 'user_id, vendor_id, last_visited',
