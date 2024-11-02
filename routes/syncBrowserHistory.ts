@@ -40,18 +40,18 @@ export const syncBrowserHistory = async ({
  * add new tools with the status: not_in_stack
  */
 const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
-  let visitedRootDomains = browserHistory
+  let detectedRootDomains = browserHistory
     .map((visit) => getRootDomain(visit.url))
     .filter((x) => x)
 
   // Dedupe
-  visitedRootDomains = [...new Set(visitedRootDomains)]
-  console.info('🧑🏼‍💻 visitedRootDomains:', visitedRootDomains)
+  detectedRootDomains = [...new Set(detectedRootDomains)]
+  console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   const vendors = await supabase
     .from('vendors')
     .select('*')
-    .in('root_domain', visitedRootDomains)
+    .in('root_domain', detectedRootDomains)
 
   await supabase
     .from('tools')
