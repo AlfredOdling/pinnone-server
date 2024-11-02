@@ -58,7 +58,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     vendors.data.map((v) => v.root_domain)
   )
 
-  return await supabase
+  const res = await supabase
     .from('tools')
     .upsert(
       vendors.data.map((vendor) => ({
@@ -74,6 +74,9 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
       }
     )
     .throwOnError()
+
+  console.info('🧑🏼‍💻 RES:', res)
+  return res
 }
 
 /**
