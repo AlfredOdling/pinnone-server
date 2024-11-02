@@ -20,6 +20,7 @@ export const syncBrowserHistory = async ({
   organization_id: string
 }) => {
   const browserHistory = decrypt(encryptedData)
+  console.log('🚀  browserHistory:', browserHistory)
   console.log('ℹ️ syncBrowserHistory for')
   console.table({ userId, organization_id })
 
