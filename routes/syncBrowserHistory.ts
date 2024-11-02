@@ -28,7 +28,7 @@ export const syncBrowserHistory = async ({
     organization_id,
   })
 
-  await pushNewUserActivity({
+  return await pushNewUserActivity({
     browserHistory,
     organization_id,
     userId,
