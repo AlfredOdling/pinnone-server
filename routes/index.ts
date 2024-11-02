@@ -47,7 +47,7 @@ router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
 
 router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   const { data } = req.body
-  console.log('⏳ syncBrowserHistory loading...')
+  console.log('⏳ syncBrowserHistory loading for user:', data.userId)
 
   try {
     const orgIds = await getOrgIds({ userId: data.userId })
