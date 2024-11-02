@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express'
-import { sendEmail } from './sendEmail'
 import { inviteAdmins } from './inviteAdmins'
 import { inviteExtensionUsers } from './inviteExtensionUsers'
 import { syncBrowserHistory } from './syncBrowserHistory'
 import { deleteExtensionUser } from './deleteExtensionUser'
 import { addVendors } from './addVendors'
 import { updateVendors } from './updateVendors'
+import { getOrgIds } from './utils'
 // import express from 'express'
 // import { handleStripeWebhooks } from './handleStripeWebhooks'
 
@@ -50,11 +50,19 @@ router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   console.log('⏳ syncBrowserHistory loading...')
 
   try {
-    await syncBrowserHistory({
-      encryptedData: data.encryptedData,
-      userId: data.userId,
-    })
+    const orgIds = await getOrgIds({ userId: data.userId })
 
+    await Promise.all(
+      orgIds.map((organization_id) =>
+        syncBrowserHistory({
+          encryptedData: data.encryptedData,
+          userId: data.userId,
+          organization_id,
+        })
+      )
+    )
+
+    console.info('syncBrowserHistory done ✅')
     res.status(200).send()
   } catch (error) {
     console.error(error)
@@ -84,6 +92,7 @@ router.post('/addVendors', async (req: Request, res: Response) => {
       budget_owner_id,
     })
 
+    console.info('addVendors done ✅')
     res.status(200).send()
   } catch (error) {
     console.error(error)
@@ -96,11 +105,18 @@ router.post('/updateVendors', async (req: Request, res: Response) => {
   console.log('⏳ updateVendors loading...')
 
   try {
-    await updateVendors({
-      encryptedData: data.encryptedData,
-      userId: data.userId,
-    })
+    const orgIds = await getOrgIds({ userId: data.userId })
 
+    await Promise.all(
+      orgIds.map((org_id) =>
+        updateVendors({
+          encryptedData: data.encryptedData,
+          org_id,
+        })
+      )
+    )
+
+    console.info('updateVendors done ✅')
     res.status(200).send({ data: 'History retrieved' })
   } catch (error) {
     console.error(error)

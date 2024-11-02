@@ -1,12 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
-import {
-  decrypt,
-  getOrgId,
-  getBrowserHistoryWithVendorId,
-  getRootDomain,
-} from './utils'
+import { decrypt, getBrowserHistoryWithVendorId, getRootDomain } from './utils'
 
 dotenv.config()
 
@@ -18,14 +13,15 @@ const supabase = createClient<Database>(
 export const syncBrowserHistory = async ({
   encryptedData,
   userId,
+  organization_id,
 }: {
   encryptedData: string
   userId: string
+  organization_id: string
 }) => {
-  console.info('🚀  userId:', userId)
   const browserHistory = decrypt(encryptedData)
-  const organization_id = await getOrgId({ userId })
-  console.info('🚀  org_id:', organization_id)
+  console.log('ℹ️ syncBrowserHistory for')
+  console.table({ userId, organization_id })
 
   await detectUntrackedTools({
     browserHistory,
@@ -50,6 +46,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
 
   // Dedupe
   visitedRootDomains = [...new Set(visitedRootDomains)]
+  console.info('🧑🏼‍💻 visitedRootDomains:', visitedRootDomains)
 
   const vendors = await supabase
     .from('vendors')

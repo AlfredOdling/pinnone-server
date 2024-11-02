@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { decrypt, getOrgId, getRootDomainsAndFilterSaaS } from './utils'
+import { decrypt, getRootDomainsAndFilterSaaS } from './utils'
 import { NewVendors } from './types'
 
 dotenv.config()
@@ -17,8 +17,16 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export const updateVendors = async ({ encryptedData, userId }: any) => {
-  const org_id = await getOrgId({ userId })
+export const updateVendors = async ({
+  encryptedData,
+  org_id,
+}: {
+  encryptedData: any
+  org_id: string
+}) => {
+  console.log('ℹ️ updateVendors for')
+  console.table({ org_id })
+
   const decryptedData = decrypt(encryptedData)
   const visitedRootDomains = await getRootDomainsAndFilterSaaS({
     decryptedData,

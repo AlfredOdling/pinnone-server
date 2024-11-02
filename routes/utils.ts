@@ -142,14 +142,14 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
   }
 }
 
-export const getOrgId = async ({ userId }) => {
+export const getOrgIds = async ({ userId }) => {
   const { data: org_ids } = await supabase
     .from('users_organizations_roles')
     .select('organization_id')
     .eq('user_id', userId)
-  const org_id = org_ids[0].organization_id
 
-  return org_id
+  const dedupedOrgIds = [...new Set(org_ids.map((org) => org.organization_id))]
+  return dedupedOrgIds
 }
 
 export const decrypt = (encryptedData) => {
