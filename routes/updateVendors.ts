@@ -56,7 +56,7 @@ export const updateVendors = async ({
     })
 
     const vendors = await supabase
-      .from('vendors')
+      .from('vendor')
       .upsert(
         completion.choices[0].message.parsed.children.map((vendor) => ({
           name: vendor.name,
@@ -76,11 +76,11 @@ export const updateVendors = async ({
     console.log(`✅ ${vendors?.data?.length} new vendors added successfully`)
 
     const visitedVendors = await supabase
-      .from('vendors')
+      .from('vendor')
       .select('*') // Get all existing vendors
       .in('root_domain', visitedRootDomains) // Filter by visited domains
 
-    await supabase.from('tools').upsert(
+    await supabase.from('tool').upsert(
       visitedVendors.data.map((vendor) => ({
         vendor_id: vendor.id,
         organization_id: org_id,

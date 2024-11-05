@@ -27,7 +27,7 @@ export const addVendors = async ({
   )
 
   const existingVendors = await supabase
-    .from('vendors')
+    .from('vendor')
     .select('root_domain')
     .in('root_domain', rootDomains)
 
@@ -56,7 +56,7 @@ export const addVendors = async ({
   })
 
   const upsertedVendors = await supabase
-    .from('vendors')
+    .from('vendor')
     .upsert(
       completion.choices[0].message.parsed.children.map((vendor) => ({
         name: vendor.name,
@@ -66,7 +66,7 @@ export const addVendors = async ({
         logo_url: vendor.logo_url,
         category: vendor.category,
         link_to_pricing_page: vendor.link_to_pricing_page,
-        //organization_id,
+        // organization_id,
       })),
       {
         onConflict: 'root_domain',
@@ -77,7 +77,7 @@ export const addVendors = async ({
     .throwOnError()
 
   await supabase
-    .from('tools')
+    .from('tool')
     .upsert(
       upsertedVendors.data.map((vendor) => ({
         vendor_id: vendor.id,

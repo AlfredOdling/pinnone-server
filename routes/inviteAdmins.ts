@@ -16,13 +16,13 @@ export const inviteAdmins = async ({ emails, organization_id }) => {
 
   const invitePromises = emails_.map(async (email) => {
     const { data: existingUser } = await supabase
-      .from('users')
+      .from('user')
       .select('id')
       .eq('email', email)
       .single()
 
     if (existingUser) {
-      await supabase.from('users_organizations_roles').insert({
+      await supabase.from('org_user').insert({
         user_id: existingUser.id,
         organization_id: organization_id,
         role_id: 3,

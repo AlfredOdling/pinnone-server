@@ -69,7 +69,7 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
   }))
 
   const existingVendors = await supabase
-    .from('vendors')
+    .from('vendor')
     .select('root_domain')
     .in('root_domain', getVendorRootDomains(browserHistory))
 
@@ -142,11 +142,11 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
   }
 }
 
-export const getOrgIds = async ({ userId }) => {
+export const getOrgIds = async ({ org_user_id }) => {
   const { data: org_ids } = await supabase
-    .from('users_organizations_roles')
+    .from('org_user')
     .select('organization_id')
-    .eq('user_id', userId)
+    .eq('id', org_user_id)
 
   const dedupedOrgIds = [...new Set(org_ids.map((org) => org.organization_id))]
   return dedupedOrgIds
@@ -162,23 +162,27 @@ export const decrypt = (encryptedData) => {
   return browserHistory as { lastVisitTime: string; url: string }[]
 }
 
-export const getBrowserHistoryWithVendorId = (
+export const getUserActivities = ({
   browserHistory,
-  trackedTools,
-  userId
-) => {
+  tools,
+  org_user_id,
+}: {
+  browserHistory: { lastVisitTime: string; url: string }[]
+  tools: Database['public']['Tables']['tool']['Row'][]
+  org_user_id: string
+}) => {
   return browserHistory
     .map((visit) => {
       const rootDomain = getVendorRootDomains([visit])[0]
-      const matchingTool = trackedTools?.find(
-        (tool) => tool.vendors.root_domain === rootDomain
+      const matchingTool = tools?.find(
+        // @ts-ignore
+        (tool) => tool.vendor.root_domain === rootDomain
       )
-
       if (!matchingTool) return null
 
       return {
-        user_id: userId,
-        vendor_id: matchingTool.vendor_id,
+        org_user_id,
+        tool_id: matchingTool.id,
         last_visited: new Date(visit.lastVisitTime).toISOString(),
       }
     })

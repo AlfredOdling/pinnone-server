@@ -47,16 +47,16 @@ router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
 
 router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   const { data } = req.body
-  console.log('⏳ syncBrowserHistory loading for user:', data.userId)
+  console.log('⏳ syncBrowserHistory loading for user:', data.org_user_id)
 
   try {
-    const orgIds = await getOrgIds({ userId: data.userId })
+    const orgIds = await getOrgIds({ org_user_id: data.org_user_id })
 
     await Promise.all(
       orgIds.map((organization_id) =>
         syncBrowserHistory({
           encryptedData: data.encryptedData,
-          userId: data.userId,
+          org_user_id: data.org_user_id,
           organization_id,
         })
       )
@@ -105,7 +105,7 @@ router.post('/updateVendors', async (req: Request, res: Response) => {
   console.log('⏳ updateVendors loading...')
 
   try {
-    const orgIds = await getOrgIds({ userId: data.userId })
+    const orgIds = await getOrgIds({ org_user_id: data.org_user_id })
 
     await Promise.all(
       orgIds.map((org_id) =>

@@ -46,7 +46,7 @@ const SubsriptionCreated = async (obj: any) => {
   const quantity = obj.quantity
 
   const res = await supabase
-    .from('organizations')
+    .from('organization')
     .update({
       //   subscription_plan: 'obj.id',
       //   payment_plan: 'pro',

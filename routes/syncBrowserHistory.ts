@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
-import { decrypt, getBrowserHistoryWithVendorId, getRootDomain } from './utils'
+import { decrypt, getRootDomain, getUserActivities } from './utils'
 
 dotenv.config()
 
@@ -12,17 +12,20 @@ const supabase = createClient<Database>(
 
 export const syncBrowserHistory = async ({
   encryptedData,
-  userId,
+  org_user_id,
   organization_id,
 }: {
   encryptedData: string
-  userId: string
+  org_user_id: string
   organization_id: string
 }) => {
   const browserHistory = decrypt(encryptedData)
-  console.log('🚀  browserHistory:', browserHistory)
+  console.log(
+    '🚀  browserHistory:',
+    browserHistory.map((x) => x.url)
+  )
   console.log('ℹ️ syncBrowserHistory for')
-  console.table({ userId, organization_id })
+  console.table({ org_user_id, organization_id })
 
   await detectUntrackedTools({
     browserHistory,
@@ -32,7 +35,7 @@ export const syncBrowserHistory = async ({
   await pushNewUserActivity({
     browserHistory,
     organization_id,
-    userId,
+    org_user_id,
   })
 }
 
@@ -50,7 +53,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
   console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   const vendors = await supabase
-    .from('vendors')
+    .from('vendor')
     .select('*')
     .in('root_domain', detectedRootDomains)
 
@@ -59,21 +62,22 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     vendors.data.map((v) => v.root_domain)
   )
 
+  const newTools = vendors.data.map((vendor) => ({
+    vendor_id: vendor.id,
+    organization_id,
+    department: vendor.category,
+    status: 'not_in_stack',
+    is_tracking: false,
+  }))
+
+  console.log('🚀  newTools:', newTools)
+
   await supabase
-    .from('tools')
-    .upsert(
-      vendors.data.map((vendor) => ({
-        vendor_id: vendor.id,
-        organization_id,
-        department: vendor.category,
-        status: 'not_in_stack',
-        is_tracking: false,
-      })),
-      {
-        onConflict: 'vendor_id, organization_id',
-        ignoreDuplicates: true,
-      }
-    )
+    .from('tool')
+    .upsert(newTools, {
+      onConflict: 'vendor_id, organization_id',
+      ignoreDuplicates: true,
+    })
     .throwOnError()
 }
 
@@ -84,24 +88,25 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
 const pushNewUserActivity = async ({
   organization_id,
   browserHistory,
-  userId,
+  org_user_id,
 }) => {
   const tools = await supabase
-    .from('tools')
-    .select('*, vendors!inner(*)') // Select the vendors associated with the tools
+    .from('tool')
+    .select('*, vendor!inner(*)') // Select the vendors associated with the tools
     .eq('is_tracking', true) // Filter the tools that the org is tracking
     .eq('organization_id', organization_id)
 
-  const browserHistoryWithVendorId = getBrowserHistoryWithVendorId(
+  const userActivities: any = getUserActivities({
     browserHistory,
-    tools.data,
-    userId
-  )
+    tools: tools.data,
+    org_user_id,
+  })
+  console.log('🚀  userActivities:', userActivities)
 
   await supabase
     .from('user_activity')
-    .upsert(browserHistoryWithVendorId, {
-      onConflict: 'user_id, vendor_id, last_visited',
+    .upsert(userActivities, {
+      onConflict: 'org_user_id, tool_id, last_visited',
       ignoreDuplicates: true,
     })
     .throwOnError()
