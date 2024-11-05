@@ -47,6 +47,8 @@ router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
 
 router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   const { data } = req.body
+  console.log('🚀 syncBrowserHistory data:', data)
+
   console.log('⏳ syncBrowserHistory loading for user:', data.org_user_id)
 
   try {
@@ -102,6 +104,7 @@ router.post('/addVendors', async (req: Request, res: Response) => {
 
 router.post('/updateVendors', async (req: Request, res: Response) => {
   const { data } = req.body
+  console.log('🚀 updateVendors data:', data)
   console.log('⏳ updateVendors loading...')
 
   try {
