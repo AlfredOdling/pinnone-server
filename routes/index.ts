@@ -5,7 +5,7 @@ import { syncBrowserHistory } from './syncBrowserHistory'
 import { deleteExtensionUser } from './deleteExtensionUser'
 import { addVendors } from './addVendors'
 import { updateVendors } from './updateVendors'
-import { getOrgIds } from './utils'
+import { getOrgUsers } from './utils'
 // import express from 'express'
 // import { handleStripeWebhooks } from './handleStripeWebhooks'
 
@@ -47,24 +47,22 @@ router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
 
 router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   const { data } = req.body
-  console.log('🚀 syncBrowserHistory data:', data)
-
-  console.log('⏳ syncBrowserHistory loading for user:', data.org_user_id)
-
+  console.log('--------⏳ syncBrowserHistory starting')
   try {
-    const orgIds = await getOrgIds({ org_user_id: data.org_user_id })
+    const orgUsers = await getOrgUsers({ user_id: data.user_id })
+    console.log('🚀 syncBrowserHistory orgUsers:', orgUsers)
 
     await Promise.all(
-      orgIds.map((organization_id) =>
+      orgUsers.map((orgUser) =>
         syncBrowserHistory({
           encryptedData: data.encryptedData,
-          org_user_id: data.org_user_id,
-          organization_id,
+          org_user_id: orgUser.id,
+          organization_id: orgUser.organization_id,
         })
       )
     )
 
-    console.info('syncBrowserHistory done ✅')
+    console.info('--------syncBrowserHistory done ✅')
     res.status(200).send()
   } catch (error) {
     console.error(error)
@@ -104,22 +102,22 @@ router.post('/addVendors', async (req: Request, res: Response) => {
 
 router.post('/updateVendors', async (req: Request, res: Response) => {
   const { data } = req.body
-  console.log('🚀 updateVendors data:', data)
-  console.log('⏳ updateVendors loading...')
+  console.log('--------⏳ updateVendors starting...')
 
   try {
-    const orgIds = await getOrgIds({ org_user_id: data.org_user_id })
+    const orgUsers = await getOrgUsers({ user_id: data.user_id })
+    console.log('🚀 updateVendors orgUsers:', orgUsers)
 
     await Promise.all(
-      orgIds.map((org_id) =>
+      orgUsers.map((orgUser) =>
         updateVendors({
           encryptedData: data.encryptedData,
-          org_id,
+          organization_id: orgUser.organization_id,
         })
       )
     )
 
-    console.info('updateVendors done ✅')
+    console.info('--------updateVendors done ✅')
     res.status(200).send({ data: 'History retrieved' })
   } catch (error) {
     console.error(error)

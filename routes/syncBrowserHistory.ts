@@ -16,16 +16,10 @@ export const syncBrowserHistory = async ({
   organization_id,
 }: {
   encryptedData: string
-  org_user_id: string
+  org_user_id: number
   organization_id: string
 }) => {
   const browserHistory = decrypt(encryptedData)
-  console.log(
-    '🚀  browserHistory:',
-    browserHistory.map((x) => x.url)
-  )
-  console.log('ℹ️ syncBrowserHistory for')
-  console.table({ org_user_id, organization_id })
 
   await detectUntrackedTools({
     browserHistory,
@@ -101,7 +95,7 @@ const pushNewUserActivity = async ({
     tools: tools.data,
     org_user_id,
   })
-  console.log('🚀  userActivities:', userActivities)
+  console.log('🚀 new user activities:', userActivities)
 
   await supabase
     .from('user_activity')

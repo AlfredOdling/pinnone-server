@@ -19,13 +19,12 @@ const openai = new OpenAI({
 
 export const updateVendors = async ({
   encryptedData,
-  org_id,
+  organization_id,
 }: {
   encryptedData: any
-  org_id: string
+  organization_id: string
 }) => {
-  console.log('ℹ️ updateVendors for')
-  console.table({ org_id })
+  console.log('ℹ️ updateVendors for org: ', organization_id)
 
   const decryptedData = decrypt(encryptedData)
   const visitedRootDomains = await getRootDomainsAndFilterSaaS({
@@ -83,7 +82,7 @@ export const updateVendors = async ({
     await supabase.from('tool').upsert(
       visitedVendors.data.map((vendor) => ({
         vendor_id: vendor.id,
-        organization_id: org_id,
+        organization_id,
         status: 'not_in_stack',
       })),
       {
