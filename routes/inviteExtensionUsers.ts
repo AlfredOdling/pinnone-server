@@ -35,7 +35,7 @@ export const inviteExtensionUsers = async ({ emails, organization_id }) => {
             toEmail: email,
             emailSubject: '(PinnOne) Extension user role added to your account',
             emailText:
-              'You are now a part of the organization. If you already have the extension installed, you will are all set.',
+              'You are now a part of the organization. If you already have the extension installed, you are all set.',
           })
           return existingUser
         } else {
