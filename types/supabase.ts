@@ -91,7 +91,7 @@ export type Database = {
           description: string
           id: number
           organization_id: string | null
-          overlappingTools: Json
+          overlapping_tools: Json
           title: string
         }
         Insert: {
@@ -99,7 +99,7 @@ export type Database = {
           description: string
           id?: number
           organization_id?: string | null
-          overlappingTools: Json
+          overlapping_tools: Json
           title: string
         }
         Update: {
@@ -107,7 +107,7 @@ export type Database = {
           description?: string
           id?: number
           organization_id?: string | null
-          overlappingTools?: Json
+          overlapping_tools?: Json
           title?: string
         }
         Relationships: [

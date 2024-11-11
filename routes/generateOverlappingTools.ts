@@ -54,10 +54,11 @@ export const generateOverlappingTools = async ({
     console.log('🚀  res1:', res1)
 
     const res2 = await supabase.from('overlapping_tool').insert(
+      // @ts-ignore
       completion.choices[0].message.parsed.children?.map((tool) => ({
         title: tool.overlap_category,
         description: tool.description,
-        overlappingTools: tool.overlappingTools,
+        overlappingtools: tool.overlappingTools,
         organization_id,
       }))
     )
