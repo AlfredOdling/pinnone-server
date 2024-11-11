@@ -82,14 +82,14 @@ router.post('/deleteExtensionUser', async (req: Request, res: Response) => {
 })
 
 router.post('/addVendors', async (req: Request, res: Response) => {
-  const { vendors, organization_id, budget_owner_id } = req.body
+  const { vendors, organization_id, owner_org_user_id } = req.body
   console.log('⏳ addVendors loading...')
 
   try {
     await addVendors({
       vendors,
       organization_id,
-      budget_owner_id,
+      owner_org_user_id,
     })
 
     console.info('addVendors done ✅')

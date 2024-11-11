@@ -20,7 +20,7 @@ const openai = new OpenAI({
 export const addVendors = async ({
   vendors,
   organization_id,
-  budget_owner_id,
+  owner_org_user_id,
 }) => {
   const rootDomains = getVendorRootDomains(
     vendors.map((vendor) => ({ url: vendor }))
@@ -83,7 +83,7 @@ export const addVendors = async ({
         vendor_id: vendor.id,
         organization_id,
         department: vendor.category,
-        budget_owner_id,
+        owner_org_user_id,
         status: 'in_stack',
         is_tracking: true,
       })),
