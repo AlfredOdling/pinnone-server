@@ -47,12 +47,13 @@ export const generateOverlappingTools = async ({
         'overlappingToolsList'
       ),
     })
-    await supabase
+    const res1 = await supabase
       .from('overlapping_tool')
       .delete()
       .eq('organization_id', organization_id)
+    console.log('🚀  res1:', res1)
 
-    await supabase.from('overlapping_tool').insert(
+    const res2 = await supabase.from('overlapping_tool').insert(
       completion.choices[0].message.parsed.children?.map((tool) => ({
         title: tool.overlap_category,
         description: tool.description,
@@ -60,6 +61,7 @@ export const generateOverlappingTools = async ({
         organization_id,
       }))
     )
+    console.log('🚀  res2:', res2)
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')
