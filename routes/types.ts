@@ -38,3 +38,13 @@ export const RootDomains = z.lazy(() =>
     ),
   })
 )
+
+const OverlappingTool = z.object({
+  overlap_category: z.string(), // Title of the category
+  description: z.string(), // Description of the category's purpose
+  overlappingTools: z.array(z.string()), // List of tools that overlap within this category
+})
+
+export const OverlappingToolsList = z.object({
+  children: z.array(OverlappingTool),
+})

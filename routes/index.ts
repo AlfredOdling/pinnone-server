@@ -6,6 +6,7 @@ import { deleteExtensionUser } from './deleteExtensionUser'
 import { addVendors } from './addVendors'
 import { updateVendors } from './updateVendors'
 import { getOrgUsers } from './utils'
+import { generateOverlappingTools } from './generateOverlappingTools'
 // import express from 'express'
 // import { handleStripeWebhooks } from './handleStripeWebhooks'
 
@@ -124,5 +125,25 @@ router.post('/updateVendors', async (req: Request, res: Response) => {
     res.status(500).send({ error: 'Failed', msg: error.message })
   }
 })
+
+router.post(
+  '/generateOverlappingTools',
+  async (req: Request, res: Response) => {
+    const { organization_id } = req.body
+    console.log('--------⏳ generateOverlappingTools starting...')
+
+    try {
+      await generateOverlappingTools({
+        organization_id,
+      })
+
+      console.info('--------generateOverlappingTools done ✅')
+      res.status(200).send()
+    } catch (error) {
+      console.error(error)
+      res.status(500).send({ error: 'Failed', msg: error.message })
+    }
+  }
+)
 
 export default router

@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          onboarded: boolean
           organization_id: string
           role_id: number
           updated_at: string
@@ -21,6 +22,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
+          onboarded?: boolean
           organization_id: string
           role_id: number
           updated_at?: string
@@ -29,6 +31,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+          onboarded?: boolean
           organization_id?: string
           role_id?: number
           updated_at?: string
@@ -81,6 +84,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      overlapping_tool: {
+        Row: {
+          created_at: string
+          description: string
+          id: number
+          organization_id: string | null
+          overlappingTools: Json
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: number
+          organization_id?: string | null
+          overlappingTools: Json
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: number
+          organization_id?: string | null
+          overlappingTools?: Json
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_overlapping_tools_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role: {
         Row: {
