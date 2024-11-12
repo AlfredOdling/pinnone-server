@@ -5,6 +5,7 @@ import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { getVendorRootDomains } from './utils'
 import { NewVendors } from './types'
+import { sendEmail } from './sendEmail'
 
 dotenv.config()
 
@@ -37,6 +38,13 @@ export const addVendors = async ({
   )
 
   console.log('🚀 addVendors: rootDomainsToFetch: ', rootDomainsToFetch)
+
+  await sendEmail({
+    fromEmail: 'info@pinneone.com',
+    toEmail: 'alfredodling@gmail.com',
+    emailSubject: 'New manual vendors added',
+    emailText: rootDomainsToFetch.join(', '),
+  })
 
   const completion = await openai.beta.chat.completions.parse({
     model: 'gpt-4o-2024-08-06',
