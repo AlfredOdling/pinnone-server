@@ -13,8 +13,8 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          onboarded: boolean
           organization_id: string
+          removed: boolean
           role_id: number
           updated_at: string
           user_id: string
@@ -22,8 +22,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
-          onboarded?: boolean
           organization_id: string
+          removed?: boolean
           role_id: number
           updated_at?: string
           user_id: string
@@ -31,8 +31,8 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
-          onboarded?: boolean
           organization_id?: string
+          removed?: boolean
           role_id?: number
           updated_at?: string
           user_id?: string
@@ -90,29 +90,29 @@ export type Database = {
           created_at: string
           description: string
           id: number
-          organization_id: string | null
-          overlapping_tools: Json
+          organization_id: string
+          overlappingtools: Json
           title: string
         }
         Insert: {
           created_at?: string
           description: string
           id?: number
-          organization_id?: string | null
-          overlapping_tools: Json
+          organization_id: string
+          overlappingtools: Json
           title: string
         }
         Update: {
           created_at?: string
           description?: string
           id?: number
-          organization_id?: string | null
-          overlapping_tools?: Json
+          organization_id?: string
+          overlappingtools?: Json
           title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "public_overlapping_tools_organization_id_fkey"
+            foreignKeyName: "overlapping_tool_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
@@ -267,32 +267,46 @@ export type Database = {
       user: {
         Row: {
           created_at: string
+          current_org_id: string | null
           email: string
           first_name: string
           id: string
           is_tracked: boolean
           last_name: string
+          onboarded: boolean | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          current_org_id?: string | null
           email: string
           first_name?: string
           id?: string
           is_tracked?: boolean
           last_name?: string
+          onboarded?: boolean | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          current_org_id?: string | null
           email?: string
           first_name?: string
           id?: string
           is_tracked?: boolean
           last_name?: string
+          onboarded?: boolean | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "public_user_current_org_id_fkey"
+            columns: ["current_org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_activity: {
         Row: {

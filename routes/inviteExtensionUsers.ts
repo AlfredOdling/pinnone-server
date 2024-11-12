@@ -3,6 +3,7 @@ import _ from 'lodash'
 import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
 import { sendEmail } from './sendEmail'
+import { Roles } from './consts'
 
 dotenv.config()
 
@@ -27,7 +28,7 @@ export const inviteExtensionUsers = async ({ emails, organization_id }) => {
           await supabase.from('org_user').insert({
             user_id: existingUser.id,
             organization_id: organization_id,
-            role_id: 3,
+            role_id: Roles.EXTENSION_USER,
           })
 
           await sendEmail({

@@ -3,6 +3,7 @@ import _ from 'lodash'
 import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
 import { sendEmail } from './sendEmail'
+import { Roles } from './consts'
 
 dotenv.config()
 
@@ -25,7 +26,13 @@ export const inviteAdmins = async ({ emails, organization_id }) => {
       await supabase.from('org_user').insert({
         user_id: existingUser.id,
         organization_id: organization_id,
-        role_id: 3,
+        role_id: Roles.ADMIN,
+        removed: false,
+      })
+
+      await supabase.from('user').update({
+        id: existingUser.id,
+        current_org_id: organization_id,
       })
 
       await sendEmail({
@@ -33,7 +40,7 @@ export const inviteAdmins = async ({ emails, organization_id }) => {
         toEmail: email,
         emailSubject: '(PinnOne) Admin role added to your account',
         emailText:
-          'You are now a part of the organization. If you already have the extension installed, you are all set.',
+          'You are now an admin of the organization. Go to app.pinn.one and login to continue.',
       })
 
       return existingUser
