@@ -96,7 +96,7 @@ export const addVendors = async ({
         is_tracking: true,
       })),
       {
-        onConflict: 'vendor_id',
+        onConflict: 'vendor_id, organization_id',
         ignoreDuplicates: true,
       }
     )
