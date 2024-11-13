@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      code: {
+        Row: {
+          code: string
+          created_at: string
+          email: string
+          id: number
+          tier: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          email: string
+          id?: number
+          tier: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          email?: string
+          id?: number
+          tier?: string
+        }
+        Relationships: []
+      }
       org_user: {
         Row: {
           created_at: string
@@ -258,7 +282,7 @@ export type Database = {
           {
             foreignKeyName: "tool_vendor_id_fkey"
             columns: ["vendor_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "vendor"
             referencedColumns: ["id"]
           },

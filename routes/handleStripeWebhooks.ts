@@ -28,35 +28,41 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
 
   switch (event.type) {
     case 'customer.subscription.created':
-      await SubsriptionCreated(event.data.object)
+      const productIdCreated = event.data.object.items.data[0].price.product // Extract product_id
+      console.log('🚀  productIdCreated:', productIdCreated)
+      await SubscriptionCreated(event.data.object)
       break
+
     case 'customer.subscription.updated':
-      await SubsriptionUpdated(event.data.object)
+      const productIdUpdated = event.data.object.items.data[0].price.product // Extract product_id
+      console.log('🚀  productIdUpdated:', productIdUpdated)
+      await SubscriptionUpdated(event.data.object)
       break
+
     case 'customer.subscription.deleted':
-      await SubsriptionDeleted(event.data.object)
+      const productIdDeleted = event.data.object.items.data[0].price.product // Extract product_id
+      console.log('🚀  productIdDeleted:', productIdDeleted)
+      await SubscriptionDeleted(event.data.object)
       break
   }
   // Return a 200 response to acknowledge receipt of the event
   res.send()
 }
 
-const SubsriptionCreated = async (obj: any) => {
+const SubscriptionCreated = async (obj: any) => {
   const customer: any = await stripe.customers.retrieve(obj.customer)
-  const quantity = obj.quantity
-
   console.log('🚀  created:', customer.email)
 
-  // const res = await supabase
-  //   .from('organization')
-  //   .update({
-  //     //   subscription_plan: 'obj.id',
-  //     //   payment_plan: 'pro',
-  //   })
-  //   .eq('email', customer.email)
+  // const res = await supabase.from('code').insert({
+  //   code: obj.id,
+  //   email: customer.email,
+  //   tier: 'pro',
+  // })
+
+  // console.log('🚀  res:', res)
 }
 
-const SubsriptionUpdated = async (obj: any) => {
+const SubscriptionUpdated = async (obj: any) => {
   const customer: any = await stripe.customers.retrieve(obj.customer)
   const quantity = obj.quantity
   console.log('🚀  updated:', quantity)
@@ -78,7 +84,7 @@ const SubsriptionUpdated = async (obj: any) => {
   //   .select()
 }
 
-const SubsriptionDeleted = async (obj: any) => {
+const SubscriptionDeleted = async (obj: any) => {
   const customer: any = await stripe.customers.retrieve(obj.customer)
   console.log('🚀  deleted:')
 
