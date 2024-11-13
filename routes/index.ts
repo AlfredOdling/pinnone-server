@@ -16,8 +16,6 @@ router.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
   async (req: Request, res: Response) => {
-    console.log('🚀  res:', res)
-    console.log('🚀  req:', req)
     await handleStripeWebhooks(req, res)
   }
 )
