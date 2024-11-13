@@ -11,8 +11,8 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || ''
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 
 export const handleStripeWebhooks = async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature']
@@ -36,7 +36,6 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
       await SubsriptionDeleted(event.data.object)
       break
   }
-
   // Return a 200 response to acknowledge receipt of the event
   res.send()
 }
@@ -45,13 +44,15 @@ const SubsriptionCreated = async (obj: any) => {
   const customer: any = await stripe.customers.retrieve(obj.customer)
   const quantity = obj.quantity
 
-  const res = await supabase
-    .from('organization')
-    .update({
-      //   subscription_plan: 'obj.id',
-      //   payment_plan: 'pro',
-    })
-    .eq('email', customer.email)
+  console.log('🚀  created:', customer.email)
+
+  // const res = await supabase
+  //   .from('organization')
+  //   .update({
+  //     //   subscription_plan: 'obj.id',
+  //     //   payment_plan: 'pro',
+  //   })
+  //   .eq('email', customer.email)
 }
 
 const SubsriptionUpdated = async (obj: any) => {

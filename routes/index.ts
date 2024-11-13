@@ -7,20 +7,20 @@ import { addVendors } from './addVendors'
 import { updateVendors } from './updateVendors'
 import { getOrgUsers } from './utils'
 import { generateOverlappingTools } from './generateOverlappingTools'
-// import express from 'express'
-// import { handleStripeWebhooks } from './handleStripeWebhooks'
+import express from 'express'
+import { handleStripeWebhooks } from './handleStripeWebhooks'
 
 const router = Router()
 
-// router.post(
-//   '/webhook',
-//   express.raw({ type: 'application/json' }),
-//   async (req: Request, res: Response) => {
-//     console.log('🚀  res:', res)
-//     console.log('🚀  req:', req)
-//     await handleStripeWebhooks(req, res)
-//   }
-// )
+router.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  async (req: Request, res: Response) => {
+    console.log('🚀  res:', res)
+    console.log('🚀  req:', req)
+    await handleStripeWebhooks(req, res)
+  }
+)
 
 router.post('/inviteAdmins', async (req: Request, res: Response) => {
   const { emails, organization_id } = req.body
