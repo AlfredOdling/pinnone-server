@@ -84,7 +84,7 @@ const SubscriptionCreated = async (obj: any, productId: string) => {
 const SubscriptionUpdated = async (obj: any) => {
   const customer: any = await stripe.customers.retrieve(obj.customer)
   const quantity = obj.quantity
-  console.log('🚀  updated:', quantity)
+  console.log('🚀  updated customer:', customer)
 
   // const res = await supabase
   //   .from('profiles')
