@@ -51,7 +51,7 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
 
 const SubscriptionCreated = async (obj: any) => {
   const customer: any = await stripe.customers.retrieve(obj.customer)
-  console.log('🚀  created:', customer.email)
+  console.log('🚀  created:', customer)
 
   // const res = await supabase.from('code').insert({
   //   code: obj.id,
