@@ -20,6 +20,7 @@ export const syncBrowserHistory = async ({
   organization_id: string
 }) => {
   const browserHistory = decrypt(encryptedData)
+  console.log('🚀  browserHistory:', browserHistory)
 
   await detectUntrackedTools({
     browserHistory,
@@ -44,7 +45,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
 
   // Dedupe
   detectedRootDomains = [...new Set(detectedRootDomains)]
-  // console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
+  console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   const vendors = await supabase
     .from('vendor')
@@ -64,7 +65,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     is_tracking: false,
   }))
 
-  // console.log('🚀  newTools:', newTools)
+  console.log('🚀  newTools:', newTools)
 
   await supabase
     .from('tool')
@@ -95,7 +96,7 @@ const pushNewUserActivity = async ({
     tools: tools.data,
     org_user_id,
   })
-  // console.log('🚀 new user activities:', userActivities)
+  console.log('🚀 new user activities:', userActivities)
 
   await supabase
     .from('user_activity')
