@@ -30,7 +30,7 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
     case 'customer.subscription.created':
       const productIdCreated = event.data.object.items.data[0].price.product // Extract product_id
       console.log('🚀  productIdCreated:', productIdCreated)
-      await SubscriptionCreated(event.data.object)
+      await SubscriptionCreated(event.data.object, productIdCreated)
       break
 
     case 'customer.subscription.updated':
@@ -49,17 +49,36 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
   res.send()
 }
 
-const SubscriptionCreated = async (obj: any) => {
+const SubscriptionCreated = async (obj: any, productId: string) => {
   const customer: any = await stripe.customers.retrieve(obj.customer)
   console.log('🚀  created:', customer)
 
-  // const res = await supabase.from('code').insert({
-  //   code: obj.id,
+  // const { data, error } = await supabase.auth.signInWithOtp({
   //   email: customer.email,
-  //   tier: 'pro',
+  //   options: {
+  //     emailRedirectTo: process.env.REACT_APP_FE_SERVER_URL,
+  //     data: {
+  //       team_name: 'My Company',
+  //       role: 'superadmin',
+  //       stripe_product_id: productId,
+  //     },
+  //   },
   // })
 
-  // console.log('🚀  res:', res)
+  const { data, error } = await supabase.auth.admin.inviteUserByEmail(
+    customer.email,
+    {
+      data: {
+        team_name: 'My Company',
+        role: 'superadmin',
+        stripe_product_id: productId,
+      },
+      redirectTo: process.env.REACT_APP_FE_SERVER_URL,
+    }
+  )
+
+  console.log('🚀  data:', data)
+  console.log('🚀  error:', error)
 }
 
 const SubscriptionUpdated = async (obj: any) => {
