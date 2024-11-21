@@ -4,7 +4,6 @@ import { createClient } from '@supabase/supabase-js'
 import _ from 'lodash'
 import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
-import { sendEmail } from './sendEmail'
 dotenv.config()
 
 const supabase = createClient<Database>(
@@ -64,15 +63,6 @@ const SubscriptionCreated = async (obj: any, productId: string) => {
 
   console.log('🚀  data:', data)
   console.log('🚀  error:', error)
-
-  if (error) {
-    await sendEmail({
-      fromEmail: 'info@pinneone.com',
-      toEmail: 'alfredodling@gmail.com',
-      emailSubject: 'Stripe create error',
-      emailText: JSON.stringify(error),
-    })
-  }
 }
 
 const SubscriptionUpdated = async (obj: any, productId: string) => {
@@ -81,31 +71,23 @@ const SubscriptionUpdated = async (obj: any, productId: string) => {
   console.log('🚀  productId:', productId)
 
   const res = await supabase
-    .from('org_user')
-    .select(`organization (id)`)
-    .eq('email', customer.email)
-
-  const organization_id = res.data[0].organization.id
+    .from('user')
+    .select(`current_org_id`)
+    .eq('email', 'alfredodling@gmail.com')
+    .single()
+  console.log('🚀 current_org_id res:', res)
+  const current_org_id = res.data.current_org_id
 
   const { data, error } = await supabase
     .from('organization')
     .update({
       stripe_product_id: productId,
     })
-    .eq('id', organization_id)
+    .eq('id', current_org_id)
     .select()
 
   console.log('🚀  data:', data)
   console.log('🚀  error:', error)
-
-  if (error) {
-    await sendEmail({
-      fromEmail: 'info@pinneone.com',
-      toEmail: 'alfredodling@gmail.com',
-      emailSubject: 'Stripe update error',
-      emailText: JSON.stringify(error),
-    })
-  }
 }
 
 const SubscriptionDeleted = async (obj: any, productId: string) => {
