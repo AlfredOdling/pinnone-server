@@ -54,7 +54,7 @@ const SubscriptionCreated = async (obj: any, productId: string) => {
     customer.email,
     {
       data: {
-        team_name: 'My Company',
+        team_name: 'NewCo',
         role: 'superadmin',
         stripe_product_id: productId,
       },

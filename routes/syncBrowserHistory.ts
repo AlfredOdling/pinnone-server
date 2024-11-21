@@ -45,7 +45,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
 
   // Dedupe
   detectedRootDomains = [...new Set(detectedRootDomains)]
-  console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
+  // console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   const vendors = await supabase
     .from('vendor')
