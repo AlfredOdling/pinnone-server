@@ -116,12 +116,12 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
     const filteredDomains = uniqueDomains.filter((d) => d.certaintyScore > 40)
     const skippedDomains = uniqueDomains.filter((d) => d.certaintyScore <= 40)
 
-    console.info('--------------')
-    console.info(
-      '\x1b[33m%s\x1b[0m',
-      '🔍 Visited domains:',
-      domains.map((d) => d.domain)
-    )
+    // console.info('--------------')
+    // console.info(
+    //   '\x1b[33m%s\x1b[0m',
+    //   '🔍 Visited domains:',
+    //   domains.map((d) => d.domain)
+    // )
 
     console.info(
       '\x1b[34m%s\x1b[0m',
@@ -129,11 +129,11 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
       filteredDomains.map((d) => d)
     )
 
-    console.info(
-      '\x1b[31m%s\x1b[0m',
-      '🚨 Skipped domains:',
-      skippedDomains.map((d) => d)
-    )
+    // console.info(
+    //   '\x1b[31m%s\x1b[0m',
+    //   '🚨 Skipped domains:',
+    //   skippedDomains.map((d) => d)
+    // )
 
     return filteredDomains.map((d) => d.domain)
   } catch (error) {

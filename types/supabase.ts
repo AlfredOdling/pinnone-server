@@ -9,30 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      code: {
-        Row: {
-          code: string
-          created_at: string
-          email: string
-          id: number
-          tier: string
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          email: string
-          id?: number
-          tier: string
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          email?: string
-          id?: number
-          tier?: string
-        }
-        Relationships: []
-      }
       org_user: {
         Row: {
           created_at: string
@@ -90,6 +66,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          stripe_product_id: string | null
           subscription_plan: string
           updated_at: string
         }
@@ -97,6 +74,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          stripe_product_id?: string | null
           subscription_plan?: string
           updated_at?: string
         }
@@ -104,6 +82,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          stripe_product_id?: string | null
           subscription_plan?: string
           updated_at?: string
         }
@@ -282,7 +261,7 @@ export type Database = {
           {
             foreignKeyName: "tool_vendor_id_fkey"
             columns: ["vendor_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "vendor"
             referencedColumns: ["id"]
           },
