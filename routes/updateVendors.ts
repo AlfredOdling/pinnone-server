@@ -79,7 +79,7 @@ export const updateVendors = async ({
       .select('*') // Get all existing vendors
       .in('root_domain', visitedRootDomains) // Filter by visited domains
 
-    await supabase.from('tool').upsert(
+    const res = await supabase.from('tool').upsert(
       visitedVendors.data.map((vendor) => ({
         vendor_id: vendor.id,
         organization_id,
@@ -90,6 +90,10 @@ export const updateVendors = async ({
         ignoreDuplicates: true,
       }
     )
+
+    if (res.error) {
+      console.error('Error updating tools:', res.error)
+    }
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')

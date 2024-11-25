@@ -62,7 +62,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     organization_id,
     department: vendor.category,
     status: 'not_in_stack',
-    is_tracking: false,
+    is_tracking: true,
   }))
 
   console.log('🚀  newTools:', newTools)
