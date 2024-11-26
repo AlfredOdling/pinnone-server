@@ -212,10 +212,12 @@ export type Database = {
           department: string | null
           file_urls: string | null
           id: number
+          is_desktop_tool: boolean
           is_tracking: boolean
           organization_id: string
           owner_org_user_id: number | null
           status: string
+          status_should_be: string | null
           updated_at: string
           vendor_id: number
         }
@@ -224,10 +226,12 @@ export type Database = {
           department?: string | null
           file_urls?: string | null
           id?: number
+          is_desktop_tool?: boolean
           is_tracking?: boolean
           organization_id: string
           owner_org_user_id?: number | null
           status: string
+          status_should_be?: string | null
           updated_at?: string
           vendor_id: number
         }
@@ -236,10 +240,12 @@ export type Database = {
           department?: string | null
           file_urls?: string | null
           id?: number
+          is_desktop_tool?: boolean
           is_tracking?: boolean
           organization_id?: string
           owner_org_user_id?: number | null
           status?: string
+          status_should_be?: string | null
           updated_at?: string
           vendor_id?: number
         }

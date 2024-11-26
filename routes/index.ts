@@ -9,6 +9,7 @@ import { getOrgUsers } from './utils'
 import { generateOverlappingTools } from './generateOverlappingTools'
 import express from 'express'
 import { handleStripeWebhooks } from './handleStripeWebhooks'
+import { askTeam } from './askTeam'
 
 const router = Router()
 
@@ -143,5 +144,17 @@ router.post(
     }
   }
 )
+
+router.post('/askTeam', async (req: Request, res: Response) => {
+  const { message, organization_id } = req.body
+
+  try {
+    await askTeam({ message, organization_id })
+    res.status(200).send()
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ error: 'Failed', msg: error.message })
+  }
+})
 
 export default router
