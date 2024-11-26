@@ -97,7 +97,7 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
             '100 = Definitely a B2B tool (e.g. Salesforce, Workday, business productivity tools) ' +
             '0 = Not a B2B tool (consumer websites, personal tools, etc). ' +
             'Look for clear indicators like enterprise features, B2B pricing pages, and business-focused marketing language. ' +
-            'Also look for cues in the url such as: "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", "console.", "app.", "api.", "dashboard.", "console.", etc. ' +
+            'MOST IMPORTANT: Look for cues in the url such as: "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", "console.", "app.", "api.", "dashboard.", "console.", etc. IF THE BROWSER HISTORY ONLY CONTAINS THE DOMAIN URL, SCORE IT AS 0. THIS MEANS WE ARE NOT USING THE TOOL, WE JUST VISITED THE SITE. ' +
             'If there is any doubt, score it as 0.' +
             'Only return one SaaS app for each domain. No duplicates.',
         },
@@ -116,12 +116,12 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
     const filteredDomains = uniqueDomains.filter((d) => d.certaintyScore > 40)
     const skippedDomains = uniqueDomains.filter((d) => d.certaintyScore <= 40)
 
-    // console.info('--------------')
-    // console.info(
-    //   '\x1b[33m%s\x1b[0m',
-    //   '🔍 Visited domains:',
-    //   domains.map((d) => d.domain)
-    // )
+    console.info('--------------')
+    console.info(
+      '\x1b[33m%s\x1b[0m',
+      '🔍 Visited domains:',
+      domains.map((d) => d.domain)
+    )
 
     console.info(
       '\x1b[34m%s\x1b[0m',
@@ -129,11 +129,11 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
       filteredDomains.map((d) => d)
     )
 
-    // console.info(
-    //   '\x1b[31m%s\x1b[0m',
-    //   '🚨 Skipped domains:',
-    //   skippedDomains.map((d) => d)
-    // )
+    console.info(
+      '\x1b[31m%s\x1b[0m',
+      '🚨 Skipped domains:',
+      skippedDomains.map((d) => d)
+    )
 
     return filteredDomains.map((d) => d.domain)
   } catch (error) {
