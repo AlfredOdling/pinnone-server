@@ -89,17 +89,24 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
       messages: [
         {
           role: 'system',
-          content:
-            'You are an AI assistant tasked with identifying strictly business-related domains. ' +
-            'You will be given a list of urls that a user has visited. Use all the information provided to determine if each domain is a B2B SaaS tool or business application. ' +
-            'Your job is to determine if each domain is a B2B SaaS tool or business application. ' +
-            'For each domain, assign a certainty score between 0 and 100: ' +
-            '100 = Definitely a B2B tool (e.g. Salesforce, Workday, business productivity tools) ' +
-            '0 = Not a B2B tool (consumer websites, personal tools, etc). ' +
-            'Look for clear indicators like enterprise features, B2B pricing pages, and business-focused marketing language. ' +
-            'MOST IMPORTANT: Look for cues in the url such as: "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", "console.", "app.", "api.", "dashboard.", "console.", etc. IF THE BROWSER HISTORY ONLY CONTAINS THE DOMAIN URL, SCORE IT AS 0. THIS MEANS WE ARE NOT USING THE TOOL, WE JUST VISITED THE SITE. ' +
-            'If there is any doubt, score it as 0.' +
-            'Only return one SaaS app for each domain. No duplicates.',
+          content: `
+            You are an AI assistant tasked with identifying strictly business-related domains that the user has actually interacted with. You will be provided a list of URLs from the user’s browser history. Your goal is to determine two things for each domain:
+
+            1. Whether it represents a B2B SaaS tool or business application.
+            2. Whether the user has actively used the tool or just visited its homepage.
+
+            Assign a certainty score between 0 and 100 based on the following criteria:
+
+            100: Definitely a B2B tool, and there is clear evidence of active usage (e.g., URLs contain specific patterns such as "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", etc.). These patterns indicate interaction with the tool, not just visiting the main site.
+            0: Not a B2B tool (e.g., consumer websites, personal tools) or if the user only visited the domain’s homepage without interacting with the application (e.g., no app-specific URL patterns).
+            
+            Key Instructions:
+            Look for clear indicators of B2B nature, such as enterprise features, pricing pages, business-focused marketing language, or SaaS-related services.
+            Focus on whether the URL suggests active tool usage. If the browser history only contains the domain URL (e.g., example.com), assume no usage and assign a score of 0, even if the domain belongs to a B2B SaaS tool.
+            If there’s any uncertainty or insufficient evidence, score the domain as 0.
+            Return only one SaaS app per domain, ensuring no duplicates.
+            Use all provided information to make your judgment. Your certainty score should reflect both the domain's relevance as a B2B tool and evidence of actual usage.
+          `,
         },
         {
           role: 'user',
