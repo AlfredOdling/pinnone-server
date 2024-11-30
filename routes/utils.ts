@@ -90,22 +90,35 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
         {
           role: 'system',
           content: `
-            You are an AI assistant tasked with identifying strictly business-related domains that the user has actually interacted with. You will be provided a list of URLs from the user’s browser history. Your goal is to determine two things for each domain:
+            Task Description: You are an AI assistant tasked with analyzing a list of URLs from the user’s browser history to identify strictly business-related domains (B2B SaaS tools or applications) and evaluate user engagement with them. For each domain, determine the following:
 
-            1. Whether it represents a B2B SaaS tool or business application.
-            2. Whether the user has actively used the tool or just visited its homepage.
+            is_b2b_tool_certainty_score
+            Purpose: Evaluate if the domain represents a B2B SaaS tool or business application.
+            Scoring Criteria (0–100):
 
-            Assign a certainty score between 0 and 100 based on the following criteria:
-
-            100: Definitely a B2B tool, and there is clear evidence of active usage (e.g., URLs contain specific patterns such as "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", etc.). These patterns indicate interaction with the tool, not just visiting the main site.
-            0: Not a B2B tool (e.g., consumer websites, personal tools) or if the user only visited the domain’s homepage without interacting with the application (e.g., no app-specific URL patterns).
+            100: Definitely a B2B tool. URL patterns include indicators such as "app.", "api.", "dashboard.", "console.", "admin.", "login.", "signup.", "register.", "portal.", etc.
+            0: Clearly not a B2B tool (e.g., consumer websites, personal tools) OR only the homepage was visited without app-specific patterns.
             
-            Key Instructions:
-            Look for clear indicators of B2B nature, such as enterprise features, pricing pages, business-focused marketing language, or SaaS-related services.
-            Focus on whether the URL suggests active tool usage. If the browser history only contains the domain URL (e.g., example.com), assume no usage and assign a score of 0, even if the domain belongs to a B2B SaaS tool.
-            If there’s any uncertainty or insufficient evidence, score the domain as 0.
-            Return only one SaaS app per domain, ensuring no duplicates.
-            Use all provided information to make your judgment. Your certainty score should reflect both the domain's relevance as a B2B tool and evidence of actual usage.
+            
+            has_logged_in_to_tool_certainty_score
+            Purpose: Assess whether the user actively used the tool or just visited the homepage.
+            Scoring Criteria (0–100):
+
+            100: Strong evidence of active usage, such as app-specific patterns (e.g., "app.", "dashboard.", "console.", etc.).
+            0: No evidence of interaction; only the homepage or non-app-related URLs (e.g., "example.com") were visited.
+
+            
+            Instructions:
+
+            Use URL patterns, page structures, and context to determine if the domain is relevant to B2B SaaS. Look for enterprise features, business-oriented marketing language, pricing pages, or SaaS-related services.
+            Focus on whether the URL suggests active tool usage. If the URL history only contains the domain's homepage or lacks app-specific patterns, assign a score of 0, even if it belongs to a B2B SaaS tool.
+            Avoid duplicate entries; return only one result per domain.
+            In cases of uncertainty or insufficient evidence, assign a score of 0 for both criteria.
+            Goal:
+            Provide two certainty scores for each domain:
+
+            is_b2b_tool_certainty_score (indicates whether it is a B2B tool).
+            has_logged_in_to_tool_certainty_score (indicates evidence of active tool usage).
           `,
         },
         {
@@ -120,8 +133,16 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
     const uniqueDomains = domains.filter(
       (domain, index, self) => self.indexOf(domain) === index
     )
-    const filteredDomains = uniqueDomains.filter((d) => d.certaintyScore > 40)
-    const skippedDomains = uniqueDomains.filter((d) => d.certaintyScore <= 40)
+    const filteredDomains = uniqueDomains.filter(
+      (d) =>
+        d.is_b2b_tool_certainty_score > 40 &&
+        d.has_logged_in_to_tool_certainty_score > 40
+    )
+    const skippedDomains = uniqueDomains.filter(
+      (d) =>
+        d.is_b2b_tool_certainty_score <= 40 ||
+        d.has_logged_in_to_tool_certainty_score <= 40
+    )
 
     console.info('--------------')
     console.info(

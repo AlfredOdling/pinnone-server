@@ -108,14 +108,12 @@ router.post('/updateVendors', async (req: Request, res: Response) => {
     const orgUsers = await getOrgUsers({ user_id: data.user_id })
     console.log('🚀 updateVendors orgUsers:', orgUsers)
 
-    await Promise.all(
-      orgUsers.map((orgUser) =>
-        updateVendors({
-          encryptedData: data.encryptedData,
-          organization_id: orgUser.organization_id,
-        })
-      )
-    )
+    for (const orgUser of orgUsers) {
+      await updateVendors({
+        encryptedData: data.encryptedData,
+        organization_id: orgUser.organization_id,
+      })
+    }
 
     console.info('--------updateVendors done ✅')
     res.status(200).send({ data: 'History retrieved' })

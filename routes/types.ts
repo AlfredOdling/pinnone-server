@@ -33,7 +33,8 @@ export const RootDomains = z.lazy(() =>
     children: z.array(
       z.object({
         domain: z.string(),
-        certaintyScore: z.number(),
+        has_logged_in_to_tool_certainty_score: z.number(),
+        is_b2b_tool_certainty_score: z.number(),
       })
     ),
   })
