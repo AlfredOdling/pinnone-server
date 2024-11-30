@@ -72,6 +72,7 @@ export const getRootDomainsAndFilterSaaS = async ({ decryptedData }) => {
     .from('vendor')
     .select('root_domain')
     .in('root_domain', getVendorRootDomains(browserHistory))
+    .neq('status', 'blocked')
 
   const notOverlappingVendors = existingVendors.data.map(
     (vendor) => vendor.root_domain

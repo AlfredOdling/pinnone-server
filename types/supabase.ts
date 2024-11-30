@@ -367,6 +367,7 @@ export type Database = {
           name: string
           organization_id: string | null
           root_domain: string
+          status: string | null
           updated_at: string
           url: string | null
         }
@@ -380,6 +381,7 @@ export type Database = {
           name: string
           organization_id?: string | null
           root_domain: string
+          status?: string | null
           updated_at?: string
           url?: string | null
         }
@@ -393,6 +395,7 @@ export type Database = {
           name?: string
           organization_id?: string | null
           root_domain?: string
+          status?: string | null
           updated_at?: string
           url?: string | null
         }

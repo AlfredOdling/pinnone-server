@@ -51,6 +51,7 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     .from('vendor')
     .select('*')
     .in('root_domain', detectedRootDomains)
+    .neq('status', 'blocked')
 
   console.info(
     '⭐️ Detected vendors:',

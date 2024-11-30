@@ -78,6 +78,7 @@ export const updateVendors = async ({
       .from('vendor')
       .select('*') // Get all existing vendors
       .in('root_domain', visitedRootDomains) // Filter by visited domains
+      .neq('status', 'blocked')
 
     const res = await supabase.from('tool').upsert(
       visitedVendors.data.map((vendor) => ({
