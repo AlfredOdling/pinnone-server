@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js'
 import { personalUrls } from './consts'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { RootDomains, Urls } from './types'
+import { RootDomains } from './types'
 import OpenAI from 'openai'
 import * as dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
