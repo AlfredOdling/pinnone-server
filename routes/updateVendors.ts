@@ -75,14 +75,15 @@ export const updateVendors = async ({
       .from('vendor')
       .select('*') // Get all existing vendors
       .in('root_domain', visitedRootDomains) // Filter by visited domains
-      .neq('status', 'blocked')
 
     const res = await supabase.from('tool').upsert(
-      visitedVendors.data.map((vendor) => ({
-        vendor_id: vendor.id,
-        organization_id,
-        status: 'not_in_stack',
-      })),
+      visitedVendors.data
+        .map((vendor) => ({
+          vendor_id: vendor.id,
+          organization_id,
+          status: 'not_in_stack',
+        }))
+        .filter((vendor) => vendor.status !== 'blocked'),
       {
         onConflict: 'vendor_id',
         ignoreDuplicates: true,

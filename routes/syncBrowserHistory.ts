@@ -51,20 +51,21 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     .from('vendor')
     .select('*')
     .in('root_domain', detectedRootDomains)
-    .neq('status', 'blocked')
 
   console.info(
     '⭐️ Detected vendors:',
     vendors.data.map((v) => v.root_domain)
   )
 
-  const newTools = vendors.data.map((vendor) => ({
-    vendor_id: vendor.id,
-    organization_id,
-    department: vendor.category,
-    status: 'not_in_stack',
-    is_tracking: true,
-  }))
+  const newTools = vendors.data
+    .map((vendor) => ({
+      vendor_id: vendor.id,
+      organization_id,
+      department: vendor.category,
+      status: 'not_in_stack',
+      is_tracking: true,
+    }))
+    .filter((tool) => tool.status !== 'blocked')
 
   console.log('🚀  newTools:', newTools)
 
