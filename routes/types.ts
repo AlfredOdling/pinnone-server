@@ -28,12 +28,17 @@ export const NewVendors = z.lazy(() =>
   })
 )
 
+export const Urls = z.lazy(() =>
+  z.object({
+    children: z.array(z.string()),
+  })
+)
+
 export const RootDomains = z.lazy(() =>
   z.object({
     children: z.array(
       z.object({
         domain: z.string(),
-        has_logged_in_to_tool_certainty_score: z.number(),
         is_b2b_tool_certainty_score: z.number(),
       })
     ),

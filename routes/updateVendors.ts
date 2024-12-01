@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { decrypt, getRootDomainsAndFilterSaaS } from './utils'
+import { decrypt, getB2BSaasDomains } from './utils'
 import { NewVendors } from './types'
 
 dotenv.config()
@@ -27,13 +27,10 @@ export const updateVendors = async ({
   console.log('ℹ️ updateVendors for org: ', organization_id)
 
   const decryptedData = decrypt(encryptedData)
-  const visitedRootDomains = await getRootDomainsAndFilterSaaS({
-    decryptedData,
-  })
+  const visitedRootDomains = await getB2BSaasDomains(decryptedData)
 
   if (!visitedRootDomains.length) {
-    console.log('No vendors to add')
-    return
+    return console.log('No vendors to add')
   }
 
   try {
