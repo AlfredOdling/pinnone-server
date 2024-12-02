@@ -10,7 +10,8 @@ import { generateOverlappingTools } from './generateOverlappingTools'
 import express from 'express'
 import { handleStripeWebhooks } from './handleStripeWebhooks'
 import { askTeam } from './askTeam'
-
+import cron from 'node-cron'
+import { autoAudit } from './autoAudit'
 const router = Router()
 
 router.post(
@@ -153,6 +154,12 @@ router.post('/askTeam', async (req: Request, res: Response) => {
     console.error(error)
     res.status(500).send({ error: 'Failed', msg: error.message })
   }
+})
+
+// Runs every day at 12:00
+cron.schedule(`0 12 * * *`, async () => {
+  console.log('🚀 autoAudit starting...')
+  await autoAudit()
 })
 
 export default router
