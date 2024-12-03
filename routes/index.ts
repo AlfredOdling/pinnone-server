@@ -3,7 +3,7 @@ import { inviteAdmins } from './inviteAdmins'
 import { inviteExtensionUsers } from './inviteExtensionUsers'
 import { syncBrowserHistory } from './syncBrowserHistory'
 import { deleteExtensionUser } from './deleteExtensionUser'
-import { addVendors } from './addVendors'
+import { addToolsManually } from './addToolsManually'
 import { updateVendors } from './updateVendors'
 import { getOrgUsers } from './utils'
 import { generateOverlappingTools } from './generateOverlappingTools'
@@ -82,18 +82,18 @@ router.post('/deleteExtensionUser', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/addVendors', async (req: Request, res: Response) => {
+router.post('/addToolsManually', async (req: Request, res: Response) => {
   const { vendors, organization_id, owner_org_user_id } = req.body
-  console.log('⏳ addVendors loading...')
+  console.log('⏳ addToolsManually loading...')
 
   try {
-    await addVendors({
+    await addToolsManually({
       vendors,
       organization_id,
       owner_org_user_id,
     })
 
-    console.info('addVendors done ✅')
+    console.info('addToolsManually done ✅')
     res.status(200).send()
   } catch (error) {
     console.error(error)

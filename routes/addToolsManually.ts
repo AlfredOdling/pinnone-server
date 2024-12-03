@@ -18,7 +18,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export const addVendors = async ({
+export const addToolsManually = async ({
   vendors,
   organization_id,
   owner_org_user_id,
