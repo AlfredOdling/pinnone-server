@@ -32,73 +32,97 @@ export const addVendors = async ({
     .select('root_domain')
     .in('root_domain', rootDomains)
 
-  const rootDomainsToFetch = rootDomains.filter(
+  const oldVendors = rootDomains.filter((domain) =>
+    existingVendors.data.map((vendor) => vendor.root_domain).includes(domain)
+  )
+  const newVendors = rootDomains.filter(
     (domain) =>
       !existingVendors.data.map((vendor) => vendor.root_domain).includes(domain)
   )
 
-  console.log('🚀 addVendors: rootDomainsToFetch: ', rootDomainsToFetch)
+  if (newVendors.length > 0) {
+    const completion = await openai.beta.chat.completions.parse({
+      model: 'gpt-4o-2024-08-06',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a professional data analyst, that knows everything about the B2B SaaS market. ' +
+            'You are given a list or domains of SaaS apps. Fetch data about the apps.',
+        },
+        {
+          role: 'user',
+          content: JSON.stringify(newVendors),
+        },
+      ],
+      response_format: zodResponseFormat(NewVendors, 'newVendors'),
+    })
 
-  await sendEmail({
-    fromEmail: 'info@pinneone.com',
-    toEmail: 'alfredodling@gmail.com',
-    emailSubject: 'New manual vendors added',
-    emailText: rootDomainsToFetch.join(', '),
-  })
+    const upsertedVendors = await supabase
+      .from('vendor')
+      .upsert(
+        completion.choices[0].message.parsed.children.map((vendor) => ({
+          name: vendor.name,
+          description: vendor.description,
+          url: vendor.url,
+          root_domain: vendor.root_domain,
+          logo_url: vendor.logo_url,
+          category: vendor.category,
+          link_to_pricing_page: vendor.link_to_pricing_page,
+          // organization_id,
+        })),
+        {
+          onConflict: 'root_domain',
+          ignoreDuplicates: true,
+        }
+      )
+      .select('*')
+      .throwOnError()
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: 'gpt-4o-2024-08-06',
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You are a professional data analyst, that knows everything about the B2B SaaS market. ' +
-          'You are given a list or domains of SaaS apps. Fetch data about the apps.',
-      },
-      {
-        role: 'user',
-        content: JSON.stringify(rootDomainsToFetch),
-      },
-    ],
-    response_format: zodResponseFormat(NewVendors, 'newVendors'),
-  })
+    await supabase
+      .from('tool')
+      .upsert(
+        upsertedVendors.data.map((vendor) => ({
+          vendor_id: vendor.id,
+          organization_id,
+          department: vendor.category,
+          owner_org_user_id,
+          status: 'in_stack',
+          is_tracking: true,
+        })),
+        {
+          onConflict: 'vendor_id, organization_id',
+          ignoreDuplicates: true,
+        }
+      )
+      .throwOnError()
+  }
 
-  const upsertedVendors = await supabase
-    .from('vendor')
-    .upsert(
-      completion.choices[0].message.parsed.children.map((vendor) => ({
-        name: vendor.name,
-        description: vendor.description,
-        url: vendor.url,
-        root_domain: vendor.root_domain,
-        logo_url: vendor.logo_url,
-        category: vendor.category,
-        link_to_pricing_page: vendor.link_to_pricing_page,
-        // organization_id,
-      })),
-      {
-        onConflict: 'root_domain',
-        ignoreDuplicates: true,
-      }
-    )
-    .select('*')
-    .throwOnError()
+  if (oldVendors.length > 0) {
+    const vendors = await supabase
+      .from('vendor')
+      .select('id, category')
+      .in('root_domain', oldVendors)
 
-  await supabase
-    .from('tool')
-    .upsert(
-      upsertedVendors.data.map((vendor) => ({
-        vendor_id: vendor.id,
-        organization_id,
-        department: vendor.category,
-        owner_org_user_id,
-        status: 'in_stack',
-        is_tracking: true,
-      })),
-      {
-        onConflict: 'vendor_id, organization_id',
-        ignoreDuplicates: true,
-      }
-    )
-    .throwOnError()
+    await supabase
+      .from('tool')
+      .insert(
+        vendors.data.map((vendor) => ({
+          vendor_id: vendor.id,
+          organization_id,
+          department: vendor.category,
+          owner_org_user_id,
+          status: 'in_stack',
+          is_tracking: true,
+        }))
+      )
+      .throwOnError()
+
+    await sendEmail({
+      fromEmail: 'info@pinneone.com',
+      toEmail: 'alfredodling@gmail.com',
+      emailSubject: 'New manual vendors added',
+      emailText: oldVendors.join(', '),
+    })
+  }
 }
