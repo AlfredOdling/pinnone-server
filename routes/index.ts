@@ -12,6 +12,7 @@ import { handleStripeWebhooks } from './handleStripeWebhooks'
 import { askTeam } from './askTeam'
 import cron from 'node-cron'
 import { autoAudit } from './autoAudit'
+import { sendExtensionInvite } from './sendExtensionInvite'
 const router = Router()
 
 router.post(
@@ -39,6 +40,19 @@ router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
 
   try {
     await inviteExtensionUsers({ emails, organization_id })
+    res.status(200).send()
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ error: 'Failed', msg: error.message })
+  }
+})
+
+router.post('/sendExtensionInvite', async (req: Request, res: Response) => {
+  const { emails } = req.body
+  console.log('🚀 sendExtensionInvite  emails:', emails)
+
+  try {
+    await sendExtensionInvite({ emails })
     res.status(200).send()
   } catch (error) {
     console.error(error)
