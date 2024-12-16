@@ -55,6 +55,14 @@ export const OverlappingToolsList = z.object({
   children: z.array(OverlappingTool),
 })
 
+export const VendorName = z.object({
+  extracted_vendor_name: z.string(),
+})
+
+export const IsB2BSaaSTool = z.object({
+  is_b2b_saas_tool: z.boolean(),
+})
+
 export const ToolCost = z.object({
   vendor: z.string(),
   renewal_frequency: z.string(),

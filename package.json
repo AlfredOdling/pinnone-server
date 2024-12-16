@@ -37,6 +37,7 @@
     "nodemailer": "^6.9.7",
     "openai": "^4.67.3",
     "pdf-img-convert": "^2.0.0",
+    "pdf-to-img": "^4.3.0",
     "pdfjs-dist": "^4.9.155",
     "stripe": "^17.2.1",
     "zod": "^3.23.8"

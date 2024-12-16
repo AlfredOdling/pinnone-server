@@ -516,7 +516,7 @@ call-bind@^1.0.7:
     get-intrinsic "^1.2.4"
     set-function-length "^1.2.1"
 
-canvas@^2.11.2:
+canvas@2.11.2, canvas@^2.11.2:
   version "2.11.2"
   resolved "https://registry.yarnpkg.com/canvas/-/canvas-2.11.2.tgz#553d87b1e0228c7ac0fc72887c3adbac4abbd860"
   integrity sha512-ItanGBMrmRV7Py2Z+Xhs7cT+FNt5K0vPL4p9EZ/UX/Mu7hFbkxSjKF2KVtPwX7UYWp7dRKnrTvReflgrItJbdw==
@@ -1349,6 +1349,11 @@ path-to-regexp@0.1.7:
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
   integrity sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==
 
+path2d@^0.2.0:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/path2d/-/path2d-0.2.2.tgz#cc85d61ed7827e7863a2ee36713d4b5315a3d85d"
+  integrity sha512-+vnG6S4dYcYxZd+CZxzXCNKdELYZSKfohrk98yajCo1PtRoDgCTrrwOvK1GT0UoAdVszagDVllQc0U1vaX4NUQ==
+
 pdf-img-convert@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/pdf-img-convert/-/pdf-img-convert-2.0.0.tgz#378834d90cf44c74c32bca688bddf8f60f96ab47"
@@ -1358,6 +1363,22 @@ pdf-img-convert@^2.0.0:
     is-url "^1.2.4"
     node-fetch "^3.3.2"
     pdfjs-dist "^4.6.82"
+
+pdf-to-img@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/pdf-to-img/-/pdf-to-img-4.3.0.tgz#b9465d315b4b14fc441e54dca02861119d661bee"
+  integrity sha512-S1H/PlqBRPds1HU+oPuynBWZbF2O+6HhgDSPwLy1zmUICQksNwUAbjQA3QhxBsi/14ACHvPaufmqSVxJNOzwGg==
+  dependencies:
+    canvas "2.11.2"
+    pdfjs-dist "4.2.67"
+
+pdfjs-dist@4.2.67:
+  version "4.2.67"
+  resolved "https://registry.yarnpkg.com/pdfjs-dist/-/pdfjs-dist-4.2.67.tgz#dd2a65a4b00d95cd4bc2c1f6a27c5e9eb31d512a"
+  integrity sha512-rJmuBDFpD7cqC8WIkQUEClyB4UAH05K4AsyewToMTp2gSy3Rrx8c1ydAVqlJlGv3yZSOrhEERQU/4ScQQFlLHA==
+  optionalDependencies:
+    canvas "^2.11.2"
+    path2d "^0.2.0"
 
 pdfjs-dist@^4.6.82, pdfjs-dist@^4.9.155:
   version "4.9.155"
