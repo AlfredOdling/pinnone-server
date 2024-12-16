@@ -13,6 +13,10 @@ import { askTeam } from './askTeam'
 import cron from 'node-cron'
 import { autoAudit } from './autoAudit'
 import { sendExtensionInvite } from './sendExtensionInvite'
+import { UserRefreshClient } from 'google-auth-library'
+import { googleAuth } from './authGoogle'
+import { scanEmailAccount } from './scanEmailAccount'
+
 const router = Router()
 
 router.post(
@@ -168,6 +172,22 @@ router.post('/askTeam', async (req: Request, res: Response) => {
     console.error(error)
     res.status(500).send({ error: 'Failed', msg: error.message })
   }
+})
+
+router.post('/auth/google', async (req, res) => {
+  const tokens = await googleAuth({
+    code: req.body.code,
+    organization_id: req.body.organization_id,
+  })
+  res.json(tokens)
+})
+
+router.post('/scanEmailAccount', async (req, res) => {
+  const tokens = await scanEmailAccount({
+    email: req.body.email,
+    organization_id: req.body.organization_id,
+  })
+  res.json(tokens)
 })
 
 // Runs every day at 12:00

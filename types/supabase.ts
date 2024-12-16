@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      email_account: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          email: string | null
+          expiry_date: string | null
+          id: number
+          last_scanned: string | null
+          organization_id: string | null
+          provider: string | null
+          refresh_token: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          email?: string | null
+          expiry_date?: string | null
+          id?: number
+          last_scanned?: string | null
+          organization_id?: string | null
+          provider?: string | null
+          refresh_token?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          email?: string | null
+          expiry_date?: string | null
+          id?: number
+          last_scanned?: string | null
+          organization_id?: string | null
+          provider?: string | null
+          refresh_token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_account_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_user: {
         Row: {
           created_at: string
@@ -64,6 +108,7 @@ export type Database = {
       organization: {
         Row: {
           auto_audit_cron: string | null
+          auto_audit_enabled: boolean | null
           created_at: string
           id: string
           name: string
@@ -73,6 +118,7 @@ export type Database = {
         }
         Insert: {
           auto_audit_cron?: string | null
+          auto_audit_enabled?: boolean | null
           created_at?: string
           id?: string
           name: string
@@ -82,6 +128,7 @@ export type Database = {
         }
         Update: {
           auto_audit_cron?: string | null
+          auto_audit_enabled?: boolean | null
           created_at?: string
           id?: string
           name?: string
@@ -156,7 +203,9 @@ export type Database = {
           other_cost: number | null
           price_per_seat: number | null
           pricing_model: string
+          receipt_file: string | null
           renewal_frequency: string
+          source: string | null
           starts_at: string
           status: string
           tool_id: number
@@ -174,7 +223,9 @@ export type Database = {
           other_cost?: number | null
           price_per_seat?: number | null
           pricing_model: string
+          receipt_file?: string | null
           renewal_frequency: string
+          source?: string | null
           starts_at: string
           status: string
           tool_id: number
@@ -192,7 +243,9 @@ export type Database = {
           other_cost?: number | null
           price_per_seat?: number | null
           pricing_model?: string
+          receipt_file?: string | null
           renewal_frequency?: string
+          source?: string | null
           starts_at?: string
           status?: string
           tool_id?: number

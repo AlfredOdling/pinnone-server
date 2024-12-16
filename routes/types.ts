@@ -54,3 +54,19 @@ const OverlappingTool = z.object({
 export const OverlappingToolsList = z.object({
   children: z.array(OverlappingTool),
 })
+
+export const ToolCost = z.object({
+  vendor: z.string(),
+  renewal_frequency: z.string(),
+  renewal_start_date: z.string(),
+  renewal_next_date: z.string(),
+
+  pricing_model: z.string(),
+  currency: z.string(),
+
+  flat_fee_cost: z.number(),
+  number_of_seats: z.number(),
+  price_per_seat: z.number(),
+  usage_based_cost: z.number(),
+  other_cost: z.number(),
+})
