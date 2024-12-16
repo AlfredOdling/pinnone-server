@@ -89,7 +89,6 @@ const convertFileAndUpload = async (gmail, messageId: string, part: any) => {
     const fileName = 'attachments_temp/' + filename + '_' + counter + '.png'
     filePathToUpload = fileName
     fs.writeFileSync(fileName, image)
-    console.log('🚀  filename:', filename)
     counter++
   }
 
@@ -104,18 +103,22 @@ const convertFileAndUpload = async (gmail, messageId: string, part: any) => {
       upsert: true,
     })
 
+  const { data: publicUrlData } = supabase.storage
+    .from('receipts')
+    .getPublicUrl(data.path)
+
   if (error) {
-    throw new Error(`Failed to upload file: ${error.message}`)
+    throw new Error('Failed to upload file:' + error.message)
   }
 
   // Cleanup temp files
   fs.unlinkSync('attachments_temp/' + filename)
   fs.unlinkSync(filePathToUpload)
 
-  return { base64Image, publicUrl: data.path }
+  return { base64Image, publicUrl: publicUrlData.publicUrl }
 }
 
-const extractVendorName = async (res: any) => {
+const extractVendorName = async (vendor) => {
   const completion = await openai.beta.chat.completions.parse({
     model: 'gpt-4o',
     messages: [
@@ -125,7 +128,7 @@ const extractVendorName = async (res: any) => {
       },
       {
         role: 'user',
-        content: JSON.stringify(res.vendor),
+        content: vendor,
       },
     ],
     response_format: zodResponseFormat(VendorName, 'vendorName'),
@@ -199,16 +202,20 @@ const updateToolAndSubscription = async (
   organization_id: string
 ) => {
   const vendorNameRaw = JSON.stringify(res.vendor)
+  console.log('🚀  vendorNameRaw:', vendorNameRaw)
 
   const isB2BSaaSTool_ = await isB2BSaaSTool(vendorNameRaw)
+  console.log('🚀  isB2BSaaSTool_:', isB2BSaaSTool_)
   if (!isB2BSaaSTool_) return
 
   const extracted_vendor_name = await extractVendorName(vendorNameRaw)
+  console.log('🚀  extracted_vendor_name:', extracted_vendor_name)
 
   const existingVendors = await supabase
     .from('vendor')
     .select('*')
     .ilike('name', `%${extracted_vendor_name}%`)
+  console.log('🚀  existingVendors:', existingVendors)
 
   let vendor_id
   if (existingVendors.data.length === 0) {
@@ -217,6 +224,7 @@ const updateToolAndSubscription = async (
   } else {
     vendor_id = existingVendors.data[0].id
   }
+  console.log('🚀  vendor_id:', vendor_id)
 
   const tool_res = await supabase
     .from('tool')
@@ -226,10 +234,9 @@ const updateToolAndSubscription = async (
       status: 'not_in_stack',
       is_tracking: true,
       is_desktop_tool: false,
-      department: 'IT',
-      owner_org_user_id: 5,
     })
     .select('id')
+  console.log('🚀  tool_res_error:', tool_res.error)
 
   const subscription_res = await supabase.from('subscription').insert({
     tool_id: tool_res.data[0].id,
@@ -246,6 +253,7 @@ const updateToolAndSubscription = async (
     status: 'active',
     source: 'email',
   })
+  console.log('🚀  subscription_res_error:', subscription_res.error)
 }
 
 async function analyzeReceipt(
@@ -256,6 +264,7 @@ async function analyzeReceipt(
 ) {
   const fileUrl = await convertFileAndUpload(gmail, messageId, part)
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
+  console.log('🚀  res:', res)
   await updateToolAndSubscription(res, fileUrl.publicUrl, organization_id)
 }
 
@@ -286,7 +295,7 @@ export const scanEmailAccount = async ({
       userId: 'me',
       q: '(invoice | receipt | faktura | kvitto) has:attachment',
     })
-    const messages = response.data.messages.slice(0, 10) || []
+    const messages = response.data.messages.slice(0, 1) || []
 
     for (const message of messages) {
       const msg = await gmail.users.messages.get({
