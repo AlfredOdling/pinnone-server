@@ -28,6 +28,12 @@ export const NewVendors = z.lazy(() =>
   })
 )
 
+export const NewVendor = z.lazy(() =>
+  z.object({
+    children: Vendor,
+  })
+)
+
 export const Urls = z.lazy(() =>
   z.object({
     children: z.array(z.string()),

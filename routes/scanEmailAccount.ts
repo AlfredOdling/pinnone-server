@@ -5,7 +5,7 @@ import OpenAI from 'openai'
 
 import { OAuth2Client, UserRefreshClient } from 'google-auth-library'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { IsB2BSaaSTool, ToolCost, VendorName } from './types'
+import { IsB2BSaaSTool, NewVendor, ToolCost, VendorName } from './types'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../types/supabase'
 import { pdf } from 'pdf-to-img'
@@ -38,7 +38,7 @@ const refreshToken = async (refreshToken: string) => {
   return credentials
 }
 
-const runOpenaiVision = async (base64Image: string) => {
+const analyzeReceiptWithOpenAI = async (base64Image: string) => {
   // Remove any potential file path prefix and get just the base64 string
   const base64Data = base64Image.includes(',')
     ? base64Image.split(',')[1]
@@ -69,7 +69,7 @@ const runOpenaiVision = async (base64Image: string) => {
   return JSON.parse(response.choices[0].message.content)
 }
 
-const prepareAttachment = async (gmail, messageId: string, part: any) => {
+const convertFileAndUpload = async (gmail, messageId: string, part: any) => {
   const attachment = await gmail.users.messages.attachments.get({
     userId: 'me',
     messageId: messageId,
@@ -108,43 +108,14 @@ const prepareAttachment = async (gmail, messageId: string, part: any) => {
     throw new Error(`Failed to upload file: ${error.message}`)
   }
 
-  // Get public URL
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from('receipts').getPublicUrl(data.path)
-
   // Cleanup temp files
   fs.unlinkSync('attachments_temp/' + filename)
   fs.unlinkSync(filePathToUpload)
 
-  return { publicUrl, base64Image }
+  return { base64Image, publicUrl: data.path }
 }
 
-const updateDB = async (res: any, attachmentUrl: string) => {
-  console.log('🚀  attachmentUrl:', attachmentUrl)
-
-  const completion1 = await openai.beta.chat.completions.parse({
-    model: 'gpt-4o',
-    messages: [
-      {
-        role: 'system',
-        content: `This is the vendor name from an invoice. Is this a B2B SaaS tool? Exclude tools that are accounting, billing, invoicing, etc. My definition of B2B SaaS tool is tools similar to tools like Slack, Zoom, Notion, Supabase, Salesforce, Hubspot, Framer, ChatGPT, etc.`,
-      },
-      {
-        role: 'user',
-        content: JSON.stringify(res.vendor),
-      },
-    ],
-    response_format: zodResponseFormat(IsB2BSaaSTool, 'isB2BSaaSTool'),
-  })
-
-  const isB2BSaaSTool = completion1.choices[0].message.parsed.is_b2b_saas_tool
-  console.log('🚀  isB2BSaaSTool:', isB2BSaaSTool)
-
-  if (!isB2BSaaSTool) {
-    return
-  }
-
+const extractVendorName = async (res: any) => {
   const completion = await openai.beta.chat.completions.parse({
     model: 'gpt-4o',
     messages: [
@@ -160,29 +131,98 @@ const updateDB = async (res: any, attachmentUrl: string) => {
     response_format: zodResponseFormat(VendorName, 'vendorName'),
   })
 
-  const extracted_vendor_name =
-    completion.choices[0].message.parsed.extracted_vendor_name
+  return completion.choices[0].message.parsed.extracted_vendor_name
+}
 
-  console.log('🚀  extracted_vendor_name:', extracted_vendor_name)
+const isB2BSaaSTool = async (vendorName) => {
+  const completion1 = await openai.beta.chat.completions.parse({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: `This is the vendor name from an invoice. Is this a B2B SaaS tool? Exclude tools that are accounting, billing, invoicing, etc. My definition of B2B SaaS tool is tools similar to tools like Slack, Zoom, Notion, Supabase, Salesforce, Hubspot, Framer, ChatGPT, etc.`,
+      },
+      {
+        role: 'user',
+        content: vendorName,
+      },
+    ],
+    response_format: zodResponseFormat(IsB2BSaaSTool, 'isB2BSaaSTool'),
+  })
 
-  const vendors = await supabase
+  return completion1.choices[0].message.parsed.is_b2b_saas_tool
+}
+
+const addNewVendor = async (vendorName: string) => {
+  const completion2 = await openai.beta.chat.completions.parse({
+    model: 'gpt-4o-2024-08-06',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a professional data analyst, that knows everything about the B2B SaaS market. ' +
+          'You are given a name of a SaaS app. Fetch data about the app.',
+      },
+      {
+        role: 'user',
+        content: vendorName,
+      },
+    ],
+    response_format: zodResponseFormat(NewVendor, 'newVendor'),
+  })
+
+  const vendor = await supabase
+    .from('vendor')
+    .upsert(
+      completion2.choices[0].message.parsed.children[0].map((vendor) => ({
+        name: vendor.name,
+        description: vendor.description,
+        url: vendor.url,
+        root_domain: vendor.root_domain,
+        logo_url: vendor.logo_url,
+        category: vendor.category,
+        link_to_pricing_page: vendor.link_to_pricing_page,
+      })),
+      {
+        onConflict: 'root_domain',
+        ignoreDuplicates: true,
+      }
+    )
+    .select('id')
+
+  return vendor
+}
+
+const updateToolAndSubscription = async (
+  res: any,
+  attachmentUrl: string,
+  organization_id: string
+) => {
+  const vendorNameRaw = JSON.stringify(res.vendor)
+
+  const isB2BSaaSTool_ = await isB2BSaaSTool(vendorNameRaw)
+  if (!isB2BSaaSTool_) return
+
+  const extracted_vendor_name = await extractVendorName(vendorNameRaw)
+
+  const existingVendors = await supabase
     .from('vendor')
     .select('*')
-    .ilike(
-      'name',
-      `%${completion.choices[0].message.parsed.extracted_vendor_name}%`
-    )
+    .ilike('name', `%${extracted_vendor_name}%`)
 
-  console.log('🚀  vendors:', vendors)
-
-  if (vendors.data.length === 0) {
+  let vendor_id
+  if (existingVendors.data.length === 0) {
+    const newVendor = await addNewVendor(extracted_vendor_name)
+    vendor_id = newVendor.data[0].id
+  } else {
+    vendor_id = existingVendors.data[0].id
   }
 
   const tool_res = await supabase
     .from('tool')
     .insert({
-      organization_id: 'b34cd74c-b805-416c-b4d9-a41dc0173d3c',
-      vendor_id: vendors.data[0].id,
+      organization_id,
+      vendor_id,
       status: 'not_in_stack',
       is_tracking: true,
       is_desktop_tool: false,
@@ -190,7 +230,6 @@ const updateDB = async (res: any, attachmentUrl: string) => {
       owner_org_user_id: 5,
     })
     .select('id')
-  console.log('🚀  tool_res:', tool_res)
 
   const subscription_res = await supabase.from('subscription').insert({
     tool_id: tool_res.data[0].id,
@@ -207,14 +246,17 @@ const updateDB = async (res: any, attachmentUrl: string) => {
     status: 'active',
     source: 'email',
   })
-  console.log('🚀  subscription_res:', subscription_res)
 }
 
-async function analyzeReceipt(gmail, messageId: string, part: any) {
-  const fileUrl = await prepareAttachment(gmail, messageId, part)
-  const res = await runOpenaiVision(fileUrl.base64Image)
-  console.log('🚀  res:', res)
-  await updateDB(res, fileUrl.publicUrl)
+async function analyzeReceipt(
+  gmail,
+  messageId: string,
+  part: any,
+  organization_id: string
+) {
+  const fileUrl = await convertFileAndUpload(gmail, messageId, part)
+  const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
+  await updateToolAndSubscription(res, fileUrl.publicUrl, organization_id)
 }
 
 export const scanEmailAccount = async ({
@@ -244,7 +286,7 @@ export const scanEmailAccount = async ({
       userId: 'me',
       q: '(invoice | receipt | faktura | kvitto) has:attachment',
     })
-    const messages = response.data.messages.slice(0, 3) || []
+    const messages = response.data.messages.slice(0, 10) || []
 
     for (const message of messages) {
       const msg = await gmail.users.messages.get({
@@ -257,7 +299,7 @@ export const scanEmailAccount = async ({
 
       for (const part of parts) {
         if (part.filename && part.body && part.body.attachmentId) {
-          await analyzeReceipt(gmail, message.id!, part)
+          await analyzeReceipt(gmail, message.id!, part, organization_id)
         }
       }
     }
