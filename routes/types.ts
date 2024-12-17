@@ -97,3 +97,11 @@ export const ToolCost = z.object({
   other_cost: z.number(),
   invoice_or_receipt: z.enum(['INVOICE', 'RECEIPT']),
 })
+
+export const ToolCost2 = z.object({
+  vendor: z.string(),
+  renewal_start_date: z.string(),
+  currency: z.enum(['USD', 'SEK', 'EUR']),
+  total_cost: z.number(),
+  invoice_or_receipt: z.enum(['INVOICE', 'RECEIPT']),
+})
