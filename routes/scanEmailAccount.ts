@@ -5,7 +5,13 @@ import OpenAI from 'openai'
 
 import { OAuth2Client, UserRefreshClient } from 'google-auth-library'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { IsB2BSaaSTool, NewVendor, ToolCost, VendorName } from './types'
+import {
+  IsB2BSaaSTool,
+  NewVendor,
+  ToolCost,
+  ToolCost_,
+  VendorName,
+} from './types'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../types/supabase'
 import { pdf } from 'pdf-to-img'
@@ -52,7 +58,62 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
         content: [
           {
             type: 'text',
-            text: `Fill out the following JSON with the information from the image.`,
+            text: `
+              You will be given an image of an invoice.
+              Fill out the following JSON with the information from the image.
+              
+              IMPORTANT 1: If you are unsure about the pricing model, just set the pricing model to FLAT_FEE,
+              and set the flat_fee_cost to the total cost of the invoice.
+
+              IMPORTANT 2: If you are unsure of the renewal_frequency, just set it to MONTHLY.
+
+              --This is the instructions for the JSON fields--
+              
+              **vendor**
+              This is the name of the company that is providing the service.
+
+              **renewal_frequency**
+              Must be one of the following: MONTHLY | QUARTERLY | YEARLY.
+              Most likely it will be MONTHLY. If you see evidence of that the invoice period is spanning 12 months, then it is likely YEARLY.
+              If you see evidence of that the invoice period is spanning 3 months, then it is likely QUARTERLY.
+
+              **renewal_start_date**
+              Should be in the format: YYYY-MM-DD.
+              This is the date for the start of the invoice period.
+
+              **renewal_next_date**
+              Should be in the format: YYYY-MM-DD.
+              This is the date for the end of the invoice period.
+
+              **pricing_model**
+              Must be one of the following: FLAT_FEE | USAGE_BASED | PER_SEAT.
+              Evidence for USAGE_BASED pricing model could be compute used, storage used or similar.
+              Evidence for PER_SEAT pricing model should be that it says something about seats and users specifically.
+              Its not enough with evidence that shows it to have price per unit.
+              Price per unit and price per seat are NOT the same thing.
+
+              **currency**
+              Must be one of the following: USD | SEK | EUR | GBP | NOK | DKK | CHF | CAD | AUD | NZD | JPY
+
+              **flat_fee_cost**
+              If pricing_model is FLAT_FEE, this is the cost.
+
+              **number_of_seats**
+              If pricing_model is PER_SEAT, then enter how many seats.
+
+              **price_per_seat**
+              If pricing_model is PER_SEAT, then enter the pricing per seat.
+
+              **usage_based_cost**
+              If pricing_model is USAGE_BASED, then enter the pricing for that.
+
+              **other_cost**
+              If it does not fit any of the other pricing_models, use this.
+
+              **invoice_or_receipt**
+              Must be one of the following: INVOICE | RECEIPT.
+              This is the type of the invoice or receipt.
+            `,
           },
           {
             type: 'image_url',
@@ -124,7 +185,14 @@ const extractVendorName = async (vendor) => {
     messages: [
       {
         role: 'system',
-        content: `Extract the vendor name from the following name. The name is from an invoice, so it might be a bit different than the actual name of the vendor. We just want the name of the vendor.`,
+        content: `
+        Extract the vendor name from the following name. 
+        The name is from an invoice, so it might be a bit different than the actual name of the vendor.
+        We just want the name of the vendor.
+        
+        For example, if the name is "Framer B.V.", return "Framer". And if the is "Supabase Pte. Ltd.", return "Supabase".
+        And so on.
+        `,
       },
       {
         role: 'user',
@@ -174,98 +242,178 @@ const addNewVendor = async (vendorName: string) => {
     response_format: zodResponseFormat(NewVendor, 'newVendor'),
   })
 
+  const vendor_ = completion2.choices[0].message.parsed.children
+
   const vendor = await supabase
     .from('vendor')
     .upsert(
-      completion2.choices[0].message.parsed.children[0].map((vendor) => ({
-        name: vendor.name,
-        description: vendor.description,
-        url: vendor.url,
-        root_domain: vendor.root_domain,
-        logo_url: vendor.logo_url,
-        category: vendor.category,
-        link_to_pricing_page: vendor.link_to_pricing_page,
-      })),
+      {
+        name: vendor_.name,
+        description: vendor_.description,
+        url: vendor_.url,
+        root_domain: vendor_.root_domain,
+        logo_url: vendor_.logo_url,
+        category: vendor_.category,
+        link_to_pricing_page: vendor_.link_to_pricing_page,
+      },
       {
         onConflict: 'root_domain',
         ignoreDuplicates: true,
       }
     )
     .select('id')
+    .single()
 
   return vendor
 }
 
 const updateToolAndSubscription = async (
-  res: any,
+  res: ToolCost_,
   attachmentUrl: string,
-  organization_id: string
+  organization_id: string,
+  email: string
 ) => {
   const vendorNameRaw = JSON.stringify(res.vendor)
   console.log('🚀  vendorNameRaw:', vendorNameRaw)
 
-  const isB2BSaaSTool_ = await isB2BSaaSTool(vendorNameRaw)
-  console.log('🚀  isB2BSaaSTool_:', isB2BSaaSTool_)
-  if (!isB2BSaaSTool_) return
-
   const extracted_vendor_name = await extractVendorName(vendorNameRaw)
   console.log('🚀  extracted_vendor_name:', extracted_vendor_name)
 
-  const existingVendors = await supabase
+  const isB2BSaaSTool_ = await isB2BSaaSTool(extracted_vendor_name)
+  console.log('🚀  isB2BSaaSTool_:', isB2BSaaSTool_)
+  if (!isB2BSaaSTool_) return
+
+  const existingVendor = await supabase // Don't know what happens if there are multiple vendors with kind of the same name
     .from('vendor')
     .select('*')
     .ilike('name', `%${extracted_vendor_name}%`)
-  console.log('🚀  existingVendors:', existingVendors)
+    .single()
+  console.log('🚀  existingVendor:', existingVendor)
 
   let vendor_id
-  if (existingVendors.data.length === 0) {
+  if (!existingVendor.data) {
     const newVendor = await addNewVendor(extracted_vendor_name)
-    vendor_id = newVendor.data[0].id
+    console.log('🚀  newVendor:', newVendor)
+    vendor_id = newVendor.data.id
   } else {
-    vendor_id = existingVendors.data[0].id
+    vendor_id = existingVendor.data.id
   }
   console.log('🚀  vendor_id:', vendor_id)
 
-  const tool_res = await supabase
+  let tool_res = await supabase
     .from('tool')
-    .insert({
-      organization_id,
-      vendor_id,
-      status: 'not_in_stack',
-      is_tracking: true,
-      is_desktop_tool: false,
-    })
     .select('id')
-  console.log('🚀  tool_res_error:', tool_res.error)
+    .eq('organization_id', organization_id)
+    .eq('vendor_id', vendor_id)
+    .single()
+  let tool_id = tool_res.data?.id
+  console.log('🚀  tool_res_error 1:', tool_res.error)
+
+  if (!tool_id) {
+    tool_res = await supabase
+      .from('tool')
+      .insert({
+        organization_id,
+        vendor_id,
+        status: 'in_stack',
+        is_tracking: true,
+        is_desktop_tool: false,
+      })
+      .select('id')
+      .single()
+    tool_id = tool_res.data?.id
+
+    console.log('🚀  tool_res_error 2:', tool_res.error)
+  }
+
+  const existing_subscriptions = await supabase
+    .from('subscription')
+    .select('*')
+    .eq('tool_id', tool_id)
+
+  console.log('🚀  existing_subscriptions:', existing_subscriptions)
+
+  let same_starts_at = false
+  let same_next_renewal_date = false
+  let same_flat_fee_cost = false
+  let same_price_per_seat = false
+  let same_usage_based_cost = false
+  let same_other_cost = false
+
+  existing_subscriptions?.data?.forEach(
+    ({
+      starts_at,
+      next_renewal_date,
+      flat_fee_cost,
+      price_per_seat,
+      usage_based_cost,
+      other_cost,
+    }) => {
+      same_starts_at = res.renewal_start_date === starts_at
+      same_next_renewal_date = res.renewal_next_date === next_renewal_date
+      same_flat_fee_cost = res.flat_fee_cost === flat_fee_cost
+      same_price_per_seat = res.price_per_seat === price_per_seat
+      same_usage_based_cost = res.usage_based_cost === usage_based_cost
+      same_other_cost = res.other_cost === other_cost
+    }
+  )
+
+  let has_conflict = false
+  let conflict_info = ''
+
+  if (same_starts_at && same_next_renewal_date) {
+    has_conflict = true
+    conflict_info = 'Same starts_at and next_renewal_date'
+  }
 
   const subscription_res = await supabase.from('subscription').insert({
-    tool_id: tool_res.data[0].id,
+    tool_id,
     currency: res.currency,
+    renewal_frequency: res.renewal_frequency,
+    starts_at: res.renewal_start_date,
     next_renewal_date: res.renewal_next_date,
     receipt_file: attachmentUrl,
-    starts_at: res.renewal_start_date,
     pricing_model: res.pricing_model,
-    renewal_frequency: res.renewal_frequency,
+    flat_fee_cost: res.flat_fee_cost,
     number_of_seats: res.number_of_seats,
     price_per_seat: res.price_per_seat,
     other_cost: res.other_cost,
     usage_based_cost: res.usage_based_cost,
-    status: 'active',
-    source: 'email',
+    status: 'ACTIVE',
+    source: 'gmail',
+    has_conflict,
+    email_recipient: email,
+    conflict_info,
   })
   console.log('🚀  subscription_res_error:', subscription_res.error)
+
+  const email_account_res = await supabase
+    .from('email_account')
+    .update({
+      last_scanned: new Date().toISOString(),
+    })
+    .eq('email', email)
+    .eq('organization_id', organization_id)
+  console.log('🚀  email_account_res_error:', email_account_res.error)
 }
 
 async function analyzeReceipt(
   gmail,
   messageId: string,
   part: any,
-  organization_id: string
+  organization_id: string,
+  email: string
 ) {
   const fileUrl = await convertFileAndUpload(gmail, messageId, part)
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
   console.log('🚀  res:', res)
-  await updateToolAndSubscription(res, fileUrl.publicUrl, organization_id)
+
+  await updateToolAndSubscription(
+    res,
+    fileUrl.publicUrl,
+    organization_id,
+    email
+  )
 }
 
 export const scanEmailAccount = async ({
@@ -295,7 +443,7 @@ export const scanEmailAccount = async ({
       userId: 'me',
       q: '(invoice | receipt | faktura | kvitto) has:attachment',
     })
-    const messages = response.data.messages.slice(0, 1) || []
+    const messages = response.data.messages.slice(0, 5) || []
 
     for (const message of messages) {
       const msg = await gmail.users.messages.get({
@@ -308,7 +456,7 @@ export const scanEmailAccount = async ({
 
       for (const part of parts) {
         if (part.filename && part.body && part.body.attachmentId) {
-          await analyzeReceipt(gmail, message.id!, part, organization_id)
+          await analyzeReceipt(gmail, message.id!, part, organization_id, email)
         }
       }
     }

@@ -14,7 +14,7 @@ export type Database = {
           access_token: string | null
           created_at: string
           email: string | null
-          expiry_date: string | null
+          expiry_date: number | null
           id: number
           last_scanned: string | null
           organization_id: string | null
@@ -25,7 +25,7 @@ export type Database = {
           access_token?: string | null
           created_at?: string
           email?: string | null
-          expiry_date?: string | null
+          expiry_date?: number | null
           id?: number
           last_scanned?: string | null
           organization_id?: string | null
@@ -36,7 +36,7 @@ export type Database = {
           access_token?: string | null
           created_at?: string
           email?: string | null
-          expiry_date?: string | null
+          expiry_date?: number | null
           id?: number
           last_scanned?: string | null
           organization_id?: string | null
@@ -194,9 +194,12 @@ export type Database = {
       subscription: {
         Row: {
           cancelled_at: string | null
+          conflict_info: string | null
           created_at: string
           currency: string
+          email_recipient: string | null
           flat_fee_cost: number | null
+          has_conflict: boolean
           id: number
           next_renewal_date: string
           number_of_seats: number | null
@@ -214,9 +217,12 @@ export type Database = {
         }
         Insert: {
           cancelled_at?: string | null
+          conflict_info?: string | null
           created_at?: string
           currency: string
+          email_recipient?: string | null
           flat_fee_cost?: number | null
+          has_conflict?: boolean
           id?: number
           next_renewal_date: string
           number_of_seats?: number | null
@@ -234,9 +240,12 @@ export type Database = {
         }
         Update: {
           cancelled_at?: string | null
+          conflict_info?: string | null
           created_at?: string
           currency?: string
+          email_recipient?: string | null
           flat_fee_cost?: number | null
+          has_conflict?: boolean
           id?: number
           next_renewal_date?: string
           number_of_seats?: number | null
@@ -266,7 +275,6 @@ export type Database = {
         Row: {
           created_at: string
           department: string | null
-          file_urls: string | null
           id: number
           is_desktop_tool: boolean
           is_tracking: boolean
@@ -280,7 +288,6 @@ export type Database = {
         Insert: {
           created_at?: string
           department?: string | null
-          file_urls?: string | null
           id?: number
           is_desktop_tool?: boolean
           is_tracking?: boolean
@@ -294,7 +301,6 @@ export type Database = {
         Update: {
           created_at?: string
           department?: string | null
-          file_urls?: string | null
           id?: number
           is_desktop_tool?: boolean
           is_tracking?: boolean

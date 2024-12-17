@@ -83,4 +83,22 @@ export const ToolCost = z.object({
   price_per_seat: z.number(),
   usage_based_cost: z.number(),
   other_cost: z.number(),
+  invoice_or_receipt: z.string(),
 })
+
+export type ToolCost_ = {
+  vendor: string
+  renewal_frequency: string
+  renewal_start_date: string
+  renewal_next_date: string
+
+  pricing_model: string
+  currency: string
+
+  flat_fee_cost: number
+  number_of_seats: number
+  price_per_seat: number
+  usage_based_cost: number
+  other_cost: number
+  invoice_or_receipt: string
+}
