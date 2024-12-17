@@ -71,34 +71,29 @@ export const IsB2BSaaSTool = z.object({
 
 export const ToolCost = z.object({
   vendor: z.string(),
-  renewal_frequency: z.string(),
+  renewal_frequency: z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY']),
   renewal_start_date: z.string(),
   renewal_next_date: z.string(),
 
-  pricing_model: z.string(),
-  currency: z.string(),
+  pricing_model: z.enum(['FLAT_FEE', 'USAGE_BASED', 'PER_SEAT']),
+  currency: z.enum([
+    'USD',
+    'SEK',
+    'EUR',
+    'GBP',
+    'NOK',
+    'DKK',
+    'CHF',
+    'CAD',
+    'AUD',
+    'NZD',
+    'JPY',
+  ]),
 
   flat_fee_cost: z.number(),
   number_of_seats: z.number(),
   price_per_seat: z.number(),
   usage_based_cost: z.number(),
   other_cost: z.number(),
-  invoice_or_receipt: z.string(),
+  invoice_or_receipt: z.enum(['INVOICE', 'RECEIPT']),
 })
-
-export type ToolCost_ = {
-  vendor: string
-  renewal_frequency: string
-  renewal_start_date: string
-  renewal_next_date: string
-
-  pricing_model: string
-  currency: string
-
-  flat_fee_cost: number
-  number_of_seats: number
-  price_per_seat: number
-  usage_based_cost: number
-  other_cost: number
-  invoice_or_receipt: string
-}

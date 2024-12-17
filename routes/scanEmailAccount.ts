@@ -5,13 +5,7 @@ import OpenAI from 'openai'
 
 import { OAuth2Client, UserRefreshClient } from 'google-auth-library'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import {
-  IsB2BSaaSTool,
-  NewVendor,
-  ToolCost,
-  ToolCost_,
-  VendorName,
-} from './types'
+import { IsB2BSaaSTool, NewVendor, ToolCost, VendorName } from './types'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../types/supabase'
 import { pdf } from 'pdf-to-img'
@@ -62,10 +56,10 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               You will be given an image of an invoice.
               Fill out the following JSON with the information from the image.
               
-              IMPORTANT 1: If you are unsure about the pricing model, just set the pricing model to FLAT_FEE,
+              IMPORTANT 1: If you are unsure about the pricing model at all, just set the pricing model to FLAT_FEE,
               and set the flat_fee_cost to the total cost of the invoice.
 
-              IMPORTANT 2: If you are unsure of the renewal_frequency, just set it to MONTHLY.
+              IMPORTANT 2: If you are unsure of the renewal_frequency at all, just set it to MONTHLY.
 
               --This is the instructions for the JSON fields--
               
@@ -73,7 +67,6 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               This is the name of the company that is providing the service.
 
               **renewal_frequency**
-              Must be one of the following: MONTHLY | QUARTERLY | YEARLY.
               Most likely it will be MONTHLY. If you see evidence of that the invoice period is spanning 12 months, then it is likely YEARLY.
               If you see evidence of that the invoice period is spanning 3 months, then it is likely QUARTERLY.
 
@@ -87,32 +80,13 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
 
               **pricing_model**
               Must be one of the following: FLAT_FEE | USAGE_BASED | PER_SEAT.
-              Evidence for USAGE_BASED pricing model could be compute used, storage used or similar.
-              Evidence for PER_SEAT pricing model should be that it says something about seats and users specifically.
+              
+              Evidence for USAGE_BASED pricing model should be some measurement of unit usage.
+              For example: compute, storage, network, disk, processing power, emails sent, number of something that has been used, or similar.
+              
+              Evidence for PER_SEAT pricing model should be that it says something about SEATS or USERS specifically.
               Its not enough with evidence that shows it to have price per unit.
               Price per unit and price per seat are NOT the same thing.
-
-              **currency**
-              Must be one of the following: USD | SEK | EUR | GBP | NOK | DKK | CHF | CAD | AUD | NZD | JPY
-
-              **flat_fee_cost**
-              If pricing_model is FLAT_FEE, this is the cost.
-
-              **number_of_seats**
-              If pricing_model is PER_SEAT, then enter how many seats.
-
-              **price_per_seat**
-              If pricing_model is PER_SEAT, then enter the pricing per seat.
-
-              **usage_based_cost**
-              If pricing_model is USAGE_BASED, then enter the pricing for that.
-
-              **other_cost**
-              If it does not fit any of the other pricing_models, use this.
-
-              **invoice_or_receipt**
-              Must be one of the following: INVOICE | RECEIPT.
-              This is the type of the invoice or receipt.
             `,
           },
           {
@@ -268,7 +242,7 @@ const addNewVendor = async (vendorName: string) => {
 }
 
 const updateToolAndSubscription = async (
-  res: ToolCost_,
+  res: any,
   attachmentUrl: string,
   organization_id: string,
   email: string
@@ -363,7 +337,8 @@ const updateToolAndSubscription = async (
 
   if (same_starts_at && same_next_renewal_date) {
     has_conflict = true
-    conflict_info = 'Same starts_at and next_renewal_date'
+    conflict_info =
+      'Invoice period is overlapping with existing invoice this month'
   }
 
   const subscription_res = await supabase.from('subscription').insert({
