@@ -69,6 +69,10 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               **renewal_frequency**
               Most likely it will be MONTHLY. If you see evidence of that the invoice period is spanning 12 months, then it is likely YEARLY.
               If you see evidence of that the invoice period is spanning 3 months, then it is likely QUARTERLY.
+              For example: If you see "30 Dec. 2024 - 30 Jan. 2025", then the renewal_frequency is MONTHLY.
+              If you see "30 nov. 2024 - 30 jan. 2025", then the renewal_frequency is QUARTERLY.
+              If you see "30 nov. 2024 - 30 mar. 2025", then the renewal_frequency is YEARLY.
+              Default to MONTHLY if you are unsure.
 
               **renewal_start_date**
               Should be in the format: YYYY-MM-DD.
@@ -79,14 +83,20 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               This is the date for the end of the invoice period.
 
               **pricing_model**
-              Must be one of the following: FLAT_FEE | USAGE_BASED | PER_SEAT.
-              
               Evidence for USAGE_BASED pricing model should be some measurement of unit usage.
               For example: compute, storage, network, disk, processing power, emails sent, number of something that has been used, or similar.
               
               Evidence for PER_SEAT pricing model should be that it says something about SEATS or USERS specifically.
               Its not enough with evidence that shows it to have price per unit.
               Price per unit and price per seat are NOT the same thing.
+
+              **number_of_seats**
+              If pricing_model is PER_SEAT, take the total number of seats.
+              For example, if the invoice says 5 seats for X, and 3 seats for Y, then the number of seats is 8.
+
+              **price_per_seat**
+              If pricing_model is PER_SEAT, just take the total cost and divide it by the number of seats.
+              For example, if the total cost is 1000 and the number of seats is 10, then the price per seat is 100.
             `,
           },
           {
@@ -313,6 +323,8 @@ const updateToolAndSubscription = async (
   let same_price_per_seat = false
   let same_usage_based_cost = false
   let same_other_cost = false
+  let same_month = false
+  const extractDate = (input: string) => input.split('T')[0]
 
   existing_subscriptions?.data?.forEach(
     ({
@@ -323,22 +335,37 @@ const updateToolAndSubscription = async (
       usage_based_cost,
       other_cost,
     }) => {
-      same_starts_at = res.renewal_start_date === starts_at
-      same_next_renewal_date = res.renewal_next_date === next_renewal_date
+      same_starts_at = res.renewal_start_date === extractDate(starts_at)
+      same_next_renewal_date =
+        res.renewal_next_date === extractDate(next_renewal_date)
+
       same_flat_fee_cost = res.flat_fee_cost === flat_fee_cost
       same_price_per_seat = res.price_per_seat === price_per_seat
       same_usage_based_cost = res.usage_based_cost === usage_based_cost
       same_other_cost = res.other_cost === other_cost
+
+      same_month =
+        res.renewal_start_date.split('-')[1] ===
+        extractDate(starts_at).split('-')[1]
     }
   )
 
+  let same_cost =
+    same_flat_fee_cost ||
+    same_price_per_seat ||
+    same_usage_based_cost ||
+    same_other_cost
   let has_conflict = false
   let conflict_info = ''
 
   if (same_starts_at && same_next_renewal_date) {
     has_conflict = true
-    conflict_info =
-      'Invoice period is overlapping with existing invoice this month'
+    conflict_info = 'You have invoices with the same start and end date.'
+  }
+
+  if (same_cost && same_month) {
+    has_conflict = true
+    conflict_info += ' You have invoices with the same cost this month.'
   }
 
   const subscription_res = await supabase.from('subscription').insert({
