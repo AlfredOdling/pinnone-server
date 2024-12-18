@@ -44,15 +44,17 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
     ? base64Image.split(',')[1]
     : base64Image
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: `
+  let response
+  try {
+    response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `
               You will be given an image of an invoice.
               Fill out the following JSON with the information from the image.
               
@@ -63,25 +65,32 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               For example, if the vendor is "Amazon Web Services", then the vendor is "AWS".
               And if the vendor is Framer B.V., then the vendor is "Framer".
 
-              **renewal_start_date**
+              **date_of_invoice**
               Should be in the format: YYYY-MM-DD.
-              This is the date for the start of the invoice period.
+              This is the date for the invoice.
 
               **total_cost**
               This is the total cost of the invoice.
+
+              **is_something_else**
+              If the invoice is not a receipt or invoice, then this should be true. It might be a contract or some other document.
             `,
-          },
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:image/png;base64,${base64Data}`,
             },
-          },
-        ],
-      },
-    ],
-    response_format: zodResponseFormat(ToolCost2, 'toolCost'),
-  })
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/png;base64,${base64Data}`,
+              },
+            },
+          ],
+        },
+      ],
+      response_format: zodResponseFormat(ToolCost2, 'toolCost'),
+    })
+  } catch (error) {
+    console.error('Error in analyzeReceiptWithOpenAI:', error)
+    throw error
+  }
 
   return JSON.parse(response.choices[0].message.content)
 }
@@ -95,8 +104,9 @@ const convertFileAndUpload = async (gmail, messageId: string, part: any) => {
 
   const base64 = Buffer.from(attachment.data.data, 'base64')
 
-  const filename = part.filename.replace('/', '')
-  const urlSafeFileName = filename.replace(/[^a-zA-Z0-9-_.]/g, '')
+  const urlSafeFileName = part.filename
+    .replace('/', '')
+    .replace(/[^a-zA-Z0-9-_.]/g, '')
 
   fs.writeFileSync('attachments_temp/' + urlSafeFileName, base64)
 
@@ -120,7 +130,7 @@ const convertFileAndUpload = async (gmail, messageId: string, part: any) => {
 
   const { data, error } = await supabase.storage
     .from('receipts')
-    .upload(`${Date.now()}_${filename}.png`, fileBuffer, {
+    .upload(`${Date.now()}_${urlSafeFileName}.png`, fileBuffer, {
       contentType: 'image/png',
       upsert: true,
     })
@@ -134,8 +144,11 @@ const convertFileAndUpload = async (gmail, messageId: string, part: any) => {
     throw new Error('Failed to upload file:' + error.message)
   }
 
+  console.log('fs.unlinkSync-1', 'attachments_temp/' + urlSafeFileName)
+  console.log('fs.unlinkSync-2', filePathToUpload)
+
   // Cleanup temp files
-  fs.unlinkSync('attachments_temp/' + filename)
+  fs.unlinkSync('attachments_temp/' + urlSafeFileName)
   fs.unlinkSync(filePathToUpload)
 
   return { base64Image, publicUrl: publicUrlData.publicUrl }
@@ -161,20 +174,25 @@ async function downloadFile(url, savePath) {
 async function analyzeReceipt(gmail, messageId: string, part: any) {
   const fileUrl = await convertFileAndUpload(gmail, messageId, part)
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
-  console.log('🚀  res:', res)
 
   const {
     vendor,
-    renewal_start_date,
+    date_of_invoice,
     total_cost,
     currency,
     invoice_or_receipt,
+    is_something_else,
   } = res
 
-  const filename = `receipts/${renewal_start_date}-${vendor}-${total_cost}-${currency}-${invoice_or_receipt}.png`
+  if (is_something_else) {
+    console.log('🚀  is_something_else:', is_something_else)
+    console.log('🚀  res:', res)
+  }
+
+  const filename = `receipts/${date_of_invoice}-${vendor}-${total_cost}-${currency}-${invoice_or_receipt}.png`
   const downloadUrl = fileUrl.publicUrl
 
-  await downloadFile(downloadUrl, filename)
+  if (vendor !== 'Unknown') await downloadFile(downloadUrl, filename)
 }
 
 export const scanEmailAccount = async ({
@@ -209,7 +227,8 @@ export const scanEmailAccount = async ({
       userId: 'me',
       q: query,
     })
-    const messages = response.data.messages.slice(0, 5) || []
+    const messages = response.data.messages || []
+    // const messages = response.data.messages.slice(0, 15) || []
 
     for (const message of messages) {
       const msg = await gmail.users.messages.get({
@@ -220,9 +239,71 @@ export const scanEmailAccount = async ({
       const payload = msg.data.payload
       const parts = payload?.parts || []
 
+      let foundPdf = false
       for (const part of parts) {
-        if (part.filename && part.body && part.body.attachmentId) {
+        if (foundPdf) break
+
+        if (
+          part.filename &&
+          part.body &&
+          part.body.attachmentId &&
+          part.filename.includes('pdf')
+        ) {
           await analyzeReceipt(gmail, message.id!, part)
+          foundPdf = true
+        }
+      }
+
+      if (!foundPdf) {
+        const email = msg.data.payload?.headers?.find(
+          (header) => header.name === 'From'
+        )?.value
+
+        const subject = msg.data.payload?.headers?.find(
+          (header) => header.name === 'Subject'
+        )?.value
+
+        const date = msg.data.payload?.headers?.find(
+          (header) => header.name === 'Date'
+        )?.value
+
+        const from = msg.data.payload?.headers?.find(
+          (header) => header.name === 'From'
+        )?.value
+
+        const to = msg.data.payload?.headers?.find(
+          (header) => header.name === 'To'
+        )?.value
+
+        const obj = {
+          email,
+          subject,
+          date,
+          from,
+          to,
+        }
+        console.log('🚀  No PDF found:', obj)
+        // console.log('🚀  parts:', msg?.data?.payload?.parts?.[0]?.parts)
+
+        if (msg?.data?.payload?.parts?.[0]?.parts?.[0]?.body?.data) {
+          const textBody = Buffer.from(
+            msg.data.payload.parts[0].parts[0].body.data,
+            'base64'
+          ).toString('utf-8')
+
+          fs.writeFileSync(`no_pdf_text_body/${email}-${subject}.txt`, textBody)
+        }
+
+        if (msg?.data?.payload?.parts?.[0]?.parts?.[1]?.body?.data) {
+          const htmlBody = Buffer.from(
+            msg.data.payload.parts[0].parts[1].body.data,
+            'base64'
+          ).toString('utf-8')
+
+          fs.writeFileSync(
+            `no_pdf_html_body/${email}-${subject}.html`,
+            htmlBody
+          )
         }
       }
     }
@@ -235,6 +316,6 @@ export const scanEmailAccount = async ({
 scanEmailAccount({
   email: 'alfredodling@gmail.com',
   organization_id: 'b34cd74c-b805-416c-b4d9-a41dc0173d3c',
-  after: '2024/12/3',
-  before: '2025/1/1',
+  after: '2023/5/31',
+  before: '2024/6/1',
 })
