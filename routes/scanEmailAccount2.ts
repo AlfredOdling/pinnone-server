@@ -187,6 +187,7 @@ async function analyzeReceipt(gmail, messageId: string, part: any) {
   if (is_something_else) {
     console.log('🚀  is_something_else:', is_something_else)
     console.log('🚀  res:', res)
+    return
   }
 
   const filename = `receipts/${date_of_invoice}-${vendor}-${total_cost}-${currency}-${invoice_or_receipt}.png`
@@ -283,7 +284,6 @@ export const scanEmailAccount = async ({
           to,
         }
         console.log('🚀  No PDF found:', obj)
-        // console.log('🚀  parts:', msg?.data?.payload?.parts?.[0]?.parts)
 
         if (msg?.data?.payload?.parts?.[0]?.parts?.[0]?.body?.data) {
           const textBody = Buffer.from(
@@ -314,7 +314,7 @@ export const scanEmailAccount = async ({
 }
 
 scanEmailAccount({
-  email: 'alfredodling@gmail.com',
+  email: 'alfred@flexone.vc',
   organization_id: 'b34cd74c-b805-416c-b4d9-a41dc0173d3c',
   after: '2023/5/31',
   before: '2024/6/1',
