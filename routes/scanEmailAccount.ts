@@ -352,6 +352,8 @@ const updateToolAndSubscription = async ({
         status: 'in_stack',
         is_tracking: true,
         is_desktop_tool: false,
+        // department: 'marketing',
+        // owner_org_user_id: 1,
       })
       .select('id')
       .single()
