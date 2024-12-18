@@ -197,6 +197,7 @@ export type Database = {
           conflict_info: string | null
           created_at: string
           currency: string
+          email_info: Json | null
           email_recipient: string | null
           flat_fee_cost: number | null
           has_conflict: boolean
@@ -220,6 +221,7 @@ export type Database = {
           conflict_info?: string | null
           created_at?: string
           currency: string
+          email_info?: Json | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
           has_conflict?: boolean
@@ -243,6 +245,7 @@ export type Database = {
           conflict_info?: string | null
           created_at?: string
           currency?: string
+          email_info?: Json | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
           has_conflict?: boolean
@@ -275,6 +278,7 @@ export type Database = {
         Row: {
           created_at: string
           department: string | null
+          file_urls: string | null
           id: number
           is_desktop_tool: boolean
           is_tracking: boolean
@@ -288,6 +292,7 @@ export type Database = {
         Insert: {
           created_at?: string
           department?: string | null
+          file_urls?: string | null
           id?: number
           is_desktop_tool?: boolean
           is_tracking?: boolean
@@ -301,6 +306,7 @@ export type Database = {
         Update: {
           created_at?: string
           department?: string | null
+          file_urls?: string | null
           id?: number
           is_desktop_tool?: boolean
           is_tracking?: boolean

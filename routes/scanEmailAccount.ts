@@ -251,19 +251,69 @@ const addNewVendor = async (vendorName: string) => {
   return vendor
 }
 
-const updateToolAndSubscription = async (
-  res: any,
-  attachmentUrl: string,
-  organization_id: string,
-  email: string
-) => {
+const getInfo = async (msg: any) => {
+  const email = msg.data.payload?.headers?.find(
+    (header) => header.name === 'From'
+  )?.value
+
+  const subject = msg.data.payload?.headers?.find(
+    (header) => header.name === 'Subject'
+  )?.value
+
+  const date = msg.data.payload?.headers?.find(
+    (header) => header.name === 'Date'
+  )?.value
+
+  const from = msg.data.payload?.headers?.find(
+    (header) => header.name === 'From'
+  )?.value
+
+  const to = msg.data.payload?.headers?.find(
+    (header) => header.name === 'To'
+  )?.value
+
+  const obj = {
+    email,
+    subject,
+    date,
+    from,
+    to,
+  }
+
+  let textBody = ''
+  let htmlBody = ''
+
+  if (msg?.data?.payload?.parts?.[0]?.parts?.[0]?.body?.data) {
+    textBody = Buffer.from(
+      msg.data.payload.parts[0].parts[0].body.data,
+      'base64'
+    ).toString('utf-8')
+  }
+
+  if (msg?.data?.payload?.parts?.[0]?.parts?.[1]?.body?.data) {
+    htmlBody = Buffer.from(
+      msg.data.payload.parts[0].parts[1].body.data,
+      'base64'
+    ).toString('utf-8')
+  }
+
+  return { textBody, htmlBody, ...obj }
+}
+
+const updateToolAndSubscription = async ({
+  res,
+  attachmentUrl,
+  organization_id,
+  email,
+  msg,
+}) => {
   const vendorNameRaw = JSON.stringify(res.vendor)
   console.log('🚀  vendorNameRaw:', vendorNameRaw)
 
   const extracted_vendor_name = await extractVendorName(vendorNameRaw)
   console.log('🚀  extracted_vendor_name:', extracted_vendor_name)
 
-  const isB2BSaaSTool_ = await isB2BSaaSTool(extracted_vendor_name)
+  const isB2BSaaSTool_ = await isB2BSaaSTool(vendorNameRaw)
   console.log('🚀  isB2BSaaSTool_:', isB2BSaaSTool_)
   if (!isB2BSaaSTool_) return
 
@@ -368,6 +418,8 @@ const updateToolAndSubscription = async (
     conflict_info += ' You have invoices with the same cost this month.'
   }
 
+  const email_info = await getInfo(msg)
+
   const subscription_res = await supabase.from('subscription').insert({
     tool_id,
     currency: res.currency,
@@ -386,6 +438,7 @@ const updateToolAndSubscription = async (
     has_conflict,
     email_recipient: email,
     conflict_info,
+    email_info,
   })
   console.log('🚀  subscription_res_error:', subscription_res.error)
 
@@ -399,23 +452,25 @@ const updateToolAndSubscription = async (
   console.log('🚀  email_account_res_error:', email_account_res.error)
 }
 
-async function analyzeReceipt(
+async function analyzeReceipt({
   gmail,
-  messageId: string,
-  part: any,
-  organization_id: string,
-  email: string
-) {
+  messageId,
+  part,
+  organization_id,
+  email,
+  msg,
+}) {
   const fileUrl = await convertFileAndUpload(gmail, messageId, part)
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
   console.log('🚀  res:', res)
 
-  await updateToolAndSubscription(
+  await updateToolAndSubscription({
     res,
-    fileUrl.publicUrl,
+    attachmentUrl: fileUrl.publicUrl,
     organization_id,
-    email
-  )
+    email,
+    msg,
+  })
 }
 
 export const scanEmailAccount = async ({
@@ -457,8 +512,20 @@ export const scanEmailAccount = async ({
       const parts = payload?.parts || []
 
       for (const part of parts) {
-        if (part.filename && part.body && part.body.attachmentId) {
-          await analyzeReceipt(gmail, message.id!, part, organization_id, email)
+        if (
+          part.filename &&
+          part.body &&
+          part.body.attachmentId &&
+          part.filename.includes('pdf')
+        ) {
+          await analyzeReceipt({
+            gmail,
+            messageId: message.id!,
+            part,
+            organization_id,
+            email,
+            msg,
+          })
         }
       }
     }
