@@ -41,7 +41,7 @@ export const googleAuth = async ({
   // If no existing account, create new one
   if (!existingAccount) {
     await supabase.from('email_account').insert({
-      email: userInfo.email,
+      email: userInfo.email as string,
       provider: 'google',
       organization_id,
       access_token: tokens.access_token,
