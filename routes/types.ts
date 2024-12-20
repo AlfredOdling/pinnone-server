@@ -98,6 +98,9 @@ export const ToolCost = z.object({
   invoice_or_receipt: z.enum(['INVOICE', 'RECEIPT']),
   due_date: z.string(),
   important_info: z.string(),
+  is_something_else: z.boolean(),
+  date_of_invoice: z.string(),
+  total_cost: z.number(),
 })
 
 export const ToolCost2 = z.object({

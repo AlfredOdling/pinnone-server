@@ -23,10 +23,14 @@ export const scanEmailAccount = async ({
   email,
   organization_id,
   owner_org_user_id,
+  after,
+  before,
 }: {
   email: string
   organization_id: string
   owner_org_user_id: number
+  after: string
+  before: string
 }) => {
   const { data: emailAccount } = await supabase
     .from('email_account')
@@ -44,11 +48,13 @@ export const scanEmailAccount = async ({
     })
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
 
+    const query = `(invoice | receipt | faktura | kvitto) has:attachment after:${after} before:${before}`
     const response = await gmail.users.messages.list({
       userId: 'me',
-      q: '(invoice | receipt | faktura | kvitto) has:attachment',
+      q: query,
     })
-    const messages = response.data.messages.slice(0, 15) || []
+
+    const messages = response.data.messages || []
 
     for (const message of messages) {
       const msg = await gmail.users.messages.get({
@@ -59,7 +65,10 @@ export const scanEmailAccount = async ({
       const payload = msg.data.payload
       const parts = payload?.parts || []
 
+      let foundPdf = false
       for (const part of parts) {
+        if (foundPdf) break
+
         if (
           part.filename &&
           part.body &&
@@ -75,7 +84,12 @@ export const scanEmailAccount = async ({
             msg,
             owner_org_user_id,
           })
+          foundPdf = true
         }
+      }
+
+      if (!foundPdf) {
+        console.log('🚀  foundPdf:', foundPdf)
       }
     }
   } catch (error) {

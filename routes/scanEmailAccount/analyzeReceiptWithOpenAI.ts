@@ -76,6 +76,16 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
 
               **important_info**
               This is urgent important information about if the invoice is a reminder (late payment).
+
+              **date_of_invoice**
+              Should be in the format: YYYY-MM-DD.
+              This is the date for the invoice.
+
+              **total_cost**
+              This is the total cost of the invoice.
+
+              **is_something_else**
+              If the invoice is not a receipt or invoice, then this should be true. It might be a contract or some other document.
             `,
           },
           {

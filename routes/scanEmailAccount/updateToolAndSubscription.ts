@@ -36,7 +36,6 @@ export const updateToolAndSubscription = async ({
     .select('*')
     .ilike('name', `%${extracted_vendor_name}%`)
     .single()
-  console.log('🚀  existingVendor:', existingVendor)
 
   let vendor
   if (!existingVendor.data) {
@@ -45,8 +44,8 @@ export const updateToolAndSubscription = async ({
     vendor = newVendor.data
   } else {
     vendor = existingVendor.data
+    console.log('🚀  existingVendor:', existingVendor)
   }
-  console.log('🚀  vendor:', vendor)
 
   let tool_res = await supabase
     .from('tool')

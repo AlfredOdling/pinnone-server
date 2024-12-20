@@ -186,6 +186,8 @@ router.post('/scanEmailAccount', async (req, res) => {
     email: req.body.email,
     organization_id: req.body.organization_id,
     owner_org_user_id: req.body.org_user_id,
+    after: req.body.after,
+    before: req.body.before,
   })
   res.json(tokens)
 })

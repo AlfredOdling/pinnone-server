@@ -1,6 +1,7 @@
 import { analyzeReceiptWithOpenAI } from './analyzeReceiptWithOpenAI'
 
 import { convertFileAndUpload } from './convertFileAndUpload'
+import { downloadFile } from './downloadFile'
 import { updateToolAndSubscription } from './updateToolAndSubscription'
 
 export async function analyzeReceipt({
@@ -16,9 +17,29 @@ export async function analyzeReceipt({
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
   console.log('🚀  res:', res)
 
+  const {
+    vendor,
+    date_of_invoice,
+    total_cost,
+    currency,
+    invoice_or_receipt,
+    is_something_else,
+  } = res
+
+  if (is_something_else) {
+    console.log('🚀  is_something_else:', res.is_something_else)
+    console.log('🚀  res:', res)
+    return
+  }
+
+  const newfilename = `${date_of_invoice}-${vendor}-${total_cost}-${currency}-${invoice_or_receipt}.png`
+  const downloadUrl = fileUrl.publicUrl
+
+  const publicUrlData = await downloadFile({ downloadUrl, newfilename })
+
   await updateToolAndSubscription({
     res,
-    attachmentUrl: fileUrl.publicUrl,
+    attachmentUrl: publicUrlData.publicUrl,
     organization_id,
     email,
     msg,
