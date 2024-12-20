@@ -49,6 +49,8 @@ export const scanEmailAccount = async ({
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
 
     const query = `(invoice | receipt | faktura | kvitto) has:attachment after:${after} before:${before}`
+    console.log('🚀  query:', query)
+
     const response = await gmail.users.messages.list({
       userId: 'me',
       q: query,

@@ -77,7 +77,7 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               If its a receipt or you are unsure, set it empty.
 
               **important_info**
-              This is urgent important information about if the invoice is a reminder (late payment). In your response, just put the word "late payment" if it is.
+              This is urgent important information about if the invoice is a reminder (late payment). In your response, use the words "late payment" in your description if it is.
 
               **date_of_invoice**
               Should be in the format: YYYY-MM-DD.

@@ -197,8 +197,10 @@ export type Database = {
           conflict_info: string | null
           created_at: string
           currency: string
+          date_of_invoice: string | null
           due_date: string | null
           email_info: Json | null
+          email_received: string | null
           email_recipient: string | null
           flat_fee_cost: number | null
           has_conflict: boolean
@@ -213,7 +215,8 @@ export type Database = {
           source: string | null
           starts_at: string
           status: string
-          tool_id: number
+          tool_id: number | null
+          total_cost: number | null
           type: string | null
           updated_at: string
           usage_based_cost: number | null
@@ -223,8 +226,10 @@ export type Database = {
           conflict_info?: string | null
           created_at?: string
           currency: string
+          date_of_invoice?: string | null
           due_date?: string | null
           email_info?: Json | null
+          email_received?: string | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
           has_conflict?: boolean
@@ -239,7 +244,8 @@ export type Database = {
           source?: string | null
           starts_at: string
           status: string
-          tool_id: number
+          tool_id?: number | null
+          total_cost?: number | null
           type?: string | null
           updated_at?: string
           usage_based_cost?: number | null
@@ -249,8 +255,10 @@ export type Database = {
           conflict_info?: string | null
           created_at?: string
           currency?: string
+          date_of_invoice?: string | null
           due_date?: string | null
           email_info?: Json | null
+          email_received?: string | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
           has_conflict?: boolean
@@ -265,7 +273,8 @@ export type Database = {
           source?: string | null
           starts_at?: string
           status?: string
-          tool_id?: number
+          tool_id?: number | null
+          total_cost?: number | null
           type?: string | null
           updated_at?: string
           usage_based_cost?: number | null
@@ -292,6 +301,7 @@ export type Database = {
           owner_org_user_id: number | null
           status: string
           status_should_be: string | null
+          type: string | null
           updated_at: string
           vendor_id: number
         }
@@ -306,6 +316,7 @@ export type Database = {
           owner_org_user_id?: number | null
           status: string
           status_should_be?: string | null
+          type?: string | null
           updated_at?: string
           vendor_id: number
         }
@@ -320,6 +331,7 @@ export type Database = {
           owner_org_user_id?: number | null
           status?: string
           status_should_be?: string | null
+          type?: string | null
           updated_at?: string
           vendor_id?: number
         }

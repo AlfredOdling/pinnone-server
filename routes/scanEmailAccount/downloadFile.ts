@@ -27,11 +27,7 @@ export const downloadFile = async ({
     const buffer = await response.arrayBuffer()
     fs.writeFileSync(newfilename, Buffer.from(buffer))
 
-    console.log('File downloaded successfully to:', newfilename)
-
-    // Upload the last generated image to Supabase storage
     const fileBuffer = fs.readFileSync(newfilename)
-
     const { data, error } = await supabase.storage
       .from('receipts')
       .upload(newfilename, fileBuffer, {
@@ -42,8 +38,6 @@ export const downloadFile = async ({
     const { data: publicUrlData } = supabase.storage
       .from('receipts')
       .getPublicUrl(data.path)
-
-    console.log('🚀 new file publicUrlData:', publicUrlData)
 
     if (error) {
       throw new Error('Failed to upload file:' + error.message)
