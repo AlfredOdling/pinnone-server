@@ -56,6 +56,7 @@ export const addNewVendor = async (vendorName: string) => {
     )
     .select('*')
     .single()
+    .throwOnError()
 
   return vendor
 }

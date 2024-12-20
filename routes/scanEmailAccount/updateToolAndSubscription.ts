@@ -28,20 +28,28 @@ export const updateToolAndSubscription = async ({
     const extracted_vendor_name = await extractVendorName(vendorNameRaw)
     const isB2BSaaSTool_ = await isB2BSaaSTool(vendorNameRaw)
 
-    const existingVendor = await supabase // Don't know what happens if there are multiple vendors with kind of the same name
+    // --- Take in consideration existing vendors ---
+    let vendor
+    const existingVendor = await supabase
       .from('vendor')
       .select('*')
       .ilike('name', `%${extracted_vendor_name}%`)
-      .single()
+      .throwOnError()
 
-    let vendor
+    console.log('🚀  existingVendor:', existingVendor)
+
     if (!existingVendor.data) {
       const newVendor = await addNewVendor(extracted_vendor_name)
+      console.log('🚀  newVendor:', newVendor)
       vendor = newVendor.data
     } else {
-      vendor = existingVendor.data
+      vendor = existingVendor.data[0]
+      console.log('🚀 123 existingVendor:', existingVendor)
     }
+    console.log('🚀  vendor:', vendor)
+    // -----------------------------------------------
 
+    // --- Take in consideration existing tools ---
     let tool_res = await supabase
       .from('tool')
       .select('id')
@@ -65,9 +73,12 @@ export const updateToolAndSubscription = async ({
         })
         .select('id')
         .single()
+        .throwOnError()
       tool_id = tool_res.data?.id
     }
+    // -----------------------------------------------
 
+    // --- Take in consideration existing subscriptions ---
     const existing_subscriptions = await supabase
       .from('subscription')
       .select('*')
@@ -84,16 +95,17 @@ export const updateToolAndSubscription = async ({
 
     existing_subscriptions?.data?.forEach(
       ({
-        starts_at,
-        next_renewal_date,
+        renewal_start_date,
+        renewal_next_date,
         flat_fee_cost,
         price_per_seat,
         usage_based_cost,
         other_cost,
       }) => {
-        same_starts_at = res.renewal_start_date === extractDate(starts_at)
+        same_starts_at =
+          res.renewal_start_date === extractDate(renewal_start_date)
         same_next_renewal_date =
-          res.renewal_next_date === extractDate(next_renewal_date)
+          res.renewal_next_date === extractDate(renewal_next_date)
 
         same_flat_fee_cost = res.flat_fee_cost === flat_fee_cost
         same_price_per_seat = res.price_per_seat === price_per_seat
@@ -102,15 +114,18 @@ export const updateToolAndSubscription = async ({
 
         same_month =
           res.renewal_start_date.split('-')[1] ===
-          extractDate(starts_at).split('-')[1]
+          extractDate(renewal_start_date).split('-')[1]
       }
     )
+    // -----------------------------------------------
 
+    // --- Check for conflicts ---
     let same_cost =
       same_flat_fee_cost ||
       same_price_per_seat ||
       same_usage_based_cost ||
       same_other_cost
+
     let has_conflict = false
     let conflict_info = ''
 
@@ -128,35 +143,48 @@ export const updateToolAndSubscription = async ({
       has_conflict = true
       conflict_info += ' ' + res.important_info
     }
+    // ------------------------------
 
     const email_info = await getInfo(msg)
-    console.log('🚀  email_info:', email_info)
-
-    await supabase.from('subscription').insert({
-      tool_id,
-      currency: res.currency,
-      renewal_frequency: res.renewal_frequency,
-      starts_at: res.renewal_start_date,
-      next_renewal_date: res.renewal_next_date,
-      receipt_file: attachmentUrl,
-      pricing_model: res.pricing_model,
-      flat_fee_cost: res.flat_fee_cost,
-      number_of_seats: res.number_of_seats,
-      price_per_seat: res.price_per_seat,
-      other_cost: res.other_cost,
-      usage_based_cost: res.usage_based_cost,
-      status: 'ACTIVE',
-      source: 'gmail',
-      has_conflict,
-      email_recipient: email,
-      conflict_info,
-      email_info,
-      type: isB2BSaaSTool_ ? 'b2b_tool' : 'other',
-      due_date: res.due_date,
-      date_of_invoice: email_info.date,
-      email_received: res.email_received_date,
+    console.log('🚀  email_info:', email_info.date)
+    const email_received: string = await new Promise((resolve) => {
+      resolve(new Date(email_info.date).toISOString())
     })
+    console.log('🚀  email_received:', email_received)
 
+    // --- Insert new subscription ---
+    await supabase
+      .from('subscription')
+      .insert({
+        tool_id,
+        currency: res.currency,
+        renewal_frequency: res.renewal_frequency,
+
+        renewal_start_date: res.renewal_start_date,
+        renewal_next_date: res.renewal_next_date,
+        due_date: res.due_date || null,
+        date_of_invoice: res.date_of_invoice,
+        email_received,
+
+        receipt_file: attachmentUrl,
+        pricing_model: res.pricing_model,
+        flat_fee_cost: res.flat_fee_cost,
+        number_of_seats: res.number_of_seats,
+        price_per_seat: res.price_per_seat,
+        other_cost: res.other_cost,
+        usage_based_cost: res.usage_based_cost,
+        status: 'ACTIVE',
+        source: 'gmail',
+        email_recipient: email,
+        warning_info: conflict_info,
+        email_info,
+        type: isB2BSaaSTool_ ? 'b2b_tool' : 'other',
+        total_cost: res.total_cost,
+      })
+      .throwOnError()
+    // ------------------------------
+
+    // --- Update email account last scanned date ---
     await supabase
       .from('email_account')
       .update({
@@ -164,6 +192,8 @@ export const updateToolAndSubscription = async ({
       })
       .eq('email', email)
       .eq('organization_id', organization_id)
+      .throwOnError()
+    // ------------------------------
   } catch (error) {
     console.log('🚀  error:', error)
   }

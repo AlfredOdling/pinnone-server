@@ -193,8 +193,6 @@ export type Database = {
       }
       subscription: {
         Row: {
-          cancelled_at: string | null
-          conflict_info: string | null
           created_at: string
           currency: string
           date_of_invoice: string | null
@@ -203,27 +201,24 @@ export type Database = {
           email_received: string | null
           email_recipient: string | null
           flat_fee_cost: number | null
-          has_conflict: boolean
           id: number
-          next_renewal_date: string
           number_of_seats: number | null
           other_cost: number | null
           price_per_seat: number | null
           pricing_model: string
           receipt_file: string | null
           renewal_frequency: string
+          renewal_next_date: string
+          renewal_start_date: string
           source: string | null
-          starts_at: string
           status: string
           tool_id: number | null
           total_cost: number | null
           type: string | null
-          updated_at: string
           usage_based_cost: number | null
+          warning_info: string | null
         }
         Insert: {
-          cancelled_at?: string | null
-          conflict_info?: string | null
           created_at?: string
           currency: string
           date_of_invoice?: string | null
@@ -232,27 +227,24 @@ export type Database = {
           email_received?: string | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
-          has_conflict?: boolean
           id?: number
-          next_renewal_date: string
           number_of_seats?: number | null
           other_cost?: number | null
           price_per_seat?: number | null
           pricing_model: string
           receipt_file?: string | null
           renewal_frequency: string
+          renewal_next_date: string
+          renewal_start_date: string
           source?: string | null
-          starts_at: string
           status: string
           tool_id?: number | null
           total_cost?: number | null
           type?: string | null
-          updated_at?: string
           usage_based_cost?: number | null
+          warning_info?: string | null
         }
         Update: {
-          cancelled_at?: string | null
-          conflict_info?: string | null
           created_at?: string
           currency?: string
           date_of_invoice?: string | null
@@ -261,23 +253,22 @@ export type Database = {
           email_received?: string | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
-          has_conflict?: boolean
           id?: number
-          next_renewal_date?: string
           number_of_seats?: number | null
           other_cost?: number | null
           price_per_seat?: number | null
           pricing_model?: string
           receipt_file?: string | null
           renewal_frequency?: string
+          renewal_next_date?: string
+          renewal_start_date?: string
           source?: string | null
-          starts_at?: string
           status?: string
           tool_id?: number | null
           total_cost?: number | null
           type?: string | null
-          updated_at?: string
           usage_based_cost?: number | null
+          warning_info?: string | null
         }
         Relationships: [
           {

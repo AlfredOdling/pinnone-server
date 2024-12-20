@@ -15,7 +15,6 @@ export async function analyzeReceipt({
 }) {
   const fileUrl = await convertFileAndUpload(gmail, messageId, part)
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
-  console.log('🚀  res:', res)
 
   const {
     vendor,
