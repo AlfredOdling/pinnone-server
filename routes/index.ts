@@ -13,7 +13,6 @@ import { askTeam } from './askTeam'
 import cron from 'node-cron'
 import { autoAudit } from './autoAudit'
 import { sendExtensionInvite } from './sendExtensionInvite'
-import { UserRefreshClient } from 'google-auth-library'
 import { googleAuth } from './authGoogle'
 import { scanEmailAccount } from './scanEmailAccount'
 
