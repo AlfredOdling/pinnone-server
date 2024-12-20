@@ -49,11 +49,13 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               **renewal_start_date**
               Should be in the format: YYYY-MM-DD.
               This is the date for the start of the invoice period.
+              If you are unsure, use the first day of the due date month.
 
               **renewal_next_date**
               Should be in the format: YYYY-MM-DD.
               This is the date for the end of the invoice period.
-
+              If you are unsure, use the last day of the due date month.
+              
               **pricing_model**
               Evidence for USAGE_BASED pricing model should be some measurement of unit usage.
               For example: compute, storage, network, disk, processing power, emails sent, number of something that has been used, or similar.
@@ -75,7 +77,7 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               If its a receipt or you are unsure, set it empty.
 
               **important_info**
-              This is urgent important information about if the invoice is a reminder (late payment).
+              This is urgent important information about if the invoice is a reminder (late payment). In your response, just put the word "late payment" if it is.
 
               **date_of_invoice**
               Should be in the format: YYYY-MM-DD.
