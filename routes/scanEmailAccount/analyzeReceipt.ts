@@ -13,7 +13,7 @@ export async function analyzeReceipt({
   msg,
   owner_org_user_id,
 }) {
-  const fileUrl = await convertFileAndUpload(gmail, messageId, part)
+  const fileUrl = await convertFileAndUpload({ gmail, messageId, part })
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
 
   const {
@@ -31,14 +31,14 @@ export async function analyzeReceipt({
     return
   }
 
-  const newfilename = `${date_of_invoice}-${vendor}-${total_cost}-${currency}-${invoice_or_receipt}.png`
+  const newfilename = `temp/receipts/${date_of_invoice}-${vendor}-${total_cost}-${currency}-${invoice_or_receipt}.png`
   const downloadUrl = fileUrl.publicUrl
 
-  const publicUrlData = await downloadFile({ downloadUrl, newfilename })
+  const attachmentUrl = await downloadFile({ downloadUrl, newfilename })
 
   await updateToolAndSubscription({
     res,
-    attachmentUrl: publicUrlData.publicUrl,
+    attachmentUrl,
     organization_id,
     email,
     msg,

@@ -11,11 +11,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const convertFileAndUpload = async (
-  gmail,
-  messageId: string,
-  part: any
-) => {
+export const convertFileAndUpload = async ({ gmail, messageId, part }) => {
   const attachment = await gmail.users.messages.attachments.get({
     userId: 'me',
     messageId: messageId,
@@ -25,14 +21,14 @@ export const convertFileAndUpload = async (
   const base64 = Buffer.from(attachment.data.data, 'base64')
 
   const filename = part.filename.replace('/', '')
-  fs.writeFileSync('attachments_temp/' + filename, base64)
+  fs.writeFileSync('temp/attachments/' + filename, base64)
 
-  const document = await pdf('attachments_temp/' + filename, { scale: 3 })
+  const document = await pdf('temp/attachments/' + filename, { scale: 3 })
   let filePathToUpload = ''
 
   let counter = 1
   for await (const image of document) {
-    const fileName = 'attachments_temp/' + filename + '_' + counter + '.png'
+    const fileName = 'temp/attachments/' + filename + '_' + counter + '.png'
     filePathToUpload = fileName
     fs.writeFileSync(fileName, image)
     counter++
@@ -56,10 +52,6 @@ export const convertFileAndUpload = async (
   if (error) {
     throw new Error('Failed to upload file:' + error.message)
   }
-
-  // Cleanup temp files
-  fs.unlinkSync('attachments_temp/' + filename)
-  fs.unlinkSync(filePathToUpload)
 
   return { base64Image, publicUrl: publicUrlData.publicUrl }
 }

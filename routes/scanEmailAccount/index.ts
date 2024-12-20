@@ -89,10 +89,6 @@ export const scanEmailAccount = async ({
           foundPdf = true
         }
       }
-
-      if (!foundPdf) {
-        console.log('🚀  foundPdf:', foundPdf)
-      }
     }
   } catch (error) {
     console.error('Error in scanEmails:', error)

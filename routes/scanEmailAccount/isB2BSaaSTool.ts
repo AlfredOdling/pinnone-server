@@ -26,5 +26,26 @@ export const isB2BSaaSTool = async (vendorName) => {
     response_format: zodResponseFormat(IsB2BSaaSTool, 'isB2BSaaSTool'),
   })
 
+  const completion2 = await openai.beta.chat.completions.parse({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: `This is the vendor name from an invoice. Tell my what type of vendor this is.
+        The options are:
+        - Software
+        - Service
+        - Other
+        `,
+      },
+      {
+        role: 'user',
+        content: vendorName,
+      },
+    ],
+  })
+
+  console.log('🚀 completion2:', completion2.choices[0].message.content)
+
   return completion1.choices[0].message.parsed.is_b2b_saas_tool
 }

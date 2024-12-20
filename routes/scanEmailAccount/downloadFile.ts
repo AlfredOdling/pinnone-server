@@ -43,7 +43,7 @@ export const downloadFile = async ({
       throw new Error('Failed to upload file:' + error.message)
     }
 
-    return publicUrlData
+    return publicUrlData.publicUrl
   } catch (error) {
     console.error('Error downloading the file:', error.message)
   }
