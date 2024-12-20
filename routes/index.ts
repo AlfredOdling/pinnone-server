@@ -186,6 +186,7 @@ router.post('/scanEmailAccount', async (req, res) => {
   const tokens = await scanEmailAccount({
     email: req.body.email,
     organization_id: req.body.organization_id,
+    owner_org_user_id: req.body.org_user_id,
   })
   res.json(tokens)
 })

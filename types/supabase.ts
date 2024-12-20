@@ -197,6 +197,7 @@ export type Database = {
           conflict_info: string | null
           created_at: string
           currency: string
+          due_date: string | null
           email_info: Json | null
           email_recipient: string | null
           flat_fee_cost: number | null
@@ -213,6 +214,7 @@ export type Database = {
           starts_at: string
           status: string
           tool_id: number
+          type: string | null
           updated_at: string
           usage_based_cost: number | null
         }
@@ -221,6 +223,7 @@ export type Database = {
           conflict_info?: string | null
           created_at?: string
           currency: string
+          due_date?: string | null
           email_info?: Json | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
@@ -237,6 +240,7 @@ export type Database = {
           starts_at: string
           status: string
           tool_id: number
+          type?: string | null
           updated_at?: string
           usage_based_cost?: number | null
         }
@@ -245,6 +249,7 @@ export type Database = {
           conflict_info?: string | null
           created_at?: string
           currency?: string
+          due_date?: string | null
           email_info?: Json | null
           email_recipient?: string | null
           flat_fee_cost?: number | null
@@ -261,6 +266,7 @@ export type Database = {
           starts_at?: string
           status?: string
           tool_id?: number
+          type?: string | null
           updated_at?: string
           usage_based_cost?: number | null
         }

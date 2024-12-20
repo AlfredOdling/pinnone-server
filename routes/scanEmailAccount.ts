@@ -97,6 +97,10 @@ const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               **price_per_seat**
               If pricing_model is PER_SEAT, just take the total cost and divide it by the number of seats.
               For example, if the total cost is 1000 and the number of seats is 10, then the price per seat is 100.
+
+              **due_date**
+              This is the date when the invoice is due.
+              If you are unsure, set it empty.
             `,
           },
           {
@@ -245,7 +249,7 @@ const addNewVendor = async (vendorName: string) => {
         ignoreDuplicates: true,
       }
     )
-    .select('id')
+    .select('*')
     .single()
 
   return vendor
@@ -306,6 +310,7 @@ const updateToolAndSubscription = async ({
   organization_id,
   email,
   msg,
+  owner_org_user_id,
 }) => {
   const vendorNameRaw = JSON.stringify(res.vendor)
   console.log('🚀  vendorNameRaw:', vendorNameRaw)
@@ -315,7 +320,7 @@ const updateToolAndSubscription = async ({
 
   const isB2BSaaSTool_ = await isB2BSaaSTool(vendorNameRaw)
   console.log('🚀  isB2BSaaSTool_:', isB2BSaaSTool_)
-  if (!isB2BSaaSTool_) return
+  // if (!isB2BSaaSTool_) return
 
   const existingVendor = await supabase // Don't know what happens if there are multiple vendors with kind of the same name
     .from('vendor')
@@ -324,21 +329,21 @@ const updateToolAndSubscription = async ({
     .single()
   console.log('🚀  existingVendor:', existingVendor)
 
-  let vendor_id
+  let vendor
   if (!existingVendor.data) {
     const newVendor = await addNewVendor(extracted_vendor_name)
     console.log('🚀  newVendor:', newVendor)
-    vendor_id = newVendor.data.id
+    vendor = newVendor.data
   } else {
-    vendor_id = existingVendor.data.id
+    vendor = existingVendor.data
   }
-  console.log('🚀  vendor_id:', vendor_id)
+  console.log('🚀  vendor:', vendor)
 
   let tool_res = await supabase
     .from('tool')
     .select('id')
     .eq('organization_id', organization_id)
-    .eq('vendor_id', vendor_id)
+    .eq('vendor_id', vendor.id)
     .single()
   let tool_id = tool_res.data?.id
   console.log('🚀  tool_res_error 1:', tool_res.error)
@@ -348,12 +353,13 @@ const updateToolAndSubscription = async ({
       .from('tool')
       .insert({
         organization_id,
-        vendor_id,
+        vendor_id: vendor.id,
         status: 'in_stack',
-        is_tracking: true,
-        is_desktop_tool: false,
-        // department: 'marketing',
-        // owner_org_user_id: 1,
+        is_tracking: isB2BSaaSTool_,
+        is_desktop_tool: !isB2BSaaSTool_,
+        department: vendor.category,
+        owner_org_user_id,
+        type: isB2BSaaSTool_ ? 'b2b_tool' : 'other',
       })
       .select('id')
       .single()
@@ -441,6 +447,7 @@ const updateToolAndSubscription = async ({
     email_recipient: email,
     conflict_info,
     email_info,
+    type: isB2BSaaSTool_ ? 'b2b_tool' : 'other',
   })
   console.log('🚀  subscription_res_error:', subscription_res.error)
 
@@ -461,6 +468,7 @@ async function analyzeReceipt({
   organization_id,
   email,
   msg,
+  owner_org_user_id,
 }) {
   const fileUrl = await convertFileAndUpload(gmail, messageId, part)
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
@@ -472,15 +480,18 @@ async function analyzeReceipt({
     organization_id,
     email,
     msg,
+    owner_org_user_id,
   })
 }
 
 export const scanEmailAccount = async ({
   email,
   organization_id,
+  owner_org_user_id,
 }: {
   email: string
   organization_id: string
+  owner_org_user_id: number
 }) => {
   const { data: emailAccount } = await supabase
     .from('email_account')
@@ -502,7 +513,7 @@ export const scanEmailAccount = async ({
       userId: 'me',
       q: '(invoice | receipt | faktura | kvitto) has:attachment',
     })
-    const messages = response.data.messages.slice(0, 5) || []
+    const messages = response.data.messages.slice(0, 15) || []
 
     for (const message of messages) {
       const msg = await gmail.users.messages.get({
@@ -527,6 +538,7 @@ export const scanEmailAccount = async ({
             organization_id,
             email,
             msg,
+            owner_org_user_id,
           })
         }
       }
