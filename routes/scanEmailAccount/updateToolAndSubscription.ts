@@ -4,7 +4,6 @@ import * as dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { extractVendorName } from './extractVendorName'
-import { isB2BSaaSTool } from './isB2BSaaSTool'
 import { addNewVendor } from './addNewVendor'
 import { getInfo } from './getInfo'
 
@@ -36,7 +35,7 @@ const generateVendor = async (extracted_vendor_name: string) => {
 const generateTool = async ({
   organization_id,
   vendor,
-  isB2BSaaSTool_,
+  type,
   owner_org_user_id,
 }) => {
   let tool_res = await supabase
@@ -54,11 +53,11 @@ const generateTool = async ({
         organization_id,
         vendor_id: vendor.id,
         status: 'in_stack',
-        is_tracking: isB2BSaaSTool_,
-        is_desktop_tool: !isB2BSaaSTool_,
+        is_tracking: type === 'software',
+        is_desktop_tool: type !== 'software',
         department: vendor.category,
         owner_org_user_id,
-        type: isB2BSaaSTool_ ? 'b2b_tool' : 'other',
+        type,
       })
       .select('id')
       .single()
@@ -139,7 +138,6 @@ const insertSubscription = async ({
   tool,
   attachmentUrl,
   msg,
-  isB2BSaaSTool_,
   email,
   warning_info,
 }) => {
@@ -170,7 +168,7 @@ const insertSubscription = async ({
       email_recipient: email,
       warning_info,
       email_info,
-      type: isB2BSaaSTool_ ? 'b2b_tool' : 'other',
+      type: res.type,
       total_cost: res.total_cost,
     })
     .throwOnError()
@@ -203,13 +201,12 @@ export const updateToolAndSubscription = async ({
   try {
     const vendorNameRaw = JSON.stringify(res.vendor)
     const extracted_vendor_name = await extractVendorName(vendorNameRaw)
-    const isB2BSaaSTool_ = await isB2BSaaSTool(vendorNameRaw)
     const vendor = await generateVendor(extracted_vendor_name)
 
     const tool = await generateTool({
       organization_id,
       vendor,
-      isB2BSaaSTool_,
+      type: res.type,
       owner_org_user_id,
     })
 
@@ -220,7 +217,6 @@ export const updateToolAndSubscription = async ({
       tool,
       attachmentUrl,
       msg,
-      isB2BSaaSTool_,
       email,
       warning_info,
     })

@@ -69,7 +69,7 @@ export const IsB2BSaaSTool = z.object({
   is_b2b_saas_tool: z.boolean(),
 })
 
-export const ToolCost = z.object({
+export const MailAnalysis = z.object({
   vendor: z.string(),
   renewal_frequency: z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY']),
   renewal_start_date: z.string(),
@@ -101,13 +101,5 @@ export const ToolCost = z.object({
   is_something_else: z.boolean(),
   date_of_invoice: z.string(),
   total_cost: z.number(),
-})
-
-export const ToolCost2 = z.object({
-  vendor: z.string(),
-  date_of_invoice: z.string(),
-  currency: z.enum(['USD', 'SEK', 'EUR']),
-  total_cost: z.number(),
-  invoice_or_receipt: z.enum(['INVOICE', 'RECEIPT']),
-  is_something_else: z.boolean(),
+  type: z.enum(['software', 'service', 'other']),
 })

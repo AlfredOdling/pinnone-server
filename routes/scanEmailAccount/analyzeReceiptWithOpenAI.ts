@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import OpenAI from 'openai'
 
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { ToolCost } from '../types'
+import { MailAnalysis } from '../types'
 
 dotenv.config()
 
@@ -86,8 +86,11 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               **total_cost**
               This is the total cost of the invoice.
 
-              **is_something_else**
-              If the invoice is not a receipt or invoice, then this should be true. It might be a contract or some other document.
+              **type**
+              Decide what type of vendor this receipt is from. You have three options:
+              - software: If the vendor is a B2B SaaS tool.
+              - service: If the vendor is a consulting service.
+              - other: If the vendor is something else.
             `,
           },
           {
@@ -99,7 +102,7 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
         ],
       },
     ],
-    response_format: zodResponseFormat(ToolCost, 'toolCost'),
+    response_format: zodResponseFormat(MailAnalysis, 'MailAnalysis'),
   })
 
   return JSON.parse(response.choices[0].message.content)

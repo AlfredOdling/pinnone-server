@@ -10,13 +10,9 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const downloadFile = async ({
-  downloadUrl,
-  newfilename,
-}: {
-  downloadUrl: string
-  newfilename: string
-}) => {
+export const downloadFile = async ({ res, downloadUrl }) => {
+  const newfilename = `temp/receipts/${res.date_of_invoice}-${res.vendor}-${res.total_cost}-${res.currency}-${res.invoice_or_receipt}.png`
+
   try {
     const response = await fetch(downloadUrl)
 

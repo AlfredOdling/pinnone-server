@@ -26,25 +26,10 @@ export async function analyzeReceipt({
 
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
 
-  const {
-    vendor,
-    date_of_invoice,
-    total_cost,
-    currency,
-    invoice_or_receipt,
-    is_something_else,
-  } = res
-
-  if (is_something_else) {
-    console.log('🚀  is_something_else:', res.is_something_else)
-    console.log('🚀  res:', res)
-    return
-  }
-
-  const newfilename = `temp/receipts/${date_of_invoice}-${vendor}-${total_cost}-${currency}-${invoice_or_receipt}.png`
-  const downloadUrl = fileUrl.publicUrl
-
-  const attachmentUrl = await downloadFile({ downloadUrl, newfilename })
+  const attachmentUrl = await downloadFile({
+    res,
+    downloadUrl: fileUrl.publicUrl,
+  })
 
   await updateToolAndSubscription({
     res,
