@@ -1,14 +1,9 @@
 import { google } from 'googleapis'
 import * as dotenv from 'dotenv'
-import fs from 'fs'
-import OpenAI from 'openai'
 
-import { OAuth2Client, UserRefreshClient } from 'google-auth-library'
-import { zodResponseFormat } from 'openai/helpers/zod'
-import { ToolCost2 } from './types'
+import { OAuth2Client } from 'google-auth-library'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../types/supabase'
-import { pdf } from 'pdf-to-img'
 
 dotenv.config()
 

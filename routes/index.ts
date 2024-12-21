@@ -15,6 +15,7 @@ import { autoAudit } from './autoAudit'
 import { sendExtensionInvite } from './sendExtensionInvite'
 import { googleAuth } from './authGoogle'
 import { scanEmailAccount } from './scanEmailAccount'
+import { emailReceipts } from './emailReceipts'
 
 const router = Router()
 
@@ -190,6 +191,12 @@ router.post('/scanEmailAccount', async (req, res) => {
     before: req.body.before,
   })
   res.json(tokens)
+})
+
+router.post('/emailReceipts', async (req, res) => {
+  const { fromEmail, toEmail, fileUrls } = req.body
+  await emailReceipts({ fromEmail, toEmail, fileUrls })
+  res.json({ data: 'Receipts emailed' })
 })
 
 // Runs every day at 12:00
