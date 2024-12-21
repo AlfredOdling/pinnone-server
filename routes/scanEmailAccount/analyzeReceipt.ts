@@ -1,6 +1,7 @@
 import { analyzeReceiptWithOpenAI } from './analyzeReceiptWithOpenAI'
 
 import { convertFileAndUpload } from './convertFileAndUpload'
+import { convertHtmlToPng } from './convertHtmlToPng'
 import { downloadFile } from './downloadFile'
 import { updateToolAndSubscription } from './updateToolAndSubscription'
 
@@ -12,8 +13,17 @@ export async function analyzeReceipt({
   email,
   msg,
   owner_org_user_id,
+  type,
 }) {
-  const fileUrl = await convertFileAndUpload({ gmail, messageId, part })
+  let fileUrl
+
+  if (type === 'noPDF') {
+    fileUrl = await convertHtmlToPng({ gmail, messageId, msg })
+  }
+  if (type === 'pdf') {
+    fileUrl = await convertFileAndUpload({ gmail, messageId, part })
+  }
+
   const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
 
   const {

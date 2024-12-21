@@ -39,6 +39,7 @@
     "pdf-img-convert": "^2.0.0",
     "pdf-to-img": "^4.3.0",
     "pdfjs-dist": "^4.9.155",
+    "puppeteer": "^23.11.1",
     "stripe": "^17.2.1",
     "zod": "^3.23.8"
   },

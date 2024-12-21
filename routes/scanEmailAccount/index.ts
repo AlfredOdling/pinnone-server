@@ -19,6 +19,35 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+const createLabel = async (gmail) => {
+  let receiptsLabelId: string
+  const labels = await gmail.users.labels.list({ userId: 'me' })
+
+  const receiptsLabel = labels.data.labels?.find(
+    (label) => label.name === 'Receipts'
+  )
+
+  if (!receiptsLabel) {
+    const newLabel = await gmail.users.labels.create({
+      userId: 'me',
+      requestBody: {
+        name: 'Receipts',
+        labelListVisibility: 'labelShow',
+        messageListVisibility: 'show',
+        color: {
+          textColor: '#ffffff',
+          backgroundColor: '#fb4c2f',
+        },
+      },
+    })
+    receiptsLabelId = newLabel.data.id!
+  } else {
+    receiptsLabelId = receiptsLabel.id!
+  }
+
+  return receiptsLabelId
+}
+
 export const scanEmailAccount = async ({
   email,
   organization_id,
@@ -47,6 +76,7 @@ export const scanEmailAccount = async ({
       refresh_token: emailAccount.refresh_token,
     })
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
+    const receiptsLabelId = await createLabel(gmail)
 
     const query = `(invoice | receipt | faktura | kvitto) has:attachment after:${after} before:${before}`
     console.log('🚀  query:', query)
@@ -71,19 +101,7 @@ export const scanEmailAccount = async ({
       for (const part of parts) {
         if (foundPdf) break
 
-        /**
-         * If there is no pdf, take the body html. Set in analysRe. a param  = type. If noPDF, create a PNG and proceed.
-         */
-        // if (part.body?.data) {
-        //   htmlBody = Buffer.from(part.body.data, 'base64').toString('utf-8')
-        // }
-
-        if (
-          part.filename &&
-          part.body &&
-          part.body.attachmentId &&
-          part.filename.includes('pdf')
-        ) {
+        if (part.filename && part.body && part.body.attachmentId) {
           await analyzeReceipt({
             gmail,
             messageId: message.id!,
@@ -92,8 +110,18 @@ export const scanEmailAccount = async ({
             email,
             msg,
             owner_org_user_id,
+            type: part.filename.includes('pdf') ? 'pdf' : 'noPDF',
           })
           foundPdf = true
+
+          // Move message to Receipts label
+          await gmail.users.messages.modify({
+            userId: 'me',
+            id: message.id!,
+            requestBody: {
+              addLabelIds: [receiptsLabelId],
+            },
+          })
         }
       }
     }
