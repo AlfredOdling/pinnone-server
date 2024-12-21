@@ -92,6 +92,7 @@ export const scanEmailAccount = async ({
             id: message.id!,
             requestBody: {
               addLabelIds: [receiptsLabelId],
+              // removeLabelIds: ['INBOX'],
             },
           })
         }
