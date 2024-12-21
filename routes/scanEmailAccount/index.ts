@@ -5,6 +5,7 @@ import { OAuth2Client } from 'google-auth-library'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { analyzeReceipt } from './analyzeReceipt'
+import { createLabel } from './createLabel'
 
 dotenv.config()
 
@@ -18,35 +19,6 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
-
-const createLabel = async (gmail) => {
-  let receiptsLabelId: string
-  const labels = await gmail.users.labels.list({ userId: 'me' })
-
-  const receiptsLabel = labels.data.labels?.find(
-    (label) => label.name === 'Receipts'
-  )
-
-  if (!receiptsLabel) {
-    const newLabel = await gmail.users.labels.create({
-      userId: 'me',
-      requestBody: {
-        name: 'Receipts',
-        labelListVisibility: 'labelShow',
-        messageListVisibility: 'show',
-        color: {
-          textColor: '#ffffff',
-          backgroundColor: '#fb4c2f',
-        },
-      },
-    })
-    receiptsLabelId = newLabel.data.id!
-  } else {
-    receiptsLabelId = receiptsLabel.id!
-  }
-
-  return receiptsLabelId
-}
 
 export const scanEmailAccount = async ({
   email,
