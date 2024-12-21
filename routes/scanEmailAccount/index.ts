@@ -71,6 +71,13 @@ export const scanEmailAccount = async ({
       for (const part of parts) {
         if (foundPdf) break
 
+        /**
+         * If there is no pdf, take the body html. Set in analysRe. a param  = type. If noPDF, create a PNG and proceed.
+         */
+        // if (part.body?.data) {
+        //   htmlBody = Buffer.from(part.body.data, 'base64').toString('utf-8')
+        // }
+
         if (
           part.filename &&
           part.body &&
