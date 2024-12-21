@@ -34,9 +34,17 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               IMPORTANT 2: If you are unsure of the renewal_frequency at all, just set it to MONTHLY.
 
               --This is the instructions for the JSON fields--
-              
-              **vendor**
+
+              **vendor_name_raw**
               This is the name of the company that is providing the service.
+
+              **vendor_name**
+              Extract the vendor name from the following name. 
+              The name is from an invoice, so it might be a bit different than the actual name of the vendor.
+              We just want the name of the vendor.
+        
+              For example, if the name is "Framer B.V.", return "Framer". And if the is "Supabase Pte. Ltd.", return "Supabase".
+              And so on.
 
               **renewal_frequency**
               Most likely it will be MONTHLY. If you see evidence of that the invoice period is spanning 12 months, then it is likely YEARLY.

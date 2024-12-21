@@ -50,12 +50,11 @@ export const addNewVendor = async (vendorName: string) => {
         link_to_pricing_page: vendor_.link_to_pricing_page,
       },
       {
-        onConflict: 'root_domain',
+        onConflict: 'name',
         ignoreDuplicates: true,
       }
     )
     .select('*')
-    .single()
     .throwOnError()
 
   return vendor

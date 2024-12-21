@@ -1,6 +1,7 @@
 import { google } from 'googleapis'
 import * as dotenv from 'dotenv'
-
+import fs from 'fs'
+import path from 'path'
 import { OAuth2Client } from 'google-auth-library'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
@@ -102,4 +103,15 @@ export const scanEmailAccount = async ({
     console.error('Error in scanEmails:', error)
     throw error
   }
+
+  // Remove all files in temp folder
+  const attachmentsFolder = 'temp/attachments'
+  fs.readdirSync(attachmentsFolder).forEach((file) => {
+    fs.unlinkSync(path.join(attachmentsFolder, file))
+  })
+
+  const receiptsFolder = 'temp/receipts'
+  fs.readdirSync(receiptsFolder).forEach((file) => {
+    fs.unlinkSync(path.join(receiptsFolder, file))
+  })
 }

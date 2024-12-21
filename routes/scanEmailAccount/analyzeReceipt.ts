@@ -3,9 +3,13 @@ import { analyzeReceiptWithOpenAI } from './analyzeReceiptWithOpenAI'
 import { convertFileAndUpload } from './convertFileAndUpload'
 import { convertHtmlToPng } from './convertHtmlToPng'
 import { downloadFile } from './downloadFile'
-import { updateToolAndSubscription } from './updateToolAndSubscription'
+import { updateEmailAccountLastScannedDate } from './updateEmailAccountLastScannedDate'
+import { generateVendor } from './generateVendor'
+import { generateTool } from './generateTool'
+import { insertSubscription } from './insertSubscription'
+import { generateWarningInfo } from './generateWarningInfo'
 
-export async function analyzeReceipt({
+export const analyzeReceipt = async ({
   gmail,
   messageId,
   part,
@@ -14,29 +18,48 @@ export async function analyzeReceipt({
   msg,
   owner_org_user_id,
   type,
-}) {
+}) => {
   let fileUrl
+  try {
+    if (type === 'noPDF') {
+      fileUrl = await convertHtmlToPng({ gmail, messageId, msg })
+    }
+    if (type === 'pdf') {
+      fileUrl = await convertFileAndUpload({ gmail, messageId, part })
+    }
 
-  if (type === 'noPDF') {
-    fileUrl = await convertHtmlToPng({ gmail, messageId, msg })
+    const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
+
+    const attachmentUrl = await downloadFile({
+      res,
+      downloadUrl: fileUrl.publicUrl,
+    })
+
+    const vendor = await generateVendor(
+      res.type === 'software' ? res.vendor_name : res.vendor_name_raw
+    )
+
+    const tool = await generateTool({
+      organization_id,
+      vendor: vendor,
+      type: res.type,
+      owner_org_user_id,
+    })
+
+    const warning_info = await generateWarningInfo({ res, tool })
+
+    await insertSubscription({
+      res,
+      tool,
+      attachmentUrl,
+      msg,
+      email,
+      warning_info,
+    })
+
+    await updateEmailAccountLastScannedDate({ email, organization_id })
+  } catch (error) {
+    console.error('Error in analyzeReceipt:', error)
+    throw error
   }
-  if (type === 'pdf') {
-    fileUrl = await convertFileAndUpload({ gmail, messageId, part })
-  }
-
-  const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
-
-  const attachmentUrl = await downloadFile({
-    res,
-    downloadUrl: fileUrl.publicUrl,
-  })
-
-  await updateToolAndSubscription({
-    res,
-    attachmentUrl,
-    organization_id,
-    email,
-    msg,
-    owner_org_user_id,
-  })
 }

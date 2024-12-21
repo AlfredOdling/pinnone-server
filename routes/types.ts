@@ -70,7 +70,8 @@ export const IsB2BSaaSTool = z.object({
 })
 
 export const MailAnalysis = z.object({
-  vendor: z.string(),
+  vendor_name_raw: z.string(),
+  vendor_name: z.string(),
   renewal_frequency: z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY']),
   renewal_start_date: z.string(),
   renewal_next_date: z.string(),
