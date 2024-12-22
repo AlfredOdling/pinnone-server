@@ -7,16 +7,22 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const generateVendor = async (extracted_vendor_name: string) => {
+export const generateVendor = async ({
+  vendorName,
+  website,
+}: {
+  vendorName: string
+  website: string
+}) => {
   let vendor
   const existingVendor = await supabase
     .from('vendor')
     .select('*')
-    .eq('name', extracted_vendor_name)
+    .ilike('name', `%${vendorName}%`)
     .throwOnError()
 
   if (!existingVendor.data?.length) {
-    const newVendor = await addNewVendor(extracted_vendor_name)
+    const newVendor = await addNewVendor({ vendorName, website })
     vendor = newVendor
   } else {
     vendor = existingVendor

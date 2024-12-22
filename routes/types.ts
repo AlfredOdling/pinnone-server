@@ -99,9 +99,9 @@ export const MailAnalysis = z.object({
   invoice_or_receipt: z.enum(['INVOICE', 'RECEIPT']),
   due_date: z.string(),
   important_info: z.string(),
-  is_something_else: z.boolean(),
   date_of_invoice: z.string(),
   total_cost: z.number(),
   type: z.enum(['software', 'service', 'other']),
   company_website: z.string(),
+  is_a_receipt_or_invoice: z.boolean(),
 })

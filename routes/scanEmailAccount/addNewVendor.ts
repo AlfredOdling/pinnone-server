@@ -17,7 +17,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export const addNewVendor = async (vendorName: string) => {
+export const addNewVendor = async ({
+  vendorName,
+  website,
+}: {
+  vendorName: string
+  website: string
+}) => {
   const completion2 = await openai.beta.chat.completions.parse({
     model: 'gpt-4o',
     messages: [
@@ -25,11 +31,12 @@ export const addNewVendor = async (vendorName: string) => {
         role: 'system',
         content:
           'You are a professional data analyst, that knows everything about the B2B SaaS market. ' +
-          'You are given a name of a SaaS app. Fetch data about the app.',
+          'You are given a name of a SaaS app and its website. (The website link can be empty) ' +
+          'Fetch data about the app.',
       },
       {
         role: 'user',
-        content: vendorName,
+        content: `vendorName: ${vendorName}, website: ${website}`,
       },
     ],
     response_format: zodResponseFormat(NewVendor, 'newVendor'),

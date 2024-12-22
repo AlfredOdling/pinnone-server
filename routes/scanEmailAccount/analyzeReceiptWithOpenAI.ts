@@ -97,6 +97,9 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               **company_website**
               This is the website of the company that is providing the service.
               If you find a website adress in the invoice, use that.
+              Take the root domain, not the full url. For example, if the url is https://www.supabase.com/pricing, then the root domain is supabase.com.
+              There might might be different websites, one corresponding to the vendor, 
+              and another one corresponding to some intermediary actor. Always use the one connected to the vendor.
               If you don't find a website adress, set it to empty string.
 
               **type**
@@ -104,6 +107,10 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               - software: If the vendor is a B2B SaaS tool.
               - service: If the vendor is a consulting service.
               - other: If the vendor is something else.
+
+              **is_a_receipt_or_invoice**
+              This is true if you find evidence that the this image is a receipt or invoice.
+              You should find information such as cost, date, vendor, or something that indicates that it is a receipt or invoice.
             `,
           },
           {
@@ -118,5 +125,7 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
     response_format: zodResponseFormat(MailAnalysis, 'MailAnalysis'),
   })
 
-  return JSON.parse(response.choices[0].message.content)
+  return JSON.parse(
+    response.choices[0].message.content
+  ) as typeof MailAnalysis._type
 }

@@ -29,16 +29,18 @@ export const analyzeReceipt = async ({
     }
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
+    if (!res.is_a_receipt_or_invoice) return
 
     const attachmentUrl = await downloadFile({
       res,
       downloadUrl: fileUrl.publicUrl,
     })
 
-    const vendor = await generateVendor(
-      // här ska hemsidan in.
-      res.type === 'software' ? res.vendor_name : res.vendor_name_raw
-    )
+    const vendor = await generateVendor({
+      vendorName:
+        res.type === 'software' ? res.vendor_name : res.vendor_name_raw,
+      website: res.company_website,
+    })
 
     const tool = await generateTool({
       organization_id,
