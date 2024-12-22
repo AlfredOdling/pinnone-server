@@ -11,7 +11,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const convertHtmlToPng = async ({ gmail, messageId, msg }) => {
+export const convertHtmlToPng = async ({ msg }) => {
   let htmlBody = ''
   if (msg?.data?.payload?.parts?.[0]?.parts?.[1]?.body?.data) {
     htmlBody = Buffer.from(

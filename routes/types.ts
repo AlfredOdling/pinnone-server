@@ -103,4 +103,5 @@ export const MailAnalysis = z.object({
   date_of_invoice: z.string(),
   total_cost: z.number(),
   type: z.enum(['software', 'service', 'other']),
+  company_website: z.string(),
 })

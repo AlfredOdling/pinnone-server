@@ -35,7 +35,7 @@ export const updateVendors = async ({
 
   try {
     const completion = await openai.beta.chat.completions.parse({
-      model: 'gpt-4o-2024-08-06',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',

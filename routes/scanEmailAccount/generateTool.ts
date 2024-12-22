@@ -6,40 +6,44 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+type Vendor = Database['public']['Tables']['vendor']['Row']
+
 export const generateTool = async ({
   organization_id,
   vendor,
   type,
   owner_org_user_id,
+}: {
+  organization_id: string
+  vendor: Vendor
+  type: string
+  owner_org_user_id: number
 }) => {
-  const vendor_ = vendor.data[0]
-
   let tool_res = await supabase
     .from('tool')
     .select('*')
     .eq('organization_id', organization_id)
-    .eq('vendor_id', vendor_.id)
-    .single()
-  let tool = tool_res.data
+    .eq('vendor_id', vendor.id)
+    .throwOnError()
+  let tool = tool_res
 
-  if (!tool) {
+  if (!tool.data?.length) {
     tool_res = await supabase
       .from('tool')
       .insert({
         organization_id,
-        vendor_id: vendor_.id,
+        vendor_id: vendor.id,
         status: 'in_stack',
         is_tracking: type === 'software',
         is_desktop_tool: type !== 'software',
-        department: vendor_.category,
+        department: vendor.category,
         owner_org_user_id,
         type,
       })
       .select('*')
-      .single()
       .throwOnError()
-    tool = tool_res.data
+    tool = tool_res
   }
 
-  return tool
+  return tool.data[0]
 }

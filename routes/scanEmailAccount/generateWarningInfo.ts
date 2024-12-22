@@ -9,7 +9,13 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const generateWarningInfo = async ({ res, tool }) => {
+export const generateWarningInfo = async ({
+  res,
+  tool,
+}: {
+  res: any
+  tool: Database['public']['Tables']['tool']['Row']
+}) => {
   const existing_subscriptions = await supabase
     .from('subscription')
     .select('*')

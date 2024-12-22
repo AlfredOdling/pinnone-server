@@ -22,14 +22,13 @@ export const analyzeReceipt = async ({
   let fileUrl
   try {
     if (type === 'noPDF') {
-      fileUrl = await convertHtmlToPng({ gmail, messageId, msg })
+      fileUrl = await convertHtmlToPng({ msg })
     }
     if (type === 'pdf') {
       fileUrl = await convertFileAndUpload({ gmail, messageId, part })
     }
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
-    console.log('🚀  res:', res)
 
     const attachmentUrl = await downloadFile({
       res,
@@ -37,20 +36,18 @@ export const analyzeReceipt = async ({
     })
 
     const vendor = await generateVendor(
+      // här ska hemsidan in.
       res.type === 'software' ? res.vendor_name : res.vendor_name_raw
     )
-    console.log('🚀  vendor:', vendor)
 
     const tool = await generateTool({
       organization_id,
-      vendor: vendor,
+      vendor,
       type: res.type,
       owner_org_user_id,
     })
-    console.log('🚀  tool:', tool)
 
     const warning_info = await generateWarningInfo({ res, tool })
-    console.log('🚀  warning_info:', warning_info)
 
     await insertSubscription({
       res,

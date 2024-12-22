@@ -19,7 +19,7 @@ const openai = new OpenAI({
 
 export const addNewVendor = async (vendorName: string) => {
   const completion2 = await openai.beta.chat.completions.parse({
-    model: 'gpt-4o-2024-08-06',
+    model: 'gpt-4o',
     messages: [
       {
         role: 'system',
@@ -39,21 +39,15 @@ export const addNewVendor = async (vendorName: string) => {
 
   const vendor = await supabase
     .from('vendor')
-    .upsert(
-      {
-        name: vendor_.name,
-        description: vendor_.description,
-        url: vendor_.url,
-        root_domain: vendor_.root_domain,
-        logo_url: vendor_.logo_url,
-        category: vendor_.category,
-        link_to_pricing_page: vendor_.link_to_pricing_page,
-      },
-      {
-        onConflict: 'name',
-        ignoreDuplicates: true,
-      }
-    )
+    .insert({
+      name: vendor_.name,
+      description: vendor_.description,
+      url: vendor_.url,
+      root_domain: vendor_.root_domain,
+      logo_url: vendor_.logo_url,
+      category: vendor_.category,
+      link_to_pricing_page: vendor_.link_to_pricing_page,
+    })
     .select('*')
     .throwOnError()
 

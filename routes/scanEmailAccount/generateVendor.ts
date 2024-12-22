@@ -15,12 +15,12 @@ export const generateVendor = async (extracted_vendor_name: string) => {
     .eq('name', extracted_vendor_name)
     .throwOnError()
 
-  if (!existingVendor.data.length) {
+  if (!existingVendor.data?.length) {
     const newVendor = await addNewVendor(extracted_vendor_name)
     vendor = newVendor
   } else {
     vendor = existingVendor
   }
 
-  return vendor
+  return vendor.data[0]
 }

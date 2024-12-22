@@ -208,11 +208,11 @@ export type Database = {
           pricing_model: string
           receipt_file: string | null
           renewal_frequency: string
-          renewal_next_date: string
-          renewal_start_date: string
+          renewal_next_date: string | null
+          renewal_start_date: string | null
           source: string | null
           status: string
-          tool_id: number | null
+          tool_id: number
           total_cost: number | null
           type: string | null
           usage_based_cost: number | null
@@ -234,11 +234,11 @@ export type Database = {
           pricing_model: string
           receipt_file?: string | null
           renewal_frequency: string
-          renewal_next_date: string
-          renewal_start_date: string
+          renewal_next_date?: string | null
+          renewal_start_date?: string | null
           source?: string | null
           status: string
-          tool_id?: number | null
+          tool_id: number
           total_cost?: number | null
           type?: string | null
           usage_based_cost?: number | null
@@ -260,11 +260,11 @@ export type Database = {
           pricing_model?: string
           receipt_file?: string | null
           renewal_frequency?: string
-          renewal_next_date?: string
-          renewal_start_date?: string
+          renewal_next_date?: string | null
+          renewal_start_date?: string | null
           source?: string | null
           status?: string
-          tool_id?: number | null
+          tool_id?: number
           total_cost?: number | null
           type?: string | null
           usage_based_cost?: number | null
