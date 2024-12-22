@@ -12,13 +12,13 @@ export const generateTool = async ({
   type,
   owner_org_user_id,
 }) => {
-  const vendor_id = vendor.data[0].id
+  const vendor_ = vendor.data[0]
 
   let tool_res = await supabase
     .from('tool')
     .select('*')
     .eq('organization_id', organization_id)
-    .eq('vendor_id', vendor_id)
+    .eq('vendor_id', vendor_.id)
     .single()
   let tool = tool_res.data
 
@@ -27,11 +27,11 @@ export const generateTool = async ({
       .from('tool')
       .insert({
         organization_id,
-        vendor_id: vendor_id,
+        vendor_id: vendor_.id,
         status: 'in_stack',
         is_tracking: type === 'software',
         is_desktop_tool: type !== 'software',
-        department: vendor.category,
+        department: vendor_.category,
         owner_org_user_id,
         type,
       })
@@ -41,5 +41,5 @@ export const generateTool = async ({
     tool = tool_res.data
   }
 
-  return tool.id
+  return tool
 }

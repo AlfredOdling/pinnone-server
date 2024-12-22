@@ -74,7 +74,7 @@ export const scanEmailAccount = async ({
       for (const part of parts) {
         if (foundPdf) break
 
-        if (part.filename && part.body && part.body.attachmentId) {
+        if (part.filename !== '' && part.body && part.body.attachmentId) {
           try {
             await analyzeReceipt({
               gmail,

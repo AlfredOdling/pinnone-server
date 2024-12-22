@@ -29,6 +29,7 @@ export const analyzeReceipt = async ({
     }
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
+    console.log('🚀  res:', res)
 
     const attachmentUrl = await downloadFile({
       res,
@@ -38,6 +39,7 @@ export const analyzeReceipt = async ({
     const vendor = await generateVendor(
       res.type === 'software' ? res.vendor_name : res.vendor_name_raw
     )
+    console.log('🚀  vendor:', vendor)
 
     const tool = await generateTool({
       organization_id,
@@ -45,8 +47,10 @@ export const analyzeReceipt = async ({
       type: res.type,
       owner_org_user_id,
     })
+    console.log('🚀  tool:', tool)
 
     const warning_info = await generateWarningInfo({ res, tool })
+    console.log('🚀  warning_info:', warning_info)
 
     await insertSubscription({
       res,
