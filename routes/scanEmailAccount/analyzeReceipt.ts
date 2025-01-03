@@ -4,9 +4,9 @@ import { convertFileAndUpload } from './convertFileAndUpload'
 import { convertHtmlToPng } from './convertHtmlToPng'
 import { downloadFile } from './downloadFile'
 import { updateEmailAccountLastScannedDate } from './updateEmailAccountLastScannedDate'
-import { generateVendor } from './generateVendor'
+import { generateSender } from './generateVendor'
 import { generateTool } from './generateTool'
-import { insertSubscription } from './insertSubscription'
+import { insertReceipt } from './insertReceipt'
 import { generateWarningInfo } from './generateWarningInfo'
 
 export const analyzeReceipt = async ({
@@ -20,6 +20,7 @@ export const analyzeReceipt = async ({
   type,
 }) => {
   let fileUrl
+
   try {
     if (type === 'noPDF') {
       fileUrl = await convertHtmlToPng({ msg })
@@ -29,6 +30,7 @@ export const analyzeReceipt = async ({
     }
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
+    console.log('🚀  res:', res)
     if (!res.is_a_receipt_or_invoice) return
 
     const attachmentUrl = await downloadFile({
@@ -36,28 +38,30 @@ export const analyzeReceipt = async ({
       downloadUrl: fileUrl.publicUrl,
     })
 
-    const vendor = await generateVendor({
-      vendorName:
-        res.type === 'software' ? res.vendor_name : res.vendor_name_raw,
-      website: res.company_website,
+    // const vendorName =
+    //   res.type === 'software' ? res.vendor_name : res.vendor_name_raw
+
+    const sender = await generateSender({
+      senderName: res.vendor_name_raw,
     })
 
-    const tool = await generateTool({
-      organization_id,
-      vendor,
-      type: res.type,
-      owner_org_user_id,
-    })
+    // const tool = await generateTool({
+    //   organization_id,
+    //   vendor,
+    //   type: res.type,
+    //   owner_org_user_id,
+    // })
 
-    const warning_info = await generateWarningInfo({ res, tool })
+    // const warning_info = await generateWarningInfo({ res })
 
-    await insertSubscription({
+    await insertReceipt({
+      senderId: sender.id,
       res,
-      tool,
       attachmentUrl,
       msg,
       email,
-      warning_info,
+      warning_info: '',
+      messageId,
     })
 
     await updateEmailAccountLastScannedDate({ email, organization_id })

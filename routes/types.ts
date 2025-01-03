@@ -75,7 +75,7 @@ export const MailAnalysis = z.object({
   renewal_frequency: z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY']),
   renewal_start_date: z.string(),
   renewal_next_date: z.string(),
-
+  root_domain: z.string(),
   pricing_model: z.enum(['FLAT_FEE', 'USAGE_BASED', 'PER_SEAT']),
   currency: z.enum([
     'USD',

@@ -2,7 +2,7 @@ import { OAuth2Client } from 'google-auth-library'
 import { google } from 'googleapis'
 import * as dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
-import { Database } from '../types/supabase'
+import { Database } from '../../types/supabase'
 
 dotenv.config()
 

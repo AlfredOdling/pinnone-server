@@ -3,6 +3,7 @@ import fs from 'fs'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { pdf } from 'pdf-to-img'
+import sharp from 'sharp'
 
 dotenv.config()
 
@@ -24,34 +25,62 @@ export const convertFileAndUpload = async ({ gmail, messageId, part }) => {
   fs.writeFileSync('temp/attachments/' + filename, base64)
 
   const document = await pdf('temp/attachments/' + filename, { scale: 3 })
-  let filePathToUpload = ''
+  let images = []
 
   let counter = 1
   for await (const image of document) {
     const fileName = 'temp/attachments/' + filename + '_' + counter + '.png'
-    filePathToUpload = fileName
     fs.writeFileSync(fileName, image)
+    images.push(fileName)
     counter++
   }
 
-  // Upload the last generated image to Supabase storage
-  const fileBuffer = fs.readFileSync(filePathToUpload)
-  const base64Image = fileBuffer.toString('base64')
+  // Get dimensions of first image to use as base
+  const firstImageMetadata = await sharp(images[0]).metadata()
+  const totalHeight = firstImageMetadata.height * images.length
 
+  // Create array of image inputs with y offsets
+  const compositeImages = images.map((image, index) => ({
+    input: image,
+    top: index * firstImageMetadata.height,
+    left: 0,
+  }))
+
+  // Merge all images into one
+  const mergedImagePath = 'temp/attachments/' + filename + '_merged.png'
+  await sharp({
+    create: {
+      width: firstImageMetadata.width,
+      height: totalHeight,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 0 },
+    },
+  })
+    .composite(compositeImages)
+    .toFile(mergedImagePath)
+
+  // Upload the merged image to Supabase storage
+  const fileBuffer = fs.readFileSync(mergedImagePath)
   const { data, error } = await supabase.storage
     .from('receipts')
-    .upload(`${Date.now()}_${filename}.png`, fileBuffer, {
+    .upload(`${Date.now()}_${filename}_merged.png`, fileBuffer, {
       contentType: 'image/png',
       upsert: true,
     })
-
-  const { data: publicUrlData } = supabase.storage
-    .from('receipts')
-    .getPublicUrl(data.path)
 
   if (error) {
     throw new Error('Failed to upload file:' + error.message)
   }
 
-  return { base64Image, publicUrl: publicUrlData.publicUrl }
+  const { data: publicUrlData } = supabase.storage
+    .from('receipts')
+    .getPublicUrl(data.path)
+
+  // Read file as base64 for OpenAI analysis
+  const base64Image = fileBuffer.toString('base64')
+
+  return {
+    publicUrl: publicUrlData.publicUrl,
+    base64Image: base64Image,
+  }
 }

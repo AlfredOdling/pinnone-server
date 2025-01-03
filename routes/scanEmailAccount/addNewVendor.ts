@@ -17,43 +17,31 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export const addNewVendor = async ({
-  vendorName,
-  website,
-}: {
-  vendorName: string
-  website: string
-}) => {
-  const completion2 = await openai.beta.chat.completions.parse({
-    model: 'gpt-4o',
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You are a professional data analyst, that knows everything about the B2B SaaS market. ' +
-          'You are given a name of a SaaS app and its website. (The website link can be empty) ' +
-          'Fetch data about the app.',
-      },
-      {
-        role: 'user',
-        content: `vendorName: ${vendorName}, website: ${website}`,
-      },
-    ],
-    response_format: zodResponseFormat(NewVendor, 'newVendor'),
-  })
-
-  const vendor_ = completion2.choices[0].message.parsed.children
+export const addNewSender = async ({ senderName }: { senderName: string }) => {
+  // const completion2 = await openai.beta.chat.completions.parse({
+  //   model: 'gpt-4o',
+  //   messages: [
+  //     {
+  //       role: 'system',
+  //       content:
+  //         'You are a professional data analyst, that knows everything about the B2B SaaS market. ' +
+  //         'You are given a name of a SaaS app and its website. (The website link can be empty) ' +
+  //         'Fetch data about the app.',
+  //     },
+  //     {
+  //       role: 'user',
+  //       content: `vendorName: ${vendorName}, website: ${website}`,
+  //     },
+  //   ],
+  //   response_format: zodResponseFormat(NewVendor, 'newVendor'),
+  // })
+  // const vendor_ = completion2.choices[0].message.parsed.children
 
   const vendor = await supabase
-    .from('vendor')
+    .from('sender')
     .insert({
-      name: vendor_.name,
-      description: vendor_.description,
-      url: vendor_.url,
-      root_domain: vendor_.root_domain,
-      logo_url: vendor_.logo_url,
-      category: vendor_.category,
-      link_to_pricing_page: vendor_.link_to_pricing_page,
+      name: senderName,
+      category: 'Other',
     })
     .select('*')
     .throwOnError()

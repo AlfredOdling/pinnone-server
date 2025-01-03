@@ -11,13 +11,11 @@ const supabase = createClient<Database>(
 
 export const generateWarningInfo = async ({
   res,
-  tool,
 }: {
   res: any
-  tool: Database['public']['Tables']['tool']['Row']
 }) => {
   const existing_subscriptions = await supabase
-    .from('subscription')
+    .from('receipt')
     .select('*')
     .eq('tool_id', tool.id)
 
@@ -29,7 +27,8 @@ export const generateWarningInfo = async ({
   let same_other_cost = false
   let same_month = false
 
-  const extractDate = (input: string) => input.split('T')[0]
+  const extractDate = (input: string) =>
+    input.includes('T') ? input.split('T')[0] : input
 
   existing_subscriptions?.data?.forEach(
     ({

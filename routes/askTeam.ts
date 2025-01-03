@@ -30,7 +30,7 @@ export const askTeam = async ({ message, organization_id }) => {
 
   const { data: userActivities } = await supabase
     .from('user_activity')
-    .select('*, org_user(*, user(*)), tool(*, vendor(*), subscription(*))')
+    .select('*, org_user(*, user(*)), tool(*, vendor(*), receipt(*))')
     .in(
       'org_user_id',
       orgUsers.map((orgUser) => orgUser.id)

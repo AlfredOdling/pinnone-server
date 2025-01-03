@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { analyzeReceipt } from './analyzeReceipt'
 import { createLabel } from './createLabel'
+import { refreshToken } from './refreshToken'
 
 dotenv.config()
 
@@ -67,6 +68,13 @@ export const scanEmailAccount = async ({
         id: message.id!,
       })
 
+      const emailId = await supabase
+        .from('receipt')
+        .select('email_id')
+        .eq('email_id', message.id!)
+
+      if (emailId.data.length > 0) continue
+
       const payload = msg.data.payload
       const parts = payload?.parts || []
 
@@ -101,7 +109,6 @@ export const scanEmailAccount = async ({
             fs.readdirSync(attachmentsFolder).forEach((file) => {
               fs.unlinkSync(path.join(attachmentsFolder, file))
             })
-
             const receiptsFolder = 'temp/receipts'
             fs.readdirSync(receiptsFolder).forEach((file) => {
               fs.unlinkSync(path.join(receiptsFolder, file))
@@ -121,7 +128,15 @@ export const scanEmailAccount = async ({
       }
     }
   } catch (error) {
-    console.error('Error in scanEmails:', error)
-    throw error
+    const invalid_grant = error.message === 'invalid_grant'
+
+    if (invalid_grant) {
+      await refreshToken({
+        refreshToken: emailAccount.refresh_token,
+        email: emailAccount.email,
+      })
+    } else {
+      throw error
+    }
   }
 }

@@ -10,22 +10,22 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-type Tool = Database['public']['Tables']['tool']['Row']
-
-export const insertSubscription = async ({
+export const insertReceipt = async ({
+  senderId,
   res,
-  tool,
   attachmentUrl,
   msg,
   email,
   warning_info,
+  messageId,
 }: {
+  senderId: number
   res: any
-  tool: Tool
   attachmentUrl: string
   msg: any
   email: string
   warning_info: string
+  messageId: string
 }) => {
   const email_info = await getInfo(msg)
 
@@ -47,9 +47,9 @@ export const insertSubscription = async ({
   } = res
 
   await supabase
-    .from('subscription')
+    .from('receipt')
     .upsert({
-      tool_id: tool.id,
+      sender_id: senderId,
       currency,
       renewal_frequency,
 
@@ -73,6 +73,7 @@ export const insertSubscription = async ({
       email_info,
       type,
       total_cost,
+      email_id: messageId,
     })
     .throwOnError()
 }

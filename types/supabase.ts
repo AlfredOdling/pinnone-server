@@ -173,6 +173,98 @@ export type Database = {
           },
         ]
       }
+      receipt: {
+        Row: {
+          created_at: string
+          currency: string
+          date_of_invoice: string | null
+          due_date: string | null
+          email_id: string | null
+          email_info: Json | null
+          email_received: string | null
+          email_recipient: string | null
+          flat_fee_cost: number | null
+          id: number
+          number_of_seats: number | null
+          other_cost: number | null
+          price_per_seat: number | null
+          pricing_model: string
+          receipt_file: string | null
+          renewal_frequency: string
+          renewal_next_date: string | null
+          renewal_start_date: string | null
+          sender_id: number | null
+          source: string | null
+          status: string
+          total_cost: number | null
+          type: string | null
+          usage_based_cost: number | null
+          warning_info: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          date_of_invoice?: string | null
+          due_date?: string | null
+          email_id?: string | null
+          email_info?: Json | null
+          email_received?: string | null
+          email_recipient?: string | null
+          flat_fee_cost?: number | null
+          id?: number
+          number_of_seats?: number | null
+          other_cost?: number | null
+          price_per_seat?: number | null
+          pricing_model: string
+          receipt_file?: string | null
+          renewal_frequency: string
+          renewal_next_date?: string | null
+          renewal_start_date?: string | null
+          sender_id?: number | null
+          source?: string | null
+          status: string
+          total_cost?: number | null
+          type?: string | null
+          usage_based_cost?: number | null
+          warning_info?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          date_of_invoice?: string | null
+          due_date?: string | null
+          email_id?: string | null
+          email_info?: Json | null
+          email_received?: string | null
+          email_recipient?: string | null
+          flat_fee_cost?: number | null
+          id?: number
+          number_of_seats?: number | null
+          other_cost?: number | null
+          price_per_seat?: number | null
+          pricing_model?: string
+          receipt_file?: string | null
+          renewal_frequency?: string
+          renewal_next_date?: string | null
+          renewal_start_date?: string | null
+          sender_id?: number | null
+          source?: string | null
+          status?: string
+          total_cost?: number | null
+          type?: string | null
+          usage_based_cost?: number | null
+          warning_info?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "sender"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role: {
         Row: {
           created_at: string
@@ -191,88 +283,59 @@ export type Database = {
         }
         Relationships: []
       }
-      subscription: {
+      sender: {
         Row: {
+          category: string | null
           created_at: string
-          currency: string
-          date_of_invoice: string | null
-          due_date: string | null
-          email_info: Json | null
-          email_received: string | null
-          email_recipient: string | null
-          flat_fee_cost: number | null
+          description: string | null
           id: number
-          number_of_seats: number | null
-          other_cost: number | null
-          price_per_seat: number | null
-          pricing_model: string
-          receipt_file: string | null
-          renewal_frequency: string
-          renewal_next_date: string | null
-          renewal_start_date: string | null
-          source: string | null
-          status: string
-          tool_id: number
-          total_cost: number | null
-          type: string | null
-          usage_based_cost: number | null
-          warning_info: string | null
+          link_to_pricing_page: string | null
+          logo_url: string | null
+          name: string
+          organization_id: string | null
+          status: string | null
+          tool_id: number | null
+          updated_at: string
+          url: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string
-          currency: string
-          date_of_invoice?: string | null
-          due_date?: string | null
-          email_info?: Json | null
-          email_received?: string | null
-          email_recipient?: string | null
-          flat_fee_cost?: number | null
+          description?: string | null
           id?: number
-          number_of_seats?: number | null
-          other_cost?: number | null
-          price_per_seat?: number | null
-          pricing_model: string
-          receipt_file?: string | null
-          renewal_frequency: string
-          renewal_next_date?: string | null
-          renewal_start_date?: string | null
-          source?: string | null
-          status: string
-          tool_id: number
-          total_cost?: number | null
-          type?: string | null
-          usage_based_cost?: number | null
-          warning_info?: string | null
+          link_to_pricing_page?: string | null
+          logo_url?: string | null
+          name: string
+          organization_id?: string | null
+          status?: string | null
+          tool_id?: number | null
+          updated_at?: string
+          url?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string
-          currency?: string
-          date_of_invoice?: string | null
-          due_date?: string | null
-          email_info?: Json | null
-          email_received?: string | null
-          email_recipient?: string | null
-          flat_fee_cost?: number | null
+          description?: string | null
           id?: number
-          number_of_seats?: number | null
-          other_cost?: number | null
-          price_per_seat?: number | null
-          pricing_model?: string
-          receipt_file?: string | null
-          renewal_frequency?: string
-          renewal_next_date?: string | null
-          renewal_start_date?: string | null
-          source?: string | null
-          status?: string
-          tool_id?: number
-          total_cost?: number | null
-          type?: string | null
-          usage_based_cost?: number | null
-          warning_info?: string | null
+          link_to_pricing_page?: string | null
+          logo_url?: string | null
+          name?: string
+          organization_id?: string | null
+          status?: string | null
+          tool_id?: number | null
+          updated_at?: string
+          url?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "subscription_tool_id_fkey"
+            foreignKeyName: "sender_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sender_tool_id_fkey"
             columns: ["tool_id"]
             isOneToOne: false
             referencedRelation: "tool"
@@ -437,13 +500,13 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
-          description: string
+          description: string | null
           id: number
           link_to_pricing_page: string | null
           logo_url: string | null
           name: string
           organization_id: string | null
-          root_domain: string
+          root_domain: string | null
           status: string | null
           updated_at: string
           url: string | null
@@ -451,13 +514,13 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
-          description: string
+          description?: string | null
           id?: number
           link_to_pricing_page?: string | null
           logo_url?: string | null
           name: string
           organization_id?: string | null
-          root_domain: string
+          root_domain?: string | null
           status?: string | null
           updated_at?: string
           url?: string | null
@@ -465,13 +528,13 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
-          description?: string
+          description?: string | null
           id?: number
           link_to_pricing_page?: string | null
           logo_url?: string | null
           name?: string
           organization_id?: string | null
-          root_domain?: string
+          root_domain?: string | null
           status?: string | null
           updated_at?: string
           url?: string | null

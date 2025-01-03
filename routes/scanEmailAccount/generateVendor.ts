@@ -1,32 +1,30 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
-import { addNewVendor } from './addNewVendor'
+import { addNewSender } from './addNewVendor'
 
 const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const generateVendor = async ({
-  vendorName,
-  website,
+export const generateSender = async ({
+  senderName,
 }: {
-  vendorName: string
-  website: string
+  senderName: string
 }) => {
-  let vendor
-  const existingVendor = await supabase
-    .from('vendor')
+  let sender
+  const existingSender = await supabase
+    .from('sender')
     .select('*')
-    .ilike('name', `%${vendorName}%`)
+    .eq('name', senderName)
     .throwOnError()
 
-  if (!existingVendor.data?.length) {
-    const newVendor = await addNewVendor({ vendorName, website })
-    vendor = newVendor
+  if (!existingSender.data?.length) {
+    const newSender = await addNewSender({ senderName })
+    sender = newSender
   } else {
-    vendor = existingVendor
+    sender = existingSender
   }
 
-  return vendor.data[0]
+  return sender.data[0]
 }

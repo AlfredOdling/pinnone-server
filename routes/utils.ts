@@ -113,10 +113,10 @@ export const getB2BSaasDomains = async (decryptedData) => {
       (domain, index, self) => self.indexOf(domain) === index
     )
     const filteredDomains = uniqueDomains.filter(
-      (d) => d.is_b2b_tool_certainty_score > 40
+      (d) => d.is_b2b_tool_certainty_score > 35
     )
     const skippedDomains = uniqueDomains.filter(
-      (d) => d.is_b2b_tool_certainty_score <= 40
+      (d) => d.is_b2b_tool_certainty_score <= 35
     )
 
     console.info('--------------')

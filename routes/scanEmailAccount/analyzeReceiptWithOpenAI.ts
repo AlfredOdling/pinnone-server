@@ -32,6 +32,10 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               and set the flat_fee_cost to the total cost of the invoice.
 
               IMPORTANT 2: If you are unsure of the renewal_frequency at all, just set it to MONTHLY.
+              
+              IMPORTANT 3: Keep in mind that the invoice can be in Swedish. So for example Invoice = "Faktura", receipt = "Kvitto".
+              
+              IMPORTANT 4: To be able to calculate everything correctly, make up a plan on what order you need to do things.
 
               --This is the instructions for the JSON fields--
 
@@ -46,14 +50,6 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               For example, if the name is "Framer B.V.", return "Framer". And if the is "Supabase Pte. Ltd.", return "Supabase".
               And so on.
 
-              **renewal_frequency**
-              Most likely it will be MONTHLY. If you see evidence of that the invoice period is spanning 12 months, then it is likely YEARLY.
-              If you see evidence of that the invoice period is spanning 3 months, then it is likely QUARTERLY.
-              For example: If you see "30 Dec. 2024 - 30 Jan. 2025", then the renewal_frequency is MONTHLY.
-              If you see "30 nov. 2024 - 30 jan. 2025", then the renewal_frequency is QUARTERLY.
-              If you see "30 nov. 2024 - 30 mar. 2025", then the renewal_frequency is YEARLY.
-              Default to MONTHLY if you are unsure.
-
               **renewal_start_date**
               Should be in the format: YYYY-MM-DD.
               This is the date for the start of the invoice period.
@@ -63,6 +59,13 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               Should be in the format: YYYY-MM-DD.
               This is the date for the end of the invoice period.
               If you are unsure, use the last day of the due date month.
+
+              **renewal_frequency**
+              If renewal_start_date and renewal_next_date spans 12 months, its YEARLY.
+              If renewal_start_date and renewal_next_date spans 3 months, its QUARTERLY.
+              If renewal_start_date and renewal_next_date spans 1 month, its MONTHLY.
+              For example: if renewal_start_date = 2024-12-01 and renewal_next_date = 2024-12-31, this spans a month, so renewal_frequency should be MONTHLY.
+              Default to MONTHLY if you are unsure.
               
               **pricing_model**
               Evidence for USAGE_BASED pricing model should be some measurement of unit usage.
@@ -97,9 +100,13 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               **company_website**
               This is the website of the company that is providing the service.
               If you find a website adress in the invoice, use that.
-              Take the root domain, not the full url. For example, if the url is https://www.supabase.com/pricing, then the root domain is supabase.com.
               There might might be different websites, one corresponding to the vendor, 
               and another one corresponding to some intermediary actor. Always use the one connected to the vendor.
+              If you don't find a website adress, set it to empty string.
+
+              **root_domain**
+              This is the root domain of the company that is providing the service.
+              For example, if the website is https://www.supabase.com/pricing, then the root domain is supabase.com.
               If you don't find a website adress, set it to empty string.
 
               **type**
@@ -109,8 +116,15 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               - other: If the vendor is something else.
 
               **is_a_receipt_or_invoice**
-              This is true if you find evidence that the this image is a receipt or invoice.
-              You should find information such as cost, date, vendor, or something that indicates that it is a receipt or invoice.
+              This is true if you find evidence that the this image is a COMPLETE receipt or invoice (not just a partial invoice).
+              Also, if the document is stating that it is page 2 or 3 or similar, then it is not a complete invoice. I just want the first page.
+              Analyze the provided document and determine if it is a complete invoice. A complete invoice must include the following details:
+              - Invoice number
+              - Date of issue
+              - Due date
+              - Billing information (e.g., sender and recipient details)
+              - Itemized breakdown of charges (description, quantity, unit price, total)
+              - Total amount due
             `,
           },
           {

@@ -89,6 +89,7 @@ export const addToolsManually = async ({
           owner_org_user_id,
           status: 'in_stack',
           is_tracking: true,
+          type: 'software',
         })),
         {
           onConflict: 'vendor_id, organization_id',
@@ -114,6 +115,7 @@ export const addToolsManually = async ({
           owner_org_user_id,
           status: 'in_stack',
           is_tracking: true,
+          type: 'software',
         }))
       )
       .throwOnError()

@@ -54,13 +54,13 @@ async function getCalendarEvents(
 export const scanCalendar = async ({
   email,
   organization_id,
-  after,
-  before,
+  timeMin,
+  timeMax,
 }: {
   email: string
   organization_id: string
-  after: string
-  before: string
+  timeMin: string
+  timeMax: string
 }) => {
   const { data: emailAccount } = await supabase
     .from('email_account')
@@ -77,9 +77,6 @@ export const scanCalendar = async ({
       refresh_token: emailAccount.refresh_token,
     })
 
-    const timeMin = '2024-01-01T00:00:00Z' // Start date (ISO format)
-    const timeMax = '2024-12-31T23:59:59Z' // End date (ISO format)
-
     try {
       const events = await getCalendarEvents(
         oAuth2Client,
@@ -88,57 +85,60 @@ export const scanCalendar = async ({
         timeMax
       )
 
-      const month_map = {
-        '1': 'January',
-        '2': 'February',
-        '3': 'March',
-        '4': 'April',
-        '5': 'May',
-        '6': 'June',
-        '7': 'July',
-        '8': 'August',
-        '9': 'September',
-        '10': 'October',
-        '11': 'November',
-        '12': 'December',
-      }
+      const filteredEvents = events.filter((event) => {
+        return event.summary && event.summary.includes('[expense]')
+      })
 
-      let travel_days_total_per_month = {
-        '1': 0,
-        '2': 0,
-        '3': 0,
-        '4': 0,
-        '5': 0,
-        '6': 0,
-        '7': 0,
-        '8': 0,
-        '9': 0,
-        '10': 0,
-        '11': 0,
-        '12': 0,
+      let travelDays = {
+        '2023': {
+          '5': 0,
+          '6': 0,
+          '7': 0,
+          '8': 0,
+          '9': 0,
+          '10': 0,
+          '11': 0,
+          '12': 0,
+        },
+        '2024': {
+          '1': 0,
+          '2': 0,
+          '3': 0,
+          '4': 0,
+          '5': 0,
+          '6': 0,
+        },
       }
-
-      const filteredEvents = events.filter((event) =>
-        event.summary.includes('[expense]')
-      )
 
       for (const event of filteredEvents) {
         const start_date = event.start?.date
         const [start_year, start_month, start_day] = start_date?.split('-')
 
+        console.log(`${start_date} / ${start_year} ${start_month} ${start_day}`)
+
         const end_date = event.end?.date
         const [end_year, end_month, end_day] = end_date?.split('-')
 
-        travel_days_total_per_month[start_month] +=
-          Number(end_day) - Number(start_day)
+        console.log(`${end_date} / ${end_year} ${end_month} ${end_day}`)
+
+        const monthDiff = Number(end_day) - Number(start_day)
+
+        console.log('🚀  monthDiff:', monthDiff)
+
+        travelDays[start_year][start_month] += monthDiff
+
+        // travel_days_total_per_month[start_month] +=
+        //   Number(end_day) - Number(start_day)
       }
 
+      console.log('🚀  travelDays:', travelDays)
+
       // Iterate underlag
-      for (const month in travel_days_total_per_month) {
-        console.log(
-          `Travel days in ${month_map[month]} is ${travel_days_total_per_month[month]}`
-        )
-      }
+      // for (const month in travel_days_total_per_month) {
+      //   console.log(
+      //     `Travel days in ${month_map[month]} is ${travel_days_total_per_month[month]}`
+      //   )
+      // }
     } catch (err) {
       console.error('Error:', err.message)
     }
@@ -149,8 +149,8 @@ export const scanCalendar = async ({
 }
 
 scanCalendar({
-  email: 'alfred@flexone.vc',
+  email: 'alfredodling@gmail.com',
   organization_id: 'b34cd74c-b805-416c-b4d9-a41dc0173d3c',
-  after: '2023/5/31',
-  before: '2024/6/1',
+  timeMin: '2023-05-31T00:00:00Z',
+  timeMax: '2024-06-01T23:59:59Z',
 })

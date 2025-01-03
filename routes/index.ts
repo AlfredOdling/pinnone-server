@@ -13,9 +13,9 @@ import { askTeam } from './askTeam'
 // import cron from 'node-cron'
 // import { autoAudit } from './autoAudit'
 import { sendExtensionInvite } from './sendExtensionInvite'
-import { googleAuth } from './authGoogle'
 import { scanEmailAccount } from './scanEmailAccount'
 import { emailReceipts } from './emailReceipts'
+import { googleAuth } from './scanEmailAccount/authGoogle'
 
 const router = Router()
 
