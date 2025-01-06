@@ -6,16 +6,15 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-type Vendor = Database['public']['Tables']['vendor']['Row']
-
+type Sender = Database['public']['Tables']['sender']['Row']
 export const generateTool = async ({
   organization_id,
-  vendor,
+  sender,
   type,
   owner_org_user_id,
 }: {
   organization_id: string
-  vendor: Vendor
+  sender: Sender
   type: string
   owner_org_user_id: number
 }) => {
@@ -23,7 +22,7 @@ export const generateTool = async ({
     .from('tool')
     .select('*')
     .eq('organization_id', organization_id)
-    .eq('vendor_id', vendor.id)
+    .eq('sender_id', sender.id) // TODO: detta ska vara kopplat: tools som har senders
     .throwOnError()
   let tool = tool_res
 
@@ -32,11 +31,10 @@ export const generateTool = async ({
       .from('tool')
       .insert({
         organization_id,
-        vendor_id: vendor.id,
         status: 'in_stack',
         is_tracking: type === 'software',
         is_desktop_tool: type !== 'software',
-        department: vendor.category,
+        department: sender.category,
         owner_org_user_id,
         type,
       })

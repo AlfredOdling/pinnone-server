@@ -347,47 +347,56 @@ export type Database = {
         Row: {
           created_at: string
           department: string | null
+          description: string | null
           file_urls: string | null
           id: number
           is_desktop_tool: boolean
           is_tracking: boolean
+          name: string | null
           organization_id: string
           owner_org_user_id: number | null
           status: string
           status_should_be: string | null
           type: string | null
           updated_at: string
-          vendor_id: number
+          vendor_id: number | null
+          website: string | null
         }
         Insert: {
           created_at?: string
           department?: string | null
+          description?: string | null
           file_urls?: string | null
           id?: number
           is_desktop_tool?: boolean
           is_tracking?: boolean
+          name?: string | null
           organization_id: string
           owner_org_user_id?: number | null
           status: string
           status_should_be?: string | null
           type?: string | null
           updated_at?: string
-          vendor_id: number
+          vendor_id?: number | null
+          website?: string | null
         }
         Update: {
           created_at?: string
           department?: string | null
+          description?: string | null
           file_urls?: string | null
           id?: number
           is_desktop_tool?: boolean
           is_tracking?: boolean
+          name?: string | null
           organization_id?: string
           owner_org_user_id?: number | null
           status?: string
           status_should_be?: string | null
           type?: string | null
           updated_at?: string
-          vendor_id?: number
+          vendor_id?: number | null
+          website?: string | null
         }
         Relationships: [
           {

@@ -6,6 +6,7 @@ import { downloadFile } from './downloadFile'
 import { updateEmailAccountLastScannedDate } from './updateEmailAccountLastScannedDate'
 import { generateSender } from './generateVendor'
 import { insertReceipt } from './insertReceipt'
+import { generateTool } from './generateTool'
 
 export const analyzeReceipt = async ({
   gmail,
@@ -46,12 +47,12 @@ export const analyzeReceipt = async ({
       senderName: res.vendor_name_raw,
     })
 
-    // const tool = await generateTool({
-    //   organization_id,
-    //   vendor,
-    //   type: res.type,
-    //   owner_org_user_id,
-    // })
+    await generateTool({
+      organization_id,
+      sender,
+      type: res.type,
+      owner_org_user_id,
+    })
 
     await insertReceipt({
       senderId: sender.id,
