@@ -53,13 +53,10 @@ export const scanEmailAccount = async ({
     const receiptsLabelId = await createLabel(gmail)
 
     const query = `(invoice | receipt | faktura | kvitto) after:${after} before:${before}`
-    console.log('🚀  query:', query)
-
     const response = await gmail.users.messages.list({
       userId: 'me',
       q: query,
     })
-
     const messages = response.data.messages || []
 
     for (const message of messages) {
@@ -114,7 +111,7 @@ export const scanEmailAccount = async ({
             })
           }
         }
-      } else {
+      } else if (!hasAttachments) {
         await analyzeReceipt({
           gmail,
           messageId: message.id!,

@@ -139,6 +139,8 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
     response_format: zodResponseFormat(MailAnalysis, 'MailAnalysis'),
   })
 
+  console.log('🚀 res:', JSON.parse(response.choices[0].message.content))
+
   return JSON.parse(
     response.choices[0].message.content
   ) as typeof MailAnalysis._type
