@@ -11,13 +11,21 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const convertHtmlToPng = async ({ msg }) => {
+export const convertHtmlToPng = async ({ msg, type }) => {
   let htmlBody = ''
-  if (msg?.data?.payload?.parts?.[0]?.parts?.[1]?.body?.data) {
-    htmlBody = Buffer.from(
-      msg.data.payload.parts[0].parts[1].body.data,
-      'base64'
-    ).toString('utf-8')
+  if (type === 'html_no_attachments') {
+    if (msg.data.payload.body.data) {
+      htmlBody = Buffer.from(msg.data.payload.body.data, 'base64').toString(
+        'utf-8'
+      )
+    }
+  } else {
+    if (msg?.data?.payload?.parts?.[0]?.parts?.[1]?.body?.data) {
+      htmlBody = Buffer.from(
+        msg.data.payload.parts[0].parts[1].body.data,
+        'base64'
+      ).toString('utf-8')
+    }
   }
 
   // Launch browser and create new page

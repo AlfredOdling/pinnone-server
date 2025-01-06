@@ -12,18 +12,27 @@ import { generateWarningInfo } from './generateWarningInfo'
 export const analyzeReceipt = async ({
   gmail,
   messageId,
-  part,
+  part = [],
   organization_id,
   email,
   msg,
   owner_org_user_id,
   type,
+}: {
+  gmail: any
+  messageId: string
+  part?: any
+  organization_id: string
+  email: string
+  msg: any
+  owner_org_user_id: number
+  type: string
 }) => {
   let fileUrl
 
   try {
-    if (type === 'noPDF') {
-      fileUrl = await convertHtmlToPng({ msg })
+    if (type === 'html' || type === 'html_no_attachments') {
+      fileUrl = await convertHtmlToPng({ msg, type })
     }
     if (type === 'pdf') {
       fileUrl = await convertFileAndUpload({ gmail, messageId, part })
@@ -62,6 +71,7 @@ export const analyzeReceipt = async ({
       email,
       warning_info: '',
       messageId,
+      type,
     })
 
     await updateEmailAccountLastScannedDate({ email, organization_id })

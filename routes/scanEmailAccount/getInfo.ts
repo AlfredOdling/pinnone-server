@@ -1,4 +1,4 @@
-export const getInfo = async (msg: any) => {
+export const getInfo = async (msg: any, type: string) => {
   const email = msg.data.payload?.headers?.find(
     (header) => header.name === 'From'
   )?.value
@@ -30,18 +30,26 @@ export const getInfo = async (msg: any) => {
   let textBody = ''
   let htmlBody = ''
 
-  if (msg?.data?.payload?.parts?.[0]?.parts?.[0]?.body?.data) {
-    textBody = Buffer.from(
-      msg.data.payload.parts[0].parts[0].body.data,
-      'base64'
-    ).toString('utf-8')
-  }
+  if (type === 'html_no_attachments') {
+    if (msg.data.payload.body.data) {
+      htmlBody = Buffer.from(msg.data.payload.body.data, 'base64').toString(
+        'utf-8'
+      )
+    }
+  } else {
+    if (msg?.data?.payload?.parts?.[0]?.parts?.[1]?.body?.data) {
+      htmlBody = Buffer.from(
+        msg.data.payload.parts[0].parts[1].body.data,
+        'base64'
+      ).toString('utf-8')
+    }
 
-  if (msg?.data?.payload?.parts?.[0]?.parts?.[1]?.body?.data) {
-    htmlBody = Buffer.from(
-      msg.data.payload.parts[0].parts[1].body.data,
-      'base64'
-    ).toString('utf-8')
+    if (msg?.data?.payload?.parts?.[0]?.parts?.[0]?.body?.data) {
+      textBody = Buffer.from(
+        msg.data.payload.parts[0].parts[0].body.data,
+        'base64'
+      ).toString('utf-8')
+    }
   }
 
   return { textBody, htmlBody, ...obj }

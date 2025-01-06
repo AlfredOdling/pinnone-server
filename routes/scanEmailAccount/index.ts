@@ -52,7 +52,7 @@ export const scanEmailAccount = async ({
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
     const receiptsLabelId = await createLabel(gmail)
 
-    const query = `(invoice | receipt | faktura | kvitto) has:attachment after:${after} before:${before}`
+    const query = `(invoice | receipt | faktura | kvitto) after:${after} before:${before}`
     console.log('🚀  query:', query)
 
     const response = await gmail.users.messages.list({
@@ -77,18 +77,20 @@ export const scanEmailAccount = async ({
 
       const payload = msg.data.payload
       const parts = payload?.parts || []
+      const hasAttachments = parts.length > 0
 
-      let foundPdf = false
-      for (const part of parts) {
-        if (foundPdf) break
+      if (hasAttachments) {
+        let foundPdf = false
 
-        if (
-          part.filename !== '' &&
-          part.body &&
-          part.body.attachmentId &&
-          !part.filename.includes('zip')
-        ) {
-          try {
+        for (const part of parts) {
+          if (foundPdf) break
+
+          if (
+            part.filename !== '' &&
+            part.body &&
+            part.body.attachmentId &&
+            !part.filename.includes('zip')
+          ) {
             await analyzeReceipt({
               gmail,
               messageId: message.id!,
@@ -97,34 +99,41 @@ export const scanEmailAccount = async ({
               email,
               msg,
               owner_org_user_id,
-              type: part.filename.includes('pdf') ? 'pdf' : 'noPDF',
+              type: part.filename.includes('pdf') ? 'pdf' : 'html',
             })
             foundPdf = true
-          } catch (error) {
-            console.error('Error in analyzeReceipt:', error)
-            throw error
-          } finally {
-            // Remove all files in temp folder
-            const attachmentsFolder = 'temp/attachments'
-            fs.readdirSync(attachmentsFolder).forEach((file) => {
-              fs.unlinkSync(path.join(attachmentsFolder, file))
-            })
-            const receiptsFolder = 'temp/receipts'
-            fs.readdirSync(receiptsFolder).forEach((file) => {
-              fs.unlinkSync(path.join(receiptsFolder, file))
+
+            // Move message to Receipts label
+            await gmail.users.messages.modify({
+              userId: 'me',
+              id: message.id!,
+              requestBody: {
+                addLabelIds: [receiptsLabelId],
+                removeLabelIds: ['INBOX'],
+              },
             })
           }
-
-          // Move message to Receipts label
-          await gmail.users.messages.modify({
-            userId: 'me',
-            id: message.id!,
-            requestBody: {
-              addLabelIds: [receiptsLabelId],
-              // removeLabelIds: ['INBOX'],
-            },
-          })
         }
+      } else {
+        await analyzeReceipt({
+          gmail,
+          messageId: message.id!,
+          organization_id,
+          email,
+          msg,
+          owner_org_user_id,
+          type: 'html_no_attachments',
+        })
+
+        // Move message to Receipts label
+        await gmail.users.messages.modify({
+          userId: 'me',
+          id: message.id!,
+          requestBody: {
+            addLabelIds: [receiptsLabelId],
+            removeLabelIds: ['INBOX'],
+          },
+        })
       }
     }
   } catch (error) {
@@ -138,5 +147,15 @@ export const scanEmailAccount = async ({
     } else {
       throw error
     }
+  } finally {
+    // Remove all files in temp folder
+    const attachmentsFolder = 'temp/attachments'
+    fs.readdirSync(attachmentsFolder).forEach((file) => {
+      fs.unlinkSync(path.join(attachmentsFolder, file))
+    })
+    const receiptsFolder = 'temp/receipts'
+    fs.readdirSync(receiptsFolder).forEach((file) => {
+      fs.unlinkSync(path.join(receiptsFolder, file))
+    })
   }
 }

@@ -18,6 +18,7 @@ export const insertReceipt = async ({
   email,
   warning_info,
   messageId,
+  type,
 }: {
   senderId: number
   res: any
@@ -26,8 +27,9 @@ export const insertReceipt = async ({
   email: string
   warning_info: string
   messageId: string
+  type: string
 }) => {
-  const email_info = await getInfo(msg)
+  const email_info = await getInfo(msg, type)
 
   const {
     renewal_start_date,
@@ -43,7 +45,7 @@ export const insertReceipt = async ({
     usage_based_cost,
     due_date,
     date_of_invoice,
-    type,
+    type_res,
   } = res
 
   await supabase
@@ -71,7 +73,7 @@ export const insertReceipt = async ({
       email_recipient: email,
       warning_info,
       email_info,
-      type,
+      type: type_res,
       total_cost,
       email_id: messageId,
     })
