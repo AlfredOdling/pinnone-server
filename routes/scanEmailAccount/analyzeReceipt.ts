@@ -4,7 +4,7 @@ import { convertFileAndUpload } from './convertFileAndUpload'
 import { convertHtmlToPng } from './convertHtmlToPng'
 import { downloadFile } from './downloadFile'
 import { updateEmailAccountLastScannedDate } from './updateEmailAccountLastScannedDate'
-import { generateSender } from './generateVendor'
+import { generateSender } from './generateSender'
 import { insertReceipt } from './insertReceipt'
 import { generateTool } from './generateTool'
 
@@ -45,6 +45,7 @@ export const analyzeReceipt = async ({
 
     const sender = await generateSender({
       senderName: res.vendor_name_raw,
+      organization_id,
     })
 
     await generateTool({

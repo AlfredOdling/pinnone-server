@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
-import { addNewSender } from './addNewVendor'
 
 const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
@@ -9,18 +8,29 @@ const supabase = createClient<Database>(
 
 export const generateSender = async ({
   senderName,
+  organization_id,
 }: {
   senderName: string
+  organization_id: string
 }) => {
   let sender
   const existingSender = await supabase
     .from('sender')
     .select('*')
     .eq('name', senderName)
+    .eq('organization_id', organization_id)
     .throwOnError()
 
   if (!existingSender.data?.length) {
-    const newSender = await addNewSender({ senderName })
+    const newSender = await supabase
+      .from('sender')
+      .insert({
+        name: senderName,
+        category: 'Other',
+        organization_id,
+      })
+      .select('*')
+      .throwOnError()
     sender = newSender
   } else {
     sender = existingSender

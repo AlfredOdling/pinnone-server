@@ -105,6 +105,59 @@ export type Database = {
           },
         ]
       }
+      org_vendor: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: number
+          link_to_pricing_page: string | null
+          logo_url: string | null
+          name: string
+          organization_id: string | null
+          root_domain: string
+          status: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          link_to_pricing_page?: string | null
+          logo_url?: string | null
+          name: string
+          organization_id?: string | null
+          root_domain: string
+          status?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          link_to_pricing_page?: string | null
+          logo_url?: string | null
+          name?: string
+          organization_id?: string | null
+          root_domain?: string
+          status?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "untracked_vendor_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization: {
         Row: {
           auto_audit_cron: string | null
@@ -294,7 +347,6 @@ export type Database = {
           name: string
           organization_id: string | null
           status: string | null
-          tool_id: number | null
           updated_at: string
           url: string | null
         }
@@ -308,7 +360,6 @@ export type Database = {
           name: string
           organization_id?: string | null
           status?: string | null
-          tool_id?: number | null
           updated_at?: string
           url?: string | null
         }
@@ -322,7 +373,6 @@ export type Database = {
           name?: string
           organization_id?: string | null
           status?: string | null
-          tool_id?: number | null
           updated_at?: string
           url?: string | null
         }
@@ -334,13 +384,6 @@ export type Database = {
             referencedRelation: "organization"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "sender_tool_id_fkey"
-            columns: ["tool_id"]
-            isOneToOne: false
-            referencedRelation: "tool"
-            referencedColumns: ["id"]
-          },
         ]
       }
       tool: {
@@ -350,11 +393,14 @@ export type Database = {
           description: string | null
           file_urls: string | null
           id: number
-          is_desktop_tool: boolean
           is_tracking: boolean
+          link_to_pricing_page: string | null
           name: string | null
+          org_vendor_id: number | null
           organization_id: string
           owner_org_user_id: number | null
+          root_domain: string | null
+          sender_id: number | null
           status: string
           status_should_be: string | null
           type: string | null
@@ -368,11 +414,14 @@ export type Database = {
           description?: string | null
           file_urls?: string | null
           id?: number
-          is_desktop_tool?: boolean
           is_tracking?: boolean
+          link_to_pricing_page?: string | null
           name?: string | null
+          org_vendor_id?: number | null
           organization_id: string
           owner_org_user_id?: number | null
+          root_domain?: string | null
+          sender_id?: number | null
           status: string
           status_should_be?: string | null
           type?: string | null
@@ -386,11 +435,14 @@ export type Database = {
           description?: string | null
           file_urls?: string | null
           id?: number
-          is_desktop_tool?: boolean
           is_tracking?: boolean
+          link_to_pricing_page?: string | null
           name?: string | null
+          org_vendor_id?: number | null
           organization_id?: string
           owner_org_user_id?: number | null
+          root_domain?: string | null
+          sender_id?: number | null
           status?: string
           status_should_be?: string | null
           type?: string | null
@@ -411,6 +463,20 @@ export type Database = {
             columns: ["owner_org_user_id"]
             isOneToOne: false
             referencedRelation: "org_user"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "sender"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_untracked_vendor_id_fkey"
+            columns: ["org_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "org_vendor"
             referencedColumns: ["id"]
           },
           {

@@ -22,7 +22,7 @@ export const generateTool = async ({
     .from('tool')
     .select('*')
     .eq('organization_id', organization_id)
-    .eq('sender_id', sender.id) // TODO: detta ska vara kopplat: tools som har senders
+    .eq('sender_id', sender.id)
     .throwOnError()
   let tool = tool_res
 
@@ -30,10 +30,11 @@ export const generateTool = async ({
     tool_res = await supabase
       .from('tool')
       .insert({
+        name: sender.name,
         organization_id,
+        sender_id: sender.id,
         status: 'in_stack',
-        is_tracking: type === 'software',
-        is_desktop_tool: type !== 'software',
+        is_tracking: false,
         department: sender.category,
         owner_org_user_id,
         type,

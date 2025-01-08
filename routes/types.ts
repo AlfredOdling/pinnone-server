@@ -18,7 +18,7 @@ export const Vendor = z.object({
     'Legal',
     'Other',
   ]),
-  root_domain: z.string(),
+  domain: z.string(),
   link_to_pricing_page: z.string(),
 })
 

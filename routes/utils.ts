@@ -16,22 +16,40 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+const b2bPaths = [
+  'dashboard',
+  'app',
+  'project',
+  'projects',
+  'team',
+  'account',
+  'accounts',
+  'sales',
+  'billing',
+  'team',
+]
+
 export function getRootDomain(url: string): string | null {
   try {
     const canParse = URL.canParse(url)
     if (!canParse) return url
-
     const urlObj = new URL(url)
+    console.log('🚀  urlObj:', urlObj)
     const domainParts = urlObj.hostname
       .split('.')
       .filter((domainPart) => domainPart !== 'www')
 
-    if (domainParts.length > 2) {
-      return domainParts.slice(-2).join('.')
-    }
+    const hasB2BPath = b2bPaths.some((segment) =>
+      urlObj.pathname.toLowerCase().includes(segment)
+    )
+    const hasSubdomain = domainParts.length > 2
+    const isB2Burl = hasB2BPath || hasSubdomain
+
+    if (isB2Burl) return urlObj.hostname
   } catch (error) {
+    // Handle invalid URLs gracefully
     console.error('Invalid URL:', url)
-    return null // Handle invalid URLs gracefully
+    return null
   }
 }
 
@@ -53,6 +71,9 @@ export function getVendorRootDomains(historyArray: { url: string }[]) {
   )
 }
 
+/**
+ * Get the root domains of B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
+ */
 export const getB2BSaasDomains = async (decryptedData) => {
   console.log('⏳ Getting root domains...')
 
@@ -61,12 +82,17 @@ export const getB2BSaasDomains = async (decryptedData) => {
       lastVisitTime,
       url,
     }))
+    // Initial filters
     .filter(({ url }) => !url.includes('localhost'))
     .filter(({ url }) => !url.includes('127.0.0.1'))
     .filter(({ url }) => !personalUrls.includes(url))
     .map(({ url }) => getRootDomain(url))
+    // Remove null values
     .filter((domain) => domain)
+    // Dedupe
     .filter((domain, index, self) => self.indexOf(domain) === index)
+
+  console.log('🚀  browserHistory:', browserHistory)
 
   const existingVendors = await supabase
     .from('vendor')
@@ -81,6 +107,7 @@ export const getB2BSaasDomains = async (decryptedData) => {
         .map((v) => v.root_domain)
         .includes(domain)
   )
+  console.log('🚀  browserHistory22:', browserHistory)
 
   try {
     const completion = await openai.beta.chat.completions.parse({

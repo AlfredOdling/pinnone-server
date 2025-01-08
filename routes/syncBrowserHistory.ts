@@ -20,9 +20,9 @@ export const syncBrowserHistory = async ({
   organization_id: string
 }) => {
   const browserHistory = decrypt(encryptedData)
-  // console.log('🚀  browserHistory:', browserHistory)
+  console.log('🚀  browserHistory:', browserHistory)
 
-  await detectUntrackedTools({
+  await addOrgVendors({
     browserHistory,
     organization_id,
   })
@@ -36,16 +36,16 @@ export const syncBrowserHistory = async ({
 
 /**
  * If there is a match between the user browser history and the vendor list,
- * add new tools with the status: not_in_stack
+ * add new org_vendors (from the official vendor list) with status: not_in_stack
  */
-const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
+const addOrgVendors = async ({ browserHistory, organization_id }) => {
   let detectedRootDomains = browserHistory
     .map((visit) => getRootDomain(visit.url))
     .filter((x) => x)
 
   // Dedupe
   detectedRootDomains = [...new Set(detectedRootDomains)]
-  // console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
+  console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   const vendors = await supabase
     .from('vendor')
@@ -57,22 +57,26 @@ const detectUntrackedTools = async ({ browserHistory, organization_id }) => {
     vendors.data.map((v) => v.root_domain)
   )
 
-  const newTools = vendors.data
+  const newOrgVendors = vendors.data
     .map((vendor) => ({
-      vendor_id: vendor.id,
+      name: vendor.name,
+      description: vendor.description,
+      url: vendor.url,
+      category: vendor.category,
+      logo_url: vendor.logo_url,
+      link_to_pricing_page: vendor.link_to_pricing_page,
+      root_domain: vendor.root_domain,
       organization_id,
-      department: vendor.category,
       status: 'not_in_stack',
-      is_tracking: true,
     }))
     .filter((tool) => tool.status !== 'blocked')
 
-  console.log('🚀  newTools:', newTools)
+  console.log('🚀  newOrgVendors:', newOrgVendors)
 
   await supabase
-    .from('tool')
-    .upsert(newTools, {
-      onConflict: 'vendor_id, organization_id',
+    .from('org_vendor')
+    .upsert(newOrgVendors, {
+      onConflict: 'root_domain',
       ignoreDuplicates: true,
     })
     .throwOnError()

@@ -29,7 +29,7 @@ export const insertReceipt = async ({
   type: string
 }) => {
   const email_info = await getInfo(msg, type)
-  const warning_info = await generateWarningInfo({ res })
+  const warning_info = await generateWarningInfo({ res, senderId })
 
   const {
     renewal_start_date,

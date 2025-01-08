@@ -11,13 +11,17 @@ const supabase = createClient<Database>(
 
 export const generateWarningInfo = async ({
   res,
+  senderId,
 }: {
   res: any
+  senderId: number
 }) => {
   const existing_subscriptions = await supabase
     .from('receipt')
     .select('*')
-    .eq('tool_id', tool.id)
+    .eq('sender_id', senderId)
+
+  console.log('🚀  existing_subscriptions:', existing_subscriptions)
 
   let same_starts_at = false
   let same_next_renewal_date = false

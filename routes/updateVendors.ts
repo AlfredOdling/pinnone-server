@@ -17,6 +17,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+/**
+ * Update the official vendor list with new vendors
+ */
 export const updateVendors = async ({
   encryptedData,
   organization_id,
@@ -28,6 +31,7 @@ export const updateVendors = async ({
 
   const decryptedData = decrypt(encryptedData)
   const visitedRootDomains = await getB2BSaasDomains(decryptedData)
+  console.log('🚀  visitedRootDomains:', visitedRootDomains)
 
   if (!visitedRootDomains.length) {
     return console.log('No vendors to add')
@@ -41,7 +45,30 @@ export const updateVendors = async ({
           role: 'system',
           content:
             'You are a professional data analyst, that knows everything about the B2B SaaS market. ' +
-            'You are given a list or domains of SaaS apps. Fetch data about the apps.',
+            'You are given a list of domains of SaaS apps. Fetch data about the apps.' +
+            `
+              Instructions for the fields:
+              **name**
+              The name of the SaaS app.
+              
+              **description**
+              The description of the SaaS app. Dont make it up, so just put an empty string if you dont know it.
+              
+              **url**
+              The url of the SaaS app landing page.
+              
+              **logo_url**
+              The favicon url of the SaaS app. Should be: https://example.com/favicon.ico
+              
+              **category**
+              The category of the SaaS app.
+              
+              **domain**
+              The domain of the SaaS app, that I provided.
+              
+              **link_to_pricing_page**
+              The link to the pricing page of the SaaS app.
+            `,
         },
         {
           role: 'user',
@@ -51,6 +78,11 @@ export const updateVendors = async ({
       response_format: zodResponseFormat(NewVendors, 'newVendors'),
     })
 
+    console.log(
+      'completion.choices[0].message.parsed.children',
+      completion.choices[0].message.parsed.children
+    )
+
     const vendors = await supabase
       .from('vendor')
       .upsert(
@@ -58,7 +90,7 @@ export const updateVendors = async ({
           name: vendor.name,
           description: vendor.description,
           url: vendor.url,
-          root_domain: vendor.root_domain,
+          root_domain: vendor.domain,
           logo_url: vendor.logo_url,
           category: vendor.category,
           link_to_pricing_page: vendor.link_to_pricing_page,
@@ -69,6 +101,9 @@ export const updateVendors = async ({
         }
       )
       .select('id')
+
+    console.log('🚀  vendors:', vendors)
+
     console.log(`✅ ${vendors?.data?.length} new vendors added successfully`)
 
     const visitedVendors = await supabase
@@ -76,23 +111,25 @@ export const updateVendors = async ({
       .select('*') // Get all existing vendors
       .in('root_domain', visitedRootDomains) // Filter by visited domains
 
-    const res = await supabase.from('tool').upsert(
-      visitedVendors.data
-        .map((vendor) => ({
-          vendor_id: vendor.id,
-          organization_id,
-          status: 'not_in_stack',
-        }))
-        .filter((vendor) => vendor.status !== 'blocked'),
-      {
-        onConflict: 'vendor_id',
-        ignoreDuplicates: true,
-      }
-    )
+    console.log('🚀  visitedVendors:', visitedVendors)
+    // <-- TODO
+    // const res = await supabase.from('tool').upsert(
+    //   visitedVendors.data
+    //     .map((vendor) => ({
+    //       vendor_id: vendor.id,
+    //       organization_id,
+    //       status: 'not_in_stack',
+    //     }))
+    //     .filter((vendor) => vendor.status !== 'blocked'),
+    //   {
+    //     onConflict: 'vendor_id',
+    //     ignoreDuplicates: true,
+    //   }
+    // )
 
-    if (res.error) {
-      console.error('Error updating tools:', res.error)
-    }
+    // if (res.error) {
+    //   console.error('Error updating tools:', res.error)
+    // }
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')
