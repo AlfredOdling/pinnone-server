@@ -127,7 +127,7 @@ export const getB2BSaasDomains = async (decryptedData) => {
             Scoring Criteria (0–100).
 
             Example of B2B SaaS tools: hubspot, salesforce, zendesk, intercom, helpscout, freshdesk, teamwork, salesforce, zendesk, intercom, freshdesk, teamwork
-            Example of non-B2B SaaS tools: amazon, twitter, facebook, instagram, youtube, pinterest, reddit, quora, medium, banks, healthcare, etc.
+            Example of non-B2B SaaS tools: amazon, twitter, facebook, instagram, youtube, pinterest, reddit, quora, medium, banks, healthcare, post offices, etc.
           `,
         },
         {
