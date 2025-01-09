@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
-import { decrypt, getRootDomain, getUserActivities } from './utils'
+import { decrypt, getUserActivities, getVendorRootDomains } from './utils'
 
 dotenv.config()
 
@@ -20,7 +20,6 @@ export const syncBrowserHistory = async ({
   organization_id: string
 }) => {
   const browserHistory = decrypt(encryptedData)
-  console.log('🚀  browserHistory:', browserHistory)
 
   await addOrgVendors({
     browserHistory,
@@ -39,13 +38,12 @@ export const syncBrowserHistory = async ({
  * add new org_vendors (from the official vendor list) with status: not_in_stack
  */
 const addOrgVendors = async ({ browserHistory, organization_id }) => {
-  let detectedRootDomains = browserHistory
-    .map((visit) => getRootDomain(visit.url))
-    .filter((x) => x)
-
-  // Dedupe
-  detectedRootDomains = [...new Set(detectedRootDomains)]
+  const detectedRootDomains = getVendorRootDomains(browserHistory)
   console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
+
+  if (!detectedRootDomains.length) {
+    return console.log('No vendors to add')
+  }
 
   const vendors = await supabase
     .from('vendor')
@@ -71,15 +69,10 @@ const addOrgVendors = async ({ browserHistory, organization_id }) => {
     }))
     .filter((tool) => tool.status !== 'blocked')
 
-  console.log('🚀  newOrgVendors:', newOrgVendors)
-
-  await supabase
-    .from('org_vendor')
-    .upsert(newOrgVendors, {
-      onConflict: 'root_domain',
-      ignoreDuplicates: true,
-    })
-    .throwOnError()
+  await supabase.from('org_vendor').upsert(newOrgVendors, {
+    onConflict: 'root_domain',
+    ignoreDuplicates: true,
+  })
 }
 
 /**
@@ -93,8 +86,9 @@ const pushNewUserActivity = async ({
 }) => {
   const tools = await supabase
     .from('tool')
-    .select('*, vendor!inner(*)') // Select the vendors associated with the tools
+    .select('*, sender(*)') // Select the vendors associated with the tools
     .eq('is_tracking', true) // Filter the tools that the org is tracking
+    .eq('status', 'in_stack')
     .eq('organization_id', organization_id)
 
   const userActivities: any = getUserActivities({
@@ -102,7 +96,6 @@ const pushNewUserActivity = async ({
     tools: tools.data,
     org_user_id,
   })
-  console.log('🚀 new user activities:', userActivities)
 
   await supabase
     .from('user_activity')

@@ -34,7 +34,7 @@ export function getRootDomain(url: string): string | null {
     const canParse = URL.canParse(url)
     if (!canParse) return url
     const urlObj = new URL(url)
-    console.log('🚀  urlObj:', urlObj)
+
     const domainParts = urlObj.hostname
       .split('.')
       .filter((domainPart) => domainPart !== 'www')
@@ -91,8 +91,6 @@ export const getB2BSaasDomains = async (decryptedData) => {
     .filter((domain) => domain)
     // Dedupe
     .filter((domain, index, self) => self.indexOf(domain) === index)
-
-  console.log('🚀  browserHistory:', browserHistory)
 
   const existingVendors = await supabase
     .from('vendor')
@@ -204,8 +202,7 @@ export const getUserActivities = ({
     .map((visit) => {
       const rootDomain = getVendorRootDomains([visit])[0]
       const matchingTool = tools?.find(
-        // @ts-ignore
-        (tool) => tool.vendor.root_domain === rootDomain
+        (tool) => tool.root_domain === rootDomain
       )
       if (!matchingTool) return null
 
