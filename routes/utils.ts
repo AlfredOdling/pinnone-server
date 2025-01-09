@@ -29,7 +29,13 @@ const b2bPaths = [
   'team',
 ]
 
-export function getRootDomain(url: string): string | null {
+export function getRootDomain({
+  url,
+  shouldFilterB2B = true,
+}: {
+  url: string
+  shouldFilterB2B?: boolean
+}): string | null {
   try {
     const canParse = URL.canParse(url)
     if (!canParse) return url
@@ -45,7 +51,8 @@ export function getRootDomain(url: string): string | null {
     const hasSubdomain = domainParts.length > 2
     const isB2Burl = hasB2BPath || hasSubdomain
 
-    if (isB2Burl) return urlObj.hostname
+    if (shouldFilterB2B && isB2Burl) return urlObj.hostname
+    if (!shouldFilterB2B) return urlObj.hostname
   } catch (error) {
     // Handle invalid URLs gracefully
     console.error('Invalid URL:', url)
@@ -57,7 +64,7 @@ export function getRootDomain(url: string): string | null {
 export function getVendorRootDomains(historyArray: { url: string }[]) {
   return (
     historyArray
-      .map((entry) => getRootDomain(entry.url))
+      .map((entry) => getRootDomain({ url: entry.url }))
       // Remove null values
       .filter((domain) => domain)
       // Remove duplicates
@@ -200,7 +207,13 @@ export const getUserActivities = ({
 }) => {
   return browserHistory
     .map((visit) => {
-      const rootDomain = getVendorRootDomains([visit])[0]
+      console.log('🚀  visit:', visit)
+
+      const rootDomain = getRootDomain({
+        url: visit.url,
+        shouldFilterB2B: false,
+      })
+
       const matchingTool = tools?.find(
         (tool) => tool.root_domain === rootDomain
       )
