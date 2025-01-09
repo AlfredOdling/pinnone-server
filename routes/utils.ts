@@ -112,7 +112,6 @@ export const getB2BSaasDomains = async (decryptedData) => {
         .map((v) => v.root_domain)
         .includes(domain)
   )
-  console.log('🚀  browserHistory22:', browserHistory)
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -127,8 +126,8 @@ export const getB2BSaasDomains = async (decryptedData) => {
             Purpose: Evaluate if the domain represents a B2B SaaS tool or business application.
             Scoring Criteria (0–100).
 
-            Example of B2B SaaS tools: app.hubspot.com, app.salesforce.com, app.zendesk.com, app.intercom.com, app.helpscout.net, app.freshdesk.com, app.teamwork.com, app.salesforce.com, app.zendesk.com, app.intercom.com, app.freshdesk.com, app.teamwork.com
-            Example of non-B2B SaaS tools: amazon.com, twitter.com, facebook.com, instagram.com, youtube.com, linkedin.com, pinterest.com, reddit.com, quora.com, medium.com, banks, healthcare, etc.
+            Example of B2B SaaS tools: hubspot, salesforce, zendesk, intercom, helpscout, freshdesk, teamwork, salesforce, zendesk, intercom, freshdesk, teamwork
+            Example of non-B2B SaaS tools: amazon, twitter, facebook, instagram, youtube, pinterest, reddit, quora, medium, banks, healthcare, etc.
           `,
         },
         {
