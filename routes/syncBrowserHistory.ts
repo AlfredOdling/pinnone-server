@@ -90,9 +90,11 @@ const addOrgVendors = async ({ browserHistory, organization_id }) => {
     ignoreDuplicates: true,
   })
 
-  await updateNotification(organization_id, 'activity_new_vendors_detected', {
-    vendor_count: newOrgVendors.length,
-  })
+  await updateNotification(
+    organization_id,
+    'activity_new_vendors_detected',
+    `Detected: ${newOrgVendors.map((v) => v.root_domain).join(', ')}`
+  )
 }
 
 /**
@@ -128,8 +130,6 @@ const pushNewUserActivity = async ({
   await updateNotification(
     organization_id,
     'activity_new_user_activities_detected',
-    {
-      user_activity_count: userActivities.length,
-    }
+    `Detected: ${userActivities.length} new user activities`
   )
 }

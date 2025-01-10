@@ -82,10 +82,13 @@ export const scanEmailAccount = async ({
       const parts = payload?.parts || []
       const hasAttachments = parts.length > 0
 
-      await updateNotification(organization_id, 'email_starting_to_scan', {
-        email_count: messages.length,
-        scanned_count: messages.indexOf(message) + 1,
-      })
+      await updateNotification(
+        organization_id,
+        'email_starting_to_scan',
+        `Starting to scan email ${messages.indexOf(message) + 1} of ${
+          messages.length
+        }`
+      )
 
       if (hasAttachments) {
         let foundPdf = false
@@ -133,12 +136,13 @@ export const scanEmailAccount = async ({
           removeLabelIds: ['INBOX'],
         },
       })
-
-      await updateNotification(organization_id, 'email_scanned', {
-        email_count: messages.length,
-        scanned_count: messages.indexOf(message) + 1,
-      })
     }
+
+    await updateNotification(
+      organization_id,
+      'email_scan_finished',
+      `Finished scanning ${messages.length}/${messages.length} emails`
+    )
   } catch (error) {
     const invalid_grant = error.message === 'invalid_grant'
 
@@ -160,7 +164,5 @@ export const scanEmailAccount = async ({
     fs.readdirSync(receiptsFolder).forEach((file) => {
       fs.unlinkSync(path.join(receiptsFolder, file))
     })
-
-    await updateNotification(organization_id, 'email_scan_finished')
   }
 }
