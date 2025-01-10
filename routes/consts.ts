@@ -446,115 +446,25 @@ export const personalUrls = [
   'fansly.com',
 ]
 
-const browserHistory = [
-  {
-    id: '500',
-    lastVisitTime: 1729060881840.874,
-    title: 'resourcer-server | Railway',
-    typedCount: 0,
-    url: 'https://railway.app/project/d63c9d7a-a314-4c05-bbfa-1856a691865a',
-    visitCount: 8,
-  },
-  {
-    id: '493',
-    lastVisitTime: 1729060880612.503,
-    title: 'Railway',
-    typedCount: 0,
-    url: 'https://railway.app/dashboard',
-    visitCount: 5,
-  },
-  {
-    id: '509',
-    lastVisitTime: 1729060876592.046,
-    title: 'Railway',
-    typedCount: 1,
-    url: 'https://railway.app/',
-    visitCount: 3,
-  },
-  {
-    id: '554',
-    lastVisitTime: 1729060865096.599,
-    title: '(18) Nyhetsflöde | LinkedIn',
-    typedCount: 1,
-    url: 'https://www.linkedin.com/feed/',
-    visitCount: 246,
-  },
-  {
-    id: '555',
-    lastVisitTime: 1729060863197.913,
-    title: 'LinkedIn',
-    typedCount: 98,
-    url: 'https://www.linkedin.com/',
-    visitCount: 279,
-  },
-  {
-    id: '5',
-    lastVisitTime: 1729060856629.187,
-    title: 'Instagram',
-    typedCount: 55,
-    url: 'https://www.instagram.com/',
-    visitCount: 339,
-  },
-  {
-    id: '7585',
-    lastVisitTime: 1729060855076.792,
-    title: 'AlfredOdling/init-server',
-    typedCount: 0,
-    url: 'https://github.com/AlfredOdling/init-server',
-    visitCount: 4,
-  },
-  {
-    id: '518',
-    lastVisitTime: 1729060851362.705,
-    title: 'GitHub',
-    typedCount: 4,
-    url: 'https://github.com/',
-    visitCount: 11,
-  },
-  {
-    id: '7584',
-    lastVisitTime: 1729060758043.525,
-    title: 'Pinnone',
-    typedCount: 0,
-    url: 'http://127.0.0.1:3000/extension?extensionId=elgcggmpjefdcjgccholdfmdoapchmac',
-    visitCount: 1,
-  },
-  {
-    id: '7583',
-    lastVisitTime: 1729060655157.017,
-    title: 'Pinnone',
-    typedCount: 1,
-    url: 'http://127.0.0.1:3000/extension',
-    visitCount: 2,
-  },
-  {
-    id: '7582',
-    lastVisitTime: 1729060529813.315,
-    title: 'Default Project | Default Organization | Supabase',
-    typedCount: 0,
-    url: 'http://127.0.0.1:64323/project/default/editor/17715',
-    visitCount: 1,
-  },
-  {
-    id: '7581',
-    lastVisitTime: 1729060295585.899,
-    title: 'Default Project | Default Organization | Supabase',
-    typedCount: 0,
-    url: 'http://127.0.0.1:64323/project/default/editor',
-    visitCount: 1,
-  },
-  {
-    id: '7580',
-    lastVisitTime: 1729060284279.41,
-    title: 'SQL | Supabase',
-    typedCount: 0,
-    url: 'http://127.0.0.1:64323/project/default/sql/1',
-    visitCount: 3,
-  },
-]
-
 export enum Roles {
   SUPERADMIN = 1,
   ADMIN = 2,
   EXTENSION_USER = 3,
+}
+
+export enum NotificationTypes {
+  TODO_DUE_DATE_DETECTED = 'todo_due_date_detected',
+
+  EMAIL_SCAN_ACCOUNT_STARTED = 'email_scan_account_started',
+  EMAIL_STARTING_TO_SCAN = 'email_starting_to_scan',
+  EMAIL_SCAN_ACCOUNT_FINISHED = 'email_scan_account_finished',
+  EMAIL_ACCOUNT_NOT_FOUND = 'email_account_not_found',
+
+  ACTIVITY_NEW_USER_ACTIVITIES_DETECTED = 'activity_new_user_activities_detected',
+  ACTIVITY_NEW_VENDORS_DETECTED = 'activity_new_vendors_detected',
+  ACTIVITY_SYNC_BROWSER_HISTORY_STARTED = 'activity_sync_browser_history_started',
+  ACTIVITY_SYNC_BROWSER_HISTORY_FINISHED = 'activity_sync_browser_history_finished',
+  ACTIVITY_NO_VENDORS_DETECTED = 'activity_no_vendors_detected',
+  ACTIVITY_UPDATE_VENDORS_STARTED = 'activity_update_vendors_started',
+  ACTIVITY_VENDORS_ADDED = 'activity_vendors_added',
 }

@@ -9,6 +9,7 @@ import { analyzeReceipt } from './analyzeReceipt'
 import { createLabel } from './createLabel'
 import { refreshToken } from './refreshToken'
 import { updateNotification } from '../utils'
+import { NotificationTypes } from '../consts'
 
 dotenv.config()
 
@@ -36,7 +37,10 @@ export const scanEmailAccount = async ({
   after: string
   before: string
 }) => {
-  await updateNotification(organization_id, 'email_scan_account_started')
+  await updateNotification(
+    organization_id,
+    NotificationTypes.EMAIL_SCAN_ACCOUNT_STARTED
+  )
 
   const { data: emailAccount } = await supabase
     .from('email_account')
@@ -46,7 +50,11 @@ export const scanEmailAccount = async ({
     .single()
 
   if (!emailAccount) {
-    await updateNotification(organization_id, 'email_account_not_found')
+    await updateNotification(
+      organization_id,
+      NotificationTypes.EMAIL_ACCOUNT_NOT_FOUND,
+      `Email account not found: ${email}`
+    )
     throw new Error('Email account not found')
   }
 
@@ -84,10 +92,8 @@ export const scanEmailAccount = async ({
 
       await updateNotification(
         organization_id,
-        'email_starting_to_scan',
-        `Starting to scan email ${messages.indexOf(message) + 1} of ${
-          messages.length
-        }`
+        NotificationTypes.EMAIL_STARTING_TO_SCAN,
+        `Scanning email ${messages.indexOf(message) + 1} of ${messages.length}`
       )
 
       if (hasAttachments) {
@@ -140,7 +146,7 @@ export const scanEmailAccount = async ({
 
     await updateNotification(
       organization_id,
-      'email_scan_finished',
+      NotificationTypes.EMAIL_SCAN_ACCOUNT_FINISHED,
       `Finished scanning ${messages.length}/${messages.length} emails`
     )
   } catch (error) {

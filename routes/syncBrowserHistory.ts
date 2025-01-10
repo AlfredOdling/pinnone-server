@@ -7,6 +7,7 @@ import {
   getVendorRootDomains,
   updateNotification,
 } from './utils'
+import { NotificationTypes } from './consts'
 
 dotenv.config()
 
@@ -26,7 +27,7 @@ export const syncBrowserHistory = async ({
 }) => {
   await updateNotification(
     organization_id,
-    'activity_sync_browser_history_started'
+    NotificationTypes.ACTIVITY_SYNC_BROWSER_HISTORY_STARTED
   )
 
   const browserHistory = decrypt(encryptedData)
@@ -44,7 +45,7 @@ export const syncBrowserHistory = async ({
 
   await updateNotification(
     organization_id,
-    'activity_sync_browser_history_finished'
+    NotificationTypes.ACTIVITY_SYNC_BROWSER_HISTORY_FINISHED
   )
 }
 
@@ -57,7 +58,10 @@ const addOrgVendors = async ({ browserHistory, organization_id }) => {
   console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   if (!detectedRootDomains.length) {
-    await updateNotification(organization_id, 'activity_no_vendors_detected')
+    await updateNotification(
+      organization_id,
+      NotificationTypes.ACTIVITY_NO_VENDORS_DETECTED
+    )
     return console.log('No vendors to add')
   }
 
@@ -92,7 +96,7 @@ const addOrgVendors = async ({ browserHistory, organization_id }) => {
 
   await updateNotification(
     organization_id,
-    'activity_new_vendors_detected',
+    NotificationTypes.ACTIVITY_NEW_VENDORS_DETECTED,
     `Detected: ${newOrgVendors.map((v) => v.root_domain).join(', ')}`
   )
 }
@@ -129,7 +133,7 @@ const pushNewUserActivity = async ({
 
   await updateNotification(
     organization_id,
-    'activity_new_user_activities_detected',
+    NotificationTypes.ACTIVITY_NEW_USER_ACTIVITIES_DETECTED,
     `Detected: ${userActivities.length} new user activities`
   )
 }

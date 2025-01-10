@@ -7,6 +7,8 @@ import { updateEmailAccountLastScannedDate } from './updateEmailAccountLastScann
 import { generateSender } from './generateSender'
 import { insertReceipt } from './insertReceipt'
 import { generateTool } from './generateTool'
+import { updateNotification } from '../utils'
+import { NotificationTypes } from '../consts'
 
 export const analyzeReceipt = async ({
   gmail,
@@ -67,6 +69,14 @@ export const analyzeReceipt = async ({
     })
 
     await updateEmailAccountLastScannedDate({ email, organization_id })
+
+    if (res.due_date) {
+      await updateNotification(
+        organization_id,
+        NotificationTypes.TODO_DUE_DATE_DETECTED,
+        `Due date: ${res.due_date} for ${res.vendor_name_raw}`
+      )
+    }
   } catch (error) {
     console.error('Error in analyzeReceipt:', error)
     throw error

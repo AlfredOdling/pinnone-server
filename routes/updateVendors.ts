@@ -5,6 +5,7 @@ import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { decrypt, getB2BSaasDomains, updateNotification } from './utils'
 import { NewVendors } from './types'
+import { NotificationTypes } from './consts'
 
 dotenv.config()
 
@@ -28,14 +29,20 @@ export const updateVendors = async ({
   organization_id: string
 }) => {
   console.log('ℹ️ updateVendors for org: ', organization_id)
-  await updateNotification(organization_id, 'activity_update_vendors_started')
+  await updateNotification(
+    organization_id,
+    NotificationTypes.ACTIVITY_UPDATE_VENDORS_STARTED
+  )
 
   const decryptedData = decrypt(encryptedData)
   const visitedRootDomains = await getB2BSaasDomains(decryptedData)
   console.log('🚀  visitedRootDomains:', visitedRootDomains)
 
   if (!visitedRootDomains.length) {
-    await updateNotification(organization_id, 'activity_no_vendors_detected')
+    await updateNotification(
+      organization_id,
+      NotificationTypes.ACTIVITY_NO_VENDORS_DETECTED
+    )
     return console.log('No vendors to add')
   }
 
@@ -106,9 +113,13 @@ export const updateVendors = async ({
 
     console.log('🚀  vendors:', vendors)
 
-    await updateNotification(organization_id, 'activity_vendors_added', {
-      vendor_count: vendors?.data?.length,
-    })
+    await updateNotification(
+      organization_id,
+      NotificationTypes.ACTIVITY_VENDORS_ADDED,
+      {
+        vendor_count: vendors?.data?.length,
+      }
+    )
 
     console.log(`✅ ${vendors?.data?.length} new vendors added successfully`)
 
@@ -139,10 +150,5 @@ export const updateVendors = async ({
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')
-  } finally {
-    await updateNotification(
-      organization_id,
-      'activity_update_vendors_finished'
-    )
   }
 }
