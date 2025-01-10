@@ -1,7 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
-import { decrypt, getUserActivities, getVendorRootDomains } from './utils'
+import {
+  decrypt,
+  getUserActivities,
+  getVendorRootDomains,
+  updateNotification,
+} from './utils'
 
 dotenv.config()
 
@@ -19,6 +24,11 @@ export const syncBrowserHistory = async ({
   org_user_id: number
   organization_id: string
 }) => {
+  await updateNotification(
+    organization_id,
+    'activity_sync_browser_history_started'
+  )
+
   const browserHistory = decrypt(encryptedData)
 
   await addOrgVendors({
@@ -31,6 +41,11 @@ export const syncBrowserHistory = async ({
     organization_id,
     org_user_id,
   })
+
+  await updateNotification(
+    organization_id,
+    'activity_sync_browser_history_finished'
+  )
 }
 
 /**
@@ -42,6 +57,7 @@ const addOrgVendors = async ({ browserHistory, organization_id }) => {
   console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   if (!detectedRootDomains.length) {
+    await updateNotification(organization_id, 'activity_no_vendors_detected')
     return console.log('No vendors to add')
   }
 
@@ -72,6 +88,10 @@ const addOrgVendors = async ({ browserHistory, organization_id }) => {
   await supabase.from('org_vendor').upsert(newOrgVendors, {
     onConflict: 'root_domain',
     ignoreDuplicates: true,
+  })
+
+  await updateNotification(organization_id, 'activity_new_vendors_detected', {
+    vendor_count: newOrgVendors.length,
   })
 }
 
@@ -104,4 +124,12 @@ const pushNewUserActivity = async ({
       ignoreDuplicates: true,
     })
     .throwOnError()
+
+  await updateNotification(
+    organization_id,
+    'activity_new_user_activities_detected',
+    {
+      user_activity_count: userActivities.length,
+    }
+  )
 }

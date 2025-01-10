@@ -65,11 +65,10 @@ export const addToolsManually = async ({
           name: vendor.name,
           description: vendor.description,
           url: vendor.url,
-          root_domain: vendor.root_domain,
+          root_domain: vendor.domain,
           logo_url: vendor.logo_url,
           category: vendor.category,
           link_to_pricing_page: vendor.link_to_pricing_page,
-          // organization_id,
         })),
         {
           onConflict: 'root_domain',

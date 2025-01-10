@@ -48,12 +48,13 @@ export const analyzeReceipt = async ({
       organization_id,
     })
 
-    await generateTool({
-      organization_id,
-      sender,
-      type: res.type,
-      owner_org_user_id,
-    })
+    if (res.type === 'software') {
+      await generateTool({
+        organization_id,
+        sender,
+        owner_org_user_id,
+      })
+    }
 
     await insertReceipt({
       senderId: sender.id,

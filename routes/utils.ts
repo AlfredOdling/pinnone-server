@@ -16,6 +16,23 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+export const updateNotification = async (
+  organization_id: string,
+  tag: string,
+  dataObject?: any,
+  dataArray?: any[]
+) =>
+  await supabase
+    .from('notification')
+    .insert({
+      organization_id,
+      created_at: new Date().toISOString(),
+      tag,
+      dataArray,
+      dataObject,
+    })
+    .eq('organization_id', organization_id)
+
 const b2bPaths = [
   'dashboard',
   'app',

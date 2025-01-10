@@ -10,12 +10,10 @@ type Sender = Database['public']['Tables']['sender']['Row']
 export const generateTool = async ({
   organization_id,
   sender,
-  type,
   owner_org_user_id,
 }: {
   organization_id: string
   sender: Sender
-  type: string
   owner_org_user_id: number
 }) => {
   let tool_res = await supabase
@@ -37,7 +35,7 @@ export const generateTool = async ({
         is_tracking: false,
         department: sender.category,
         owner_org_user_id,
-        type,
+        type: 'software',
       })
       .select('*')
       .throwOnError()

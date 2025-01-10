@@ -53,6 +53,41 @@ export type Database = {
           },
         ]
       }
+      notification: {
+        Row: {
+          created_at: string
+          dataArray: Json | null
+          dataObject: Json | null
+          id: number
+          organization_id: string | null
+          tag: string | null
+        }
+        Insert: {
+          created_at?: string
+          dataArray?: Json | null
+          dataObject?: Json | null
+          id?: number
+          organization_id?: string | null
+          tag?: string | null
+        }
+        Update: {
+          created_at?: string
+          dataArray?: Json | null
+          dataObject?: Json | null
+          id?: number
+          organization_id?: string | null
+          tag?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_user: {
         Row: {
           created_at: string
@@ -248,7 +283,6 @@ export type Database = {
           renewal_start_date: string | null
           sender_id: number | null
           source: string | null
-          status: string
           total_cost: number | null
           type: string | null
           usage_based_cost: number | null
@@ -275,7 +309,6 @@ export type Database = {
           renewal_start_date?: string | null
           sender_id?: number | null
           source?: string | null
-          status: string
           total_cost?: number | null
           type?: string | null
           usage_based_cost?: number | null
@@ -302,7 +335,6 @@ export type Database = {
           renewal_start_date?: string | null
           sender_id?: number | null
           source?: string | null
-          status?: string
           total_cost?: number | null
           type?: string | null
           usage_based_cost?: number | null

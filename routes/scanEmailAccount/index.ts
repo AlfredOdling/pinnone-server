@@ -8,6 +8,7 @@ import { Database } from '../../types/supabase'
 import { analyzeReceipt } from './analyzeReceipt'
 import { createLabel } from './createLabel'
 import { refreshToken } from './refreshToken'
+import { updateNotification } from '../utils'
 
 dotenv.config()
 
@@ -35,6 +36,8 @@ export const scanEmailAccount = async ({
   after: string
   before: string
 }) => {
+  await updateNotification(organization_id, 'email_scan_account_started')
+
   const { data: emailAccount } = await supabase
     .from('email_account')
     .select()
@@ -42,7 +45,10 @@ export const scanEmailAccount = async ({
     .eq('organization_id', organization_id)
     .single()
 
-  if (!emailAccount) throw new Error('Email account not found')
+  if (!emailAccount) {
+    await updateNotification(organization_id, 'email_account_not_found')
+    throw new Error('Email account not found')
+  }
 
   try {
     oAuth2Client.setCredentials({
@@ -76,6 +82,11 @@ export const scanEmailAccount = async ({
       const parts = payload?.parts || []
       const hasAttachments = parts.length > 0
 
+      await updateNotification(organization_id, 'email_starting_to_scan', {
+        email_count: messages.length,
+        scanned_count: messages.indexOf(message) + 1,
+      })
+
       if (hasAttachments) {
         let foundPdf = false
 
@@ -99,16 +110,6 @@ export const scanEmailAccount = async ({
               type: part.filename.includes('pdf') ? 'pdf' : 'html',
             })
             foundPdf = true
-
-            // Move message to Receipts label
-            await gmail.users.messages.modify({
-              userId: 'me',
-              id: message.id!,
-              requestBody: {
-                addLabelIds: [receiptsLabelId],
-                removeLabelIds: ['INBOX'],
-              },
-            })
           }
         }
       } else if (!hasAttachments) {
@@ -121,17 +122,22 @@ export const scanEmailAccount = async ({
           owner_org_user_id,
           type: 'html_no_attachments',
         })
-
-        // Move message to Receipts label
-        await gmail.users.messages.modify({
-          userId: 'me',
-          id: message.id!,
-          requestBody: {
-            addLabelIds: [receiptsLabelId],
-            removeLabelIds: ['INBOX'],
-          },
-        })
       }
+
+      // Move message to Receipts label
+      await gmail.users.messages.modify({
+        userId: 'me',
+        id: message.id!,
+        requestBody: {
+          addLabelIds: [receiptsLabelId],
+          removeLabelIds: ['INBOX'],
+        },
+      })
+
+      await updateNotification(organization_id, 'email_scanned', {
+        email_count: messages.length,
+        scanned_count: messages.indexOf(message) + 1,
+      })
     }
   } catch (error) {
     const invalid_grant = error.message === 'invalid_grant'
@@ -154,5 +160,7 @@ export const scanEmailAccount = async ({
     fs.readdirSync(receiptsFolder).forEach((file) => {
       fs.unlinkSync(path.join(receiptsFolder, file))
     })
+
+    await updateNotification(organization_id, 'email_scan_finished')
   }
 }

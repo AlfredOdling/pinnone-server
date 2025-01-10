@@ -68,7 +68,6 @@ export const insertReceipt = async ({
       price_per_seat,
       other_cost,
       usage_based_cost,
-      status: 'ACTIVE',
       source: 'gmail',
       email_recipient: email,
       warning_info,

@@ -61,11 +61,11 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               If you are unsure, use the last day of the due date month.
 
               **renewal_frequency**
+              If there is no period mentioned, it probably is just a one time payment and its should be OTHER.
               If renewal_start_date and renewal_next_date spans 12 months, its YEARLY.
               If renewal_start_date and renewal_next_date spans 3 months, its QUARTERLY.
               If renewal_start_date and renewal_next_date spans 1 month, its MONTHLY.
               For example: if renewal_start_date = 2024-12-01 and renewal_next_date = 2024-12-31, this spans a month, so renewal_frequency should be MONTHLY.
-              Default to MONTHLY if you are unsure.
               
               **pricing_model**
               Evidence for USAGE_BASED pricing model should be some measurement of unit usage.
