@@ -71,7 +71,7 @@ export const mapOrgVendorsWithSenders = async ({
             Try to map the sender name to the vendor name.
             For example: if you have a sender with the name "Supabase Pte. Ltd.", that should be mapped to a vendor with the name "Supabase".
             
-            If there is a match, use the name and id from the vendor.
+            If there is a match, use the name and id from the vendor and sender.
             If there is no match, just return null.
           `,
       },
