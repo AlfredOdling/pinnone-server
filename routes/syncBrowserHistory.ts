@@ -10,7 +10,7 @@ import {
 import { NotificationTypes } from './consts'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { MatchedVendors, NewVendors } from './types'
+import { MatchedVendorsSenders } from './types'
 
 dotenv.config()
 
@@ -198,23 +198,30 @@ const mapOrgVendorsWithSenders = async ({ organization_id, newOrgVendors }) => {
         content: JSON.stringify(content),
       },
     ],
-    response_format: zodResponseFormat(MatchedVendors, 'matchedVendors'),
+    response_format: zodResponseFormat(
+      MatchedVendorsSenders,
+      'matchedVendorsSenders'
+    ),
   })
 
   // Get the matched org_vendors
-  const matchedOrgVendorIds = completion.choices[0].message.parsed.children.map(
-    (org_vendor) => org_vendor.id
-  )
-  console.log('🚀 5 matchedOrgVendorIds:', matchedOrgVendorIds)
+  const matchedVendorsSenders = completion.choices[0].message.parsed.children
+  console.log('🚀 5 matchedVendorsSenders:', matchedVendorsSenders)
 
   // Map the org_vendor ids to the real data, and create the new tools
   const newTools =
     org_vendors.data
-      ?.filter((org_vendor) => matchedOrgVendorIds.includes(org_vendor.id))
+      ?.filter((org_vendor) =>
+        matchedVendorsSenders.find(
+          (matchedOrgVendor) => matchedOrgVendor.vendor_id === org_vendor.id
+        )
+      )
       ?.map((org_vendor) => ({
         organization_id,
         org_vendor_id: org_vendor.id,
-        sender_id: '',
+        sender_id: matchedVendorsSenders.find(
+          (matchedOrgVendor) => matchedOrgVendor.vendor_id === org_vendor.id
+        )?.sender_id,
         owner_org_user_id: 9,
 
         name: org_vendor.name,

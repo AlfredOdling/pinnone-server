@@ -106,13 +106,15 @@ export const MailAnalysis = z.object({
   is_a_receipt_or_invoice: z.boolean(),
 })
 
-export const MatchedVendor = z.object({
-  id: z.number(),
-  name: z.string(),
+export const MatchedVendorSender = z.object({
+  sender_id: z.number(),
+  sender_name: z.string(),
+  vendor_id: z.number(),
+  vendor_name: z.string(),
 })
 
-export const MatchedVendors = z.lazy(() =>
+export const MatchedVendorsSenders = z.lazy(() =>
   z.object({
-    children: z.array(MatchedVendor),
+    children: z.array(MatchedVendorSender),
   })
 )
