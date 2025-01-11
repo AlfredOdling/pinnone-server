@@ -126,4 +126,14 @@ export const mapOrgVendorsWithSenders = async ({
   })
 
   console.log('🚀 7 res:', res)
+
+  await supabase
+    .from('org_vendor')
+    .update({
+      status: 'in_stack',
+    })
+    .in(
+      'id',
+      matchedVendorsSenders.map((vendor) => vendor.vendor_id)
+    )
 }
