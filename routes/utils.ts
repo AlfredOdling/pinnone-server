@@ -99,8 +99,6 @@ export function getVendorRootDomains(historyArray: { url: string }[]) {
  * Get the root domains of B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
  */
 export const getB2BSaasDomains = async (decryptedData) => {
-  console.log('⏳ Getting root domains...')
-
   let browserHistory = decryptedData
     .map(({ lastVisitTime, url }) => ({
       lastVisitTime,
@@ -110,7 +108,7 @@ export const getB2BSaasDomains = async (decryptedData) => {
     .filter(({ url }) => !url.includes('localhost'))
     .filter(({ url }) => !url.includes('127.0.0.1'))
     .filter(({ url }) => !personalUrls.includes(url))
-    .map(({ url }) => getRootDomain(url))
+    .map(({ url }) => getRootDomain({ url }))
     // Remove null values
     .filter((domain) => domain)
     // Dedupe
@@ -167,24 +165,24 @@ export const getB2BSaasDomains = async (decryptedData) => {
       (d) => d.is_b2b_tool_certainty_score <= 35
     )
 
-    console.info('--------------')
-    console.info(
-      '\x1b[33m%s\x1b[0m',
-      '🔍 Visited domains:',
-      domains.map((d) => d.domain)
-    )
+    // console.info('--------------')
+    // console.info(
+    //   '\x1b[33m%s\x1b[0m',
+    //   '🔍 Visited domains:',
+    //   domains.map((d) => d.domain)
+    // )
 
-    console.info(
-      '\x1b[34m%s\x1b[0m',
-      '✅ Approved domains (certaintyScore > 40%):',
-      filteredDomains.map((d) => d)
-    )
+    // console.info(
+    //   '\x1b[34m%s\x1b[0m',
+    //   '✅ Approved domains (certaintyScore > 40%):',
+    //   filteredDomains.map((d) => d)
+    // )
 
-    console.info(
-      '\x1b[31m%s\x1b[0m',
-      '🚨 Skipped domains:',
-      skippedDomains.map((d) => d)
-    )
+    // console.info(
+    //   '\x1b[31m%s\x1b[0m',
+    //   '🚨 Skipped domains:',
+    //   skippedDomains.map((d) => d)
+    // )
 
     return filteredDomains.map((d) => d.domain)
   } catch (error) {
@@ -223,8 +221,6 @@ export const getUserActivities = ({
 }) => {
   return browserHistory
     .map((visit) => {
-      console.log('🚀  visit:', visit)
-
       const rootDomain = getRootDomain({
         url: visit.url,
         shouldFilterB2B: false,

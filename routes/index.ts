@@ -4,7 +4,7 @@ import { inviteExtensionUsers } from './inviteExtensionUsers'
 import { syncBrowserHistory } from './syncBrowserHistory'
 import { deleteExtensionUser } from './deleteExtensionUser'
 import { addToolsManually } from './addToolsManually'
-import { updateVendors } from './updateVendors'
+import { updateOfficialVendors } from './updateOfficialVendors'
 import { getOrgUsers } from './utils'
 import { generateOverlappingTools } from './generateOverlappingTools'
 import express from 'express'
@@ -125,10 +125,9 @@ router.post('/updateVendors', async (req: Request, res: Response) => {
 
   try {
     const orgUsers = await getOrgUsers({ user_id: data.user_id })
-    console.log('🚀 updateVendors orgUsers:', orgUsers)
 
     for (const orgUser of orgUsers) {
-      await updateVendors({
+      await updateOfficialVendors({
         encryptedData: data.encryptedData,
         organization_id: orgUser.organization_id,
       })

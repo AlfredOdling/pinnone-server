@@ -21,14 +21,13 @@ const openai = new OpenAI({
 /**
  * Update the official vendor list with new vendors
  */
-export const updateVendors = async ({
+export const updateOfficialVendors = async ({
   encryptedData,
   organization_id,
 }: {
   encryptedData: any
   organization_id: string
 }) => {
-  console.log('ℹ️ updateVendors for org: ', organization_id)
   await updateNotification(
     organization_id,
     NotificationTypes.ACTIVITY_UPDATE_VENDORS_STARTED
@@ -36,7 +35,6 @@ export const updateVendors = async ({
 
   const decryptedData = decrypt(encryptedData)
   const visitedRootDomains = await getB2BSaasDomains(decryptedData)
-  console.log('🚀  visitedRootDomains:', visitedRootDomains)
 
   if (!visitedRootDomains.length) {
     await updateNotification(
@@ -87,11 +85,6 @@ export const updateVendors = async ({
       response_format: zodResponseFormat(NewVendors, 'newVendors'),
     })
 
-    console.log(
-      'completion.choices[0].message.parsed.children',
-      completion.choices[0].message.parsed.children
-    )
-
     const vendors = await supabase
       .from('vendor')
       .upsert(
@@ -111,8 +104,6 @@ export const updateVendors = async ({
       )
       .select('id')
 
-    console.log('🚀  vendors:', vendors)
-
     await updateNotification(
       organization_id,
       NotificationTypes.ACTIVITY_VENDORS_ADDED,
@@ -122,31 +113,6 @@ export const updateVendors = async ({
     )
 
     console.log(`✅ ${vendors?.data?.length} new vendors added successfully`)
-
-    // const visitedVendors = await supabase
-    //   .from('vendor')
-    //   .select('*') // Get all existing vendors
-    //   .in('root_domain', visitedRootDomains) // Filter by visited domains
-
-    //console.log('🚀  visitedVendors:', visitedVendors)
-    // <-- TODO
-    // const res = await supabase.from('tool').upsert(
-    //   visitedVendors.data
-    //     .map((vendor) => ({
-    //       vendor_id: vendor.id,
-    //       organization_id,
-    //       status: 'not_in_stack',
-    //     }))
-    //     .filter((vendor) => vendor.status !== 'blocked'),
-    //   {
-    //     onConflict: 'vendor_id',
-    //     ignoreDuplicates: true,
-    //   }
-    // )
-
-    // if (res.error) {
-    //   console.error('Error updating tools:', res.error)
-    // }
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')
