@@ -1,16 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
-import { Database } from '../types/supabase'
-import {
-  decrypt,
-  getUserActivities,
-  getVendorRootDomains,
-  updateNotification,
-} from './utils'
-import { NotificationTypes } from './consts'
+import { Database } from '../../types/supabase'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { MatchedVendorsSenders } from './types'
+import { MatchedVendorsSenders } from '../types'
 
 dotenv.config()
 
@@ -22,124 +15,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export const syncBrowserHistory = async ({
-  encryptedData,
-  org_user_id,
-  organization_id,
-}: {
-  encryptedData: string
-  org_user_id: number
-  organization_id: string
-}) => {
-  await updateNotification(
-    organization_id,
-    NotificationTypes.ACTIVITY_SYNC_BROWSER_HISTORY_STARTED
-  )
-
-  const browserHistory = decrypt(encryptedData)
-
-  await addOrgVendors({
-    browserHistory,
-    organization_id,
-  })
-
-  await pushNewUserActivity({
-    browserHistory,
-    organization_id,
-    org_user_id,
-  })
-
-  await updateNotification(
-    organization_id,
-    NotificationTypes.ACTIVITY_SYNC_BROWSER_HISTORY_FINISHED
-  )
-}
-
-/**
- * If there is a match between the user browser history and the vendor list,
- * add new org_vendors (from the official vendor list) with status: not_in_stack
- */
-const addOrgVendors = async ({ browserHistory, organization_id }) => {
-  const detectedRootDomains = getVendorRootDomains(browserHistory)
-  console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
-
-  if (!detectedRootDomains.length) {
-    await updateNotification(
-      organization_id,
-      NotificationTypes.ACTIVITY_NO_VENDORS_DETECTED
-    )
-    return console.log('No vendors to add')
-  }
-
-  const officialVendors = await supabase
-    .from('vendor')
-    .select('*')
-    .in('root_domain', detectedRootDomains)
-
-  const newOrgVendors = officialVendors.data
-    .map((vendor) => ({
-      name: vendor.name,
-      description: vendor.description,
-      url: vendor.url,
-      category: vendor.category,
-      logo_url: vendor.logo_url,
-      link_to_pricing_page: vendor.link_to_pricing_page,
-      root_domain: vendor.root_domain,
-      organization_id,
-      status: 'not_in_stack',
-    }))
-    .filter((tool) => tool.status !== 'blocked')
-
-  await updateNotification(
-    organization_id,
-    NotificationTypes.ACTIVITY_NEW_VENDORS_DETECTED,
-    `Detected: ${newOrgVendors.map((v) => v.root_domain).join(', ')}`
-  )
-
-  await mapOrgVendorsWithSenders({ organization_id, newOrgVendors })
-}
-
-/**
- * If there is a match between the user browser history and the tools
- * that the org is tracking, push new user_activity
- */
-const pushNewUserActivity = async ({
-  organization_id,
-  browserHistory,
-  org_user_id,
-}) => {
-  const tools = await supabase
-    .from('tool')
-    .select('*, sender(*)') // Select the vendors associated with the tools
-    .eq('is_tracking', true) // Filter the tools that the org is tracking
-    .eq('status', 'in_stack')
-    .eq('organization_id', organization_id)
-
-  const userActivities: any = getUserActivities({
-    browserHistory,
-    tools: tools.data,
-    org_user_id,
-  })
-
-  await supabase
-    .from('user_activity')
-    .upsert(userActivities, {
-      onConflict: 'org_user_id, tool_id, last_visited',
-      ignoreDuplicates: true,
-    })
-    .throwOnError()
-
-  await updateNotification(
-    organization_id,
-    NotificationTypes.ACTIVITY_NEW_USER_ACTIVITIES_DETECTED,
-    `Detected: ${userActivities.length} new user activities`
-  )
-}
-
 /**
  * Map the new org_vendors with the senders and create new tools
  */
-const mapOrgVendorsWithSenders = async ({ organization_id, newOrgVendors }) => {
+export const mapOrgVendorsWithSenders = async ({
+  organization_id,
+  newOrgVendors,
+}) => {
   console.log('🚀 1 newOrgVendors:', newOrgVendors)
 
   // Get the new org_vendors
