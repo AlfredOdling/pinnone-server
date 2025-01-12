@@ -75,8 +75,8 @@ export const analyzeReceipt = async ({
         title: `💳 Payment due for ${res.vendor_name} of ${res.total_cost} ${res.currency}`,
         notes: `
         🗓️ Due date: ${res.due_date} (in 3 days)
-        #️⃣ OCR: ${res.ocr}
         🏦 Bank account number: ${res.bank_number}
+        #️⃣ OCR: ${res.ocr}
 
         🔗 Link to invoice: ${attachmentUrl}
         `,
