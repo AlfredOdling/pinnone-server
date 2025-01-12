@@ -35,10 +35,18 @@ export const pushNewUserActivity = async ({
 
   await supabase
     .from('user_activity')
-    .upsert(userActivities, {
-      onConflict: 'org_user_id, tool_id, last_visited',
-      ignoreDuplicates: true,
-    })
+    .upsert(
+      // Just to filter out root_domain
+      userActivities.map((activity) => ({
+        org_user_id,
+        tool_id: activity.tool_id,
+        last_visited: activity.last_visited,
+      })),
+      {
+        onConflict: 'org_user_id, tool_id, last_visited',
+        ignoreDuplicates: true,
+      }
+    )
     .throwOnError()
 
   await updateNotification(

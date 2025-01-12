@@ -120,12 +120,32 @@ export const mapOrgVendorsWithSenders = async ({
 
   console.log('🚀 6 newTools:', newTools)
 
-  const res = await supabase.from('tool').upsert(newTools, {
-    onConflict: 'root_domain',
-    ignoreDuplicates: true,
-  })
+  for (const tool of newTools) {
+    const existing_tool = await supabase
+      .from('tool')
+      .select('*')
+      .eq('organization_id', organization_id)
+      .eq('sender_id', tool.sender_id)
+      .single()
 
-  console.log('🚀 7 res:', res)
+    console.log('🚀 7 existing_sender:', existing_tool)
+
+    if (existing_tool.data) {
+      const res = await supabase
+        .from('tool')
+        .update(tool)
+        .eq('id', existing_tool.data.id)
+
+      console.log('🚀 8 res:', res)
+    } else {
+      const res = await supabase.from('tool').upsert(tool, {
+        onConflict: 'root_domain',
+        ignoreDuplicates: true,
+      })
+
+      console.log('🚀 9 res:', res)
+    }
+  }
 
   await supabase
     .from('org_vendor')

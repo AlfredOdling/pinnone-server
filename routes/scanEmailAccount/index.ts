@@ -84,7 +84,9 @@ export const scanEmailAccount = async ({
       await updateNotification(
         organization_id,
         NotificationTypes.EMAIL_STARTING_TO_SCAN,
-        `Scanning email ${messages.indexOf(message) + 1} of ${messages.length}`
+        `Scanning email ${messages.indexOf(message) + 1} of ${
+          messages.length
+        }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`
       )
 
       if (hasAttachments) {
