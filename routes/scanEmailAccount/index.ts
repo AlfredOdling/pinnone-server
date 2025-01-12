@@ -37,11 +37,6 @@ export const scanEmailAccount = async ({
   after: string
   before: string
 }) => {
-  await updateNotification(
-    organization_id,
-    NotificationTypes.EMAIL_SCAN_ACCOUNT_STARTED
-  )
-
   const { data: emailAccount } = await supabase
     .from('email_account')
     .select()
@@ -50,11 +45,6 @@ export const scanEmailAccount = async ({
     .single()
 
   if (!emailAccount) {
-    await updateNotification(
-      organization_id,
-      NotificationTypes.EMAIL_ACCOUNT_NOT_FOUND,
-      `Email account not found: ${email}`
-    )
     throw new Error('Email account not found')
   }
 

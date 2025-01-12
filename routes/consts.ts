@@ -455,7 +455,6 @@ export enum Roles {
 export enum NotificationTypes {
   TODO_DUE_DATE_DETECTED = 'todo_due_date_detected',
 
-  EMAIL_SCAN_ACCOUNT_STARTED = 'email_scan_account_started',
   EMAIL_STARTING_TO_SCAN = 'email_starting_to_scan',
   EMAIL_SCAN_ACCOUNT_FINISHED = 'email_scan_account_finished',
   EMAIL_ACCOUNT_NOT_FOUND = 'email_account_not_found',

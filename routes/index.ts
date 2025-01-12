@@ -69,7 +69,6 @@ router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   console.log('--------⏳ syncBrowserHistory starting')
   try {
     const orgUsers = await getOrgUsers({ user_id: data.user_id })
-    console.log('🚀 syncBrowserHistory orgUsers:', orgUsers)
 
     await Promise.all(
       orgUsers.map((orgUser) =>

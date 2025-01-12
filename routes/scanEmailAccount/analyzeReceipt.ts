@@ -7,8 +7,6 @@ import { updateEmailAccountLastScannedDate } from './updateEmailAccountLastScann
 import { generateSender } from './generateSender'
 import { insertReceipt } from './insertReceipt'
 import { generateTool } from './generateTool'
-import { updateNotification } from '../utils'
-import { NotificationTypes } from '../consts'
 
 export const analyzeReceipt = async ({
   gmail,
@@ -71,11 +69,28 @@ export const analyzeReceipt = async ({
     await updateEmailAccountLastScannedDate({ email, organization_id })
 
     if (res.due_date) {
-      await updateNotification(
-        organization_id,
-        NotificationTypes.TODO_DUE_DATE_DETECTED,
-        `Due date: ${res.due_date} for ${res.vendor_name_raw}`
-      )
+      const event = {
+        summary: `Payment due for ${res.vendor_name}`,
+        description: `Invoice payment of ${res.total_cost} ${res.currency} due for ${res.vendor_name}`,
+        start: {
+          date: res.due_date,
+        },
+        end: {
+          date: res.due_date,
+        },
+        reminders: {
+          useDefault: false,
+          overrides: [
+            { method: 'email', minutes: 24 * 60 }, // 1 day before
+            { method: 'popup', minutes: 24 * 60 }, // 1 day before
+          ],
+        },
+      }
+
+      await gmail.users.settings.calendarSettings.insert({
+        userId: 'me',
+        requestBody: event,
+      })
     }
   } catch (error) {
     console.error('Error in analyzeReceipt:', error)

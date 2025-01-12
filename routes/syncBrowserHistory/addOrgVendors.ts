@@ -18,14 +18,12 @@ const supabase = createClient<Database>(
  */
 export const addOrgVendors = async ({ browserHistory, organization_id }) => {
   const detectedRootDomains = getVendorRootDomains(browserHistory)
-  console.info('🧑🏼‍💻 Detected root domains:', detectedRootDomains)
 
   if (!detectedRootDomains.length) {
-    await updateNotification(
+    return await updateNotification(
       organization_id,
       NotificationTypes.ACTIVITY_NO_VENDORS_DETECTED
     )
-    return console.log('No vendors to add')
   }
 
   const officialVendors = await supabase

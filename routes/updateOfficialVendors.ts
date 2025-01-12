@@ -28,20 +28,14 @@ export const updateOfficialVendors = async ({
   encryptedData: any
   organization_id: string
 }) => {
-  await updateNotification(
-    organization_id,
-    NotificationTypes.ACTIVITY_UPDATE_VENDORS_STARTED
-  )
-
   const decryptedData = decrypt(encryptedData)
   const visitedRootDomains = await getB2BSaasDomains(decryptedData)
 
   if (!visitedRootDomains.length) {
-    await updateNotification(
+    return await updateNotification(
       organization_id,
       NotificationTypes.ACTIVITY_NO_VENDORS_DETECTED
     )
-    return console.log('No vendors to add')
   }
 
   try {
@@ -102,17 +96,15 @@ export const updateOfficialVendors = async ({
           ignoreDuplicates: true,
         }
       )
-      .select('id')
+      .select('id, root_domain')
 
     await updateNotification(
       organization_id,
       NotificationTypes.ACTIVITY_VENDORS_ADDED,
-      {
-        vendor_count: vendors?.data?.length,
-      }
+      `Added new vendors: ${vendors?.data
+        ?.map((v) => v.root_domain)
+        .join(', ')}`
     )
-
-    console.log(`✅ ${vendors?.data?.length} new vendors added successfully`)
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')

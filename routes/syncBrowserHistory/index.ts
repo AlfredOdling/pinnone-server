@@ -1,5 +1,4 @@
-import { decrypt, updateNotification } from '../utils'
-import { NotificationTypes } from '../consts'
+import { decrypt } from '../utils'
 import { addOrgVendors } from './addOrgVendors'
 import { pushNewUserActivity } from './pushNewUserActivity'
 
@@ -12,11 +11,6 @@ export const syncBrowserHistory = async ({
   org_user_id: number
   organization_id: string
 }) => {
-  await updateNotification(
-    organization_id,
-    NotificationTypes.ACTIVITY_SYNC_BROWSER_HISTORY_STARTED
-  )
-
   const browserHistory = decrypt(encryptedData)
 
   await addOrgVendors({
@@ -29,9 +23,4 @@ export const syncBrowserHistory = async ({
     organization_id,
     org_user_id,
   })
-
-  await updateNotification(
-    organization_id,
-    NotificationTypes.ACTIVITY_SYNC_BROWSER_HISTORY_FINISHED
-  )
 }
