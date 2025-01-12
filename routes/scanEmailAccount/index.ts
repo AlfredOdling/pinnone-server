@@ -54,6 +54,7 @@ export const scanEmailAccount = async ({
       refresh_token: emailAccount.refresh_token,
     })
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
+    const tasksApi = google.tasks({ version: 'v1', auth: oAuth2Client })
     const receiptsLabelId = await createLabel(gmail)
 
     const query = `(invoice | receipt | faktura | kvitto) after:${after} before:${before}`
@@ -100,6 +101,7 @@ export const scanEmailAccount = async ({
           ) {
             await analyzeReceipt({
               gmail,
+              tasksApi,
               messageId: message.id!,
               part,
               organization_id,
@@ -114,6 +116,7 @@ export const scanEmailAccount = async ({
       } else if (!hasAttachments) {
         await analyzeReceipt({
           gmail,
+          tasksApi,
           messageId: message.id!,
           organization_id,
           email,

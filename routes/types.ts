@@ -104,6 +104,8 @@ export const MailAnalysis = z.object({
   type: z.enum(['software', 'service', 'other']),
   company_website: z.string(),
   is_a_receipt_or_invoice: z.boolean(),
+  ocr: z.string(),
+  bank_number: z.string(),
 })
 
 export const MatchedVendorSender = z.object({

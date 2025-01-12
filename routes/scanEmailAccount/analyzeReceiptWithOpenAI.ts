@@ -125,6 +125,14 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               - Billing information (e.g., sender and recipient details)
               - Itemized breakdown of charges (description, quantity, unit price, total)
               - Total amount due
+
+              **ocr**
+              This is the OCR number from the image. Should be a string of numbers, and look something like this: 506101435042358.
+              If you are unsure, set it to empty string.
+
+              **bank_number**
+              This is the bank account number from the image. Should be a string of numbers, and look something like this: 5020-7042.
+              If you are unsure, set it to empty string.
             `,
           },
           {

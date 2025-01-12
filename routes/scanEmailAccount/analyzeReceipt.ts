@@ -10,6 +10,7 @@ import { generateTool } from './generateTool'
 
 export const analyzeReceipt = async ({
   gmail,
+  tasksApi,
   messageId,
   part = [],
   organization_id,
@@ -19,6 +20,7 @@ export const analyzeReceipt = async ({
   type,
 }: {
   gmail: any
+  tasksApi: any
   messageId: string
   part?: any
   organization_id: string
@@ -68,28 +70,25 @@ export const analyzeReceipt = async ({
 
     await updateEmailAccountLastScannedDate({ email, organization_id })
 
-    if (res.due_date) {
-      const event = {
-        summary: `Payment due for ${res.vendor_name}`,
-        description: `Invoice payment of ${res.total_cost} ${res.currency} due for ${res.vendor_name}`,
-        start: {
-          date: res.due_date,
-        },
-        end: {
-          date: res.due_date,
-        },
-        reminders: {
-          useDefault: false,
-          overrides: [
-            { method: 'email', minutes: 24 * 60 }, // 1 day before
-            { method: 'popup', minutes: 24 * 60 }, // 1 day before
-          ],
-        },
+    if (res.ocr && res.bank_number && res.due_date) {
+      const task = {
+        title: `💳 Payment due for ${res.vendor_name} of ${res.total_cost} ${res.currency}`,
+        notes: `
+        🗓️ Due date: ${res.due_date} (in 3 days)
+        #️⃣ OCR: ${res.ocr}
+        🏦 Bank account number: ${res.bank_number}
+
+        🔗 Link to invoice: ${attachmentUrl}
+        `,
+        due: new Date(
+          new Date(`${res.due_date}T23:59:59.000Z`).getTime() -
+            3 * 24 * 60 * 60 * 1000
+        ).toISOString(),
       }
 
-      await gmail.users.settings.calendarSettings.insert({
-        userId: 'me',
-        requestBody: event,
+      await tasksApi.tasks.insert({
+        tasklist: '@default',
+        requestBody: task,
       })
     }
   } catch (error) {

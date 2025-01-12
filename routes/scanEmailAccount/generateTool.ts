@@ -107,5 +107,5 @@ const matchSenderWithOrgVendor = async (
 
   console.log('🚀 4 completion:', completion.choices[0].message.parsed.children)
 
-  return completion.choices[0].message.parsed.children[0].vendor_id || null
+  return completion.choices[0].message.parsed.children?.[0]?.vendor_id || null
 }

@@ -46,6 +46,8 @@ export const insertReceipt = async ({
     due_date,
     date_of_invoice,
     type_res,
+    ocr,
+    bank_number,
   } = res
 
   await supabase
@@ -75,6 +77,8 @@ export const insertReceipt = async ({
       type: type_res,
       total_cost,
       email_id: messageId,
+      ocr,
+      bank_number,
     })
     .throwOnError()
 }

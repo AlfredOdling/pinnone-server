@@ -234,6 +234,7 @@ export const getUserActivities = ({
       return {
         org_user_id,
         tool_id: matchingTool.id,
+        root_domain: rootDomain,
         last_visited: new Date(visit.lastVisitTime).toISOString(),
       }
     })
