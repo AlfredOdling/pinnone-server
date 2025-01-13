@@ -263,6 +263,7 @@ export type Database = {
       }
       receipt: {
         Row: {
+          bank_number: string | null
           created_at: string
           currency: string
           date_of_invoice: string | null
@@ -274,6 +275,7 @@ export type Database = {
           flat_fee_cost: number | null
           id: number
           number_of_seats: number | null
+          ocr: string | null
           other_cost: number | null
           price_per_seat: number | null
           pricing_model: string
@@ -289,6 +291,7 @@ export type Database = {
           warning_info: string | null
         }
         Insert: {
+          bank_number?: string | null
           created_at?: string
           currency: string
           date_of_invoice?: string | null
@@ -300,6 +303,7 @@ export type Database = {
           flat_fee_cost?: number | null
           id?: number
           number_of_seats?: number | null
+          ocr?: string | null
           other_cost?: number | null
           price_per_seat?: number | null
           pricing_model: string
@@ -315,6 +319,7 @@ export type Database = {
           warning_info?: string | null
         }
         Update: {
+          bank_number?: string | null
           created_at?: string
           currency?: string
           date_of_invoice?: string | null
@@ -326,6 +331,7 @@ export type Database = {
           flat_fee_cost?: number | null
           id?: number
           number_of_seats?: number | null
+          ocr?: string | null
           other_cost?: number | null
           price_per_seat?: number | null
           pricing_model?: string
@@ -530,6 +536,7 @@ export type Database = {
           is_tracked: boolean
           last_name: string
           onboarded: boolean | null
+          phone: string | null
           updated_at: string
         }
         Insert: {
@@ -541,6 +548,7 @@ export type Database = {
           is_tracked?: boolean
           last_name?: string
           onboarded?: boolean | null
+          phone?: string | null
           updated_at?: string
         }
         Update: {
@@ -552,6 +560,7 @@ export type Database = {
           is_tracked?: boolean
           last_name?: string
           onboarded?: boolean | null
+          phone?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -52,10 +52,8 @@ export const pushNewUserActivity = async ({
   await updateNotification(
     organization_id,
     NotificationTypes.ACTIVITY_NEW_USER_ACTIVITIES_DETECTED,
-    `Detected: ${
-      userActivities.length
-    } new user activities from ${userActivities
-      .map((activity) => activity.root_domain)
-      .join(', ')}`
+    `Detected: ${userActivities.length} new user activities from ${[
+      ...new Set(userActivities.map((activity) => activity.root_domain)),
+    ].join(', ')}`
   )
 }

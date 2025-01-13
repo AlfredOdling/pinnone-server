@@ -10,12 +10,13 @@ import { generateOverlappingTools } from './generateOverlappingTools'
 import express from 'express'
 import { handleStripeWebhooks } from './handleStripeWebhooks'
 import { askTeam } from './askTeam'
-// import cron from 'node-cron'
-// import { autoAudit } from './autoAudit'
+import cron from 'node-cron'
+import { autoAudit } from './autoAudit'
 import { sendExtensionInvite } from './sendExtensionInvite'
 import { scanEmailAccount } from './scanEmailAccount'
 import { emailReceipts } from './emailReceipts'
 import { googleAuth } from './scanEmailAccount/authGoogle'
+import { sendSMS } from './sendSMS'
 
 const router = Router()
 
@@ -202,5 +203,11 @@ router.post('/emailReceipts', async (req, res) => {
 //   console.log('🚀 autoAudit starting...')
 //   await autoAudit()
 // })
+
+// Runs every day at 12:00
+cron.schedule(`0 12 * * *`, async () => {
+  console.log('🚀 scheduleSMS starting...')
+  await sendSMS()
+})
 
 export default router

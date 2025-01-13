@@ -48,7 +48,9 @@ export const addOrgVendors = async ({ browserHistory, organization_id }) => {
   await updateNotification(
     organization_id,
     NotificationTypes.ACTIVITY_NEW_VENDORS_DETECTED,
-    `Detected: ${newOrgVendors.map((v) => v.root_domain).join(', ')}`
+    `Detected: ${[...new Set(newOrgVendors.map((v) => v.root_domain))].join(
+      ', '
+    )}`
   )
 
   await mapOrgVendorsWithSenders({ organization_id, newOrgVendors })
