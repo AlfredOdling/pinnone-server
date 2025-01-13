@@ -82,9 +82,9 @@ export const scanEmailAccount = async ({
 
       await updateNotification({
         organization_id,
-        title: 'EMAIL_STARTING_TO_SCAN',
+        title: 'Analyzing email',
         tag: 'email',
-        dataObject: `Scanning email ${messages.indexOf(message) + 1} of ${
+        dataObject: `Analyzing email ${messages.indexOf(message) + 1} of ${
           messages.length
         }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`,
       })

@@ -30,14 +30,6 @@ export const updateOfficialVendors = async ({
   const decryptedData = decrypt(encryptedData)
   const visitedRootDomains = await getB2BSaasDomains(decryptedData)
 
-  if (!visitedRootDomains.length) {
-    return await updateNotification({
-      organization_id,
-      title: 'No new vendors detected',
-      tag: 'activity_finished',
-    })
-  }
-
   try {
     const completion = await openai.beta.chat.completions.parse({
       model: 'gpt-4o',
@@ -98,14 +90,23 @@ export const updateOfficialVendors = async ({
       )
       .select('id, root_domain')
 
-    await updateNotification({
-      organization_id,
-      title: 'New vendors added',
-      tag: 'activity_finished',
-      dataObject: `Added new vendors: ${vendors?.data
-        ?.map((v) => v.root_domain)
-        .join(', ')}`,
-    })
+    if (!vendors?.data.length) {
+      await updateNotification({
+        organization_id,
+        title: 'Finished scanning new vendors',
+        dataObject: 'No new vendors detected',
+        tag: 'activity_finished',
+      })
+    } else {
+      await updateNotification({
+        organization_id,
+        title: 'New vendors added',
+        tag: 'activity_finished',
+        dataObject: `Added new vendors: ${vendors?.data
+          ?.map((v) => v.root_domain)
+          .join(', ')}`,
+      })
+    }
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')

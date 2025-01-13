@@ -21,7 +21,8 @@ export const addOrgVendors = async ({ browserHistory, organization_id }) => {
   if (!detectedRootDomains.length) {
     return await updateNotification({
       organization_id,
-      title: 'No new vendors detected',
+      title: 'Finished scanning new vendors',
+      dataObject: 'No new vendors detected',
       tag: 'activity_finished',
     })
   }
