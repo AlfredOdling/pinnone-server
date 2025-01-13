@@ -5,7 +5,6 @@ import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { decrypt, getB2BSaasDomains, updateNotification } from './utils'
 import { NewVendors } from './types'
-import { NotificationTypes } from './consts'
 
 dotenv.config()
 
@@ -32,10 +31,11 @@ export const updateOfficialVendors = async ({
   const visitedRootDomains = await getB2BSaasDomains(decryptedData)
 
   if (!visitedRootDomains.length) {
-    return await updateNotification(
+    return await updateNotification({
       organization_id,
-      NotificationTypes.ACTIVITY_NO_VENDORS_DETECTED
-    )
+      title: 'No new vendors detected',
+      tag: 'activity_finished',
+    })
   }
 
   try {
@@ -98,13 +98,14 @@ export const updateOfficialVendors = async ({
       )
       .select('id, root_domain')
 
-    await updateNotification(
+    await updateNotification({
       organization_id,
-      NotificationTypes.ACTIVITY_VENDORS_ADDED,
-      `Added new vendors: ${vendors?.data
+      title: 'New vendors added',
+      tag: 'activity_finished',
+      dataObject: `Added new vendors: ${vendors?.data
         ?.map((v) => v.root_domain)
-        .join(', ')}`
-    )
+        .join(', ')}`,
+    })
   } catch (error) {
     console.error('Error processing vendors:', error)
     throw new Error('Failed to process and update vendors')

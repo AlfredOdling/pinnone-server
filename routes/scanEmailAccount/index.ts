@@ -9,7 +9,6 @@ import { analyzeReceipt } from './analyzeReceipt'
 import { createLabel } from './createLabel'
 import { refreshToken } from './refreshToken'
 import { updateNotification } from '../utils'
-import { NotificationTypes } from '../consts'
 
 dotenv.config()
 
@@ -81,13 +80,14 @@ export const scanEmailAccount = async ({
       const parts = payload?.parts || []
       const hasAttachments = parts.length > 0
 
-      await updateNotification(
+      await updateNotification({
         organization_id,
-        NotificationTypes.EMAIL_STARTING_TO_SCAN,
-        `Scanning email ${messages.indexOf(message) + 1} of ${
+        title: 'EMAIL_STARTING_TO_SCAN',
+        tag: 'email',
+        dataObject: `Scanning email ${messages.indexOf(message) + 1} of ${
           messages.length
-        }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`
-      )
+        }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`,
+      })
 
       if (hasAttachments) {
         let foundPdf = false
@@ -139,11 +139,12 @@ export const scanEmailAccount = async ({
       })
     }
 
-    await updateNotification(
+    await updateNotification({
       organization_id,
-      NotificationTypes.EMAIL_SCAN_ACCOUNT_FINISHED,
-      `Finished scanning ${messages.length}/${messages.length} emails`
-    )
+      title: 'EMAIL_SCAN_ACCOUNT_FINISHED',
+      tag: 'email_finished',
+      dataObject: `Finished scanning ${messages.length}/${messages.length} emails`,
+    })
   } catch (error) {
     const invalid_grant = error.message === 'invalid_grant'
 

@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import { Database } from '../../types/supabase'
 import { getUserActivities, updateNotification } from '../utils'
-import { NotificationTypes } from '../consts'
 
 dotenv.config()
 
@@ -33,6 +32,14 @@ export const pushNewUserActivity = async ({
     org_user_id,
   })
 
+  if (userActivities.length === 0) {
+    return await updateNotification({
+      organization_id,
+      title: 'No new user activities detected',
+      tag: 'activity_finished',
+    })
+  }
+
   await supabase
     .from('user_activity')
     .upsert(
@@ -49,11 +56,12 @@ export const pushNewUserActivity = async ({
     )
     .throwOnError()
 
-  await updateNotification(
+  await updateNotification({
     organization_id,
-    NotificationTypes.ACTIVITY_NEW_USER_ACTIVITIES_DETECTED,
-    `Detected: ${userActivities.length} new user activities from ${[
+    title: 'New user activities detected',
+    tag: 'activity_finished',
+    dataObject: `Detected: ${userActivities.length} new user activities from ${[
       ...new Set(userActivities.map((activity) => activity.root_domain)),
-    ].join(', ')}`
-  )
+    ].join(', ')}`,
+  })
 }

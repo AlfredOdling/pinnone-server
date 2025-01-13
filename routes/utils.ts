@@ -16,17 +16,25 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const updateNotification = async (
-  organization_id: string,
-  tag: string,
-  dataObject?: any,
+export const updateNotification = async ({
+  organization_id,
+  title,
+  tag,
+  dataObject,
+  dataArray,
+}: {
+  organization_id: string
+  title: string
+  tag?: string
+  dataObject?: any
   dataArray?: any[]
-) =>
+}) =>
   await supabase
     .from('notification')
     .insert({
       organization_id,
       created_at: new Date().toISOString(),
+      title,
       tag,
       dataArray,
       dataObject,

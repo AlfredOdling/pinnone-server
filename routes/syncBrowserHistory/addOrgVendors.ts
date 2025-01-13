@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import { Database } from '../../types/supabase'
 import { getVendorRootDomains, updateNotification } from '../utils'
-import { NotificationTypes } from '../consts'
 import { mapOrgVendorsWithSenders } from './mapOrgVendorsWithSenders'
 
 dotenv.config()
@@ -20,10 +19,11 @@ export const addOrgVendors = async ({ browserHistory, organization_id }) => {
   const detectedRootDomains = getVendorRootDomains(browserHistory)
 
   if (!detectedRootDomains.length) {
-    return await updateNotification(
+    return await updateNotification({
       organization_id,
-      NotificationTypes.ACTIVITY_NO_VENDORS_DETECTED
-    )
+      title: 'No new vendors detected',
+      tag: 'activity_finished',
+    })
   }
 
   const officialVendors = await supabase
@@ -45,13 +45,14 @@ export const addOrgVendors = async ({ browserHistory, organization_id }) => {
     }))
     .filter((tool) => tool.status !== 'blocked')
 
-  await updateNotification(
+  await updateNotification({
     organization_id,
-    NotificationTypes.ACTIVITY_NEW_VENDORS_DETECTED,
-    `Detected: ${[...new Set(newOrgVendors.map((v) => v.root_domain))].join(
-      ', '
-    )}`
-  )
+    title: 'New vendors detected',
+    tag: 'activity_finished',
+    dataObject: `Detected: ${[
+      ...new Set(newOrgVendors.map((v) => v.root_domain)),
+    ].join(', ')}`,
+  })
 
   await mapOrgVendorsWithSenders({ organization_id, newOrgVendors })
 }

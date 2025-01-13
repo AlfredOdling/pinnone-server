@@ -451,19 +451,3 @@ export enum Roles {
   ADMIN = 2,
   EXTENSION_USER = 3,
 }
-
-export enum NotificationTypes {
-  TODO_DUE_DATE_DETECTED = 'todo_due_date_detected',
-
-  EMAIL_STARTING_TO_SCAN = 'email_starting_to_scan',
-  EMAIL_SCAN_ACCOUNT_FINISHED = 'email_scan_account_finished',
-  EMAIL_ACCOUNT_NOT_FOUND = 'email_account_not_found',
-
-  ACTIVITY_NEW_USER_ACTIVITIES_DETECTED = 'activity_new_user_activities_detected',
-  ACTIVITY_NEW_VENDORS_DETECTED = 'activity_new_vendors_detected',
-  ACTIVITY_SYNC_BROWSER_HISTORY_STARTED = 'activity_sync_browser_history_started',
-  ACTIVITY_SYNC_BROWSER_HISTORY_FINISHED = 'activity_sync_browser_history_finished',
-  ACTIVITY_NO_VENDORS_DETECTED = 'activity_no_vendors_detected',
-  ACTIVITY_UPDATE_VENDORS_STARTED = 'activity_update_vendors_started',
-  ACTIVITY_VENDORS_ADDED = 'activity_vendors_added',
-}
