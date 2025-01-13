@@ -47,19 +47,21 @@ export const sendSMS = async () => {
       const today = new Date().toISOString().split('T')[0]
       if (dueDate !== today) {
         phoneNumbers.forEach((phoneNumber) => {
-          client.messages
-            .create({
-              body:
-                'Hi! The following invoice is due in three days: ' +
-                receiptObject.name +
-                ' - ' +
-                receiptObject.total_cost +
-                ' ' +
-                receiptObject.currency,
-              from: '+12765301433',
-              to: phoneNumber,
-            })
-            .then((message) => console.log(message.sid))
+          if (phoneNumber.includes('+')) {
+            client.messages
+              .create({
+                body:
+                  'Hi! The following invoice is due in three days: ' +
+                  receiptObject.name +
+                  ' - ' +
+                  receiptObject.total_cost +
+                  ' ' +
+                  receiptObject.currency,
+                from: '+12765301433',
+                to: phoneNumber,
+              })
+              .then((message) => console.log(message.sid))
+          }
         })
       }
     }
