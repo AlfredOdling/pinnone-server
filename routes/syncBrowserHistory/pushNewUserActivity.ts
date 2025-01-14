@@ -31,6 +31,7 @@ export const pushNewUserActivity = async ({
     tools: tools.data,
     org_user_id,
   })
+  console.log('🚀  userActivities:', userActivities)
 
   if (userActivities.length === 0) {
     return await updateNotification({
@@ -43,7 +44,7 @@ export const pushNewUserActivity = async ({
   await supabase
     .from('user_activity')
     .upsert(
-      // Just to filter out root_domain
+      // Just to filter out root_domain from the array
       userActivities.map((activity) => ({
         org_user_id,
         tool_id: activity.tool_id,

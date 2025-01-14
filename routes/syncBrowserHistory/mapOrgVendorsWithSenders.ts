@@ -21,10 +21,11 @@ const openai = new OpenAI({
 export const mapOrgVendorsWithSenders = async ({
   organization_id,
   newOrgVendors,
+  owner_org_user_id,
 }) => {
-  console.log('🚀 1 newOrgVendors:', newOrgVendors)
+  // console.log('🚀 1 newOrgVendors:', newOrgVendors)
 
-  // Get the new org_vendors
+  // Upsert and get the new org_vendors
   const org_vendors = await supabase
     .from('org_vendor')
     .upsert(newOrgVendors, {
@@ -33,7 +34,7 @@ export const mapOrgVendorsWithSenders = async ({
     })
     .select('*')
 
-  console.log('🚀 2 org_vendors:', org_vendors)
+  // console.log('🚀 2 org_vendors:', org_vendors)
 
   // Get the organization's senders
   const senders = await supabase
@@ -41,7 +42,7 @@ export const mapOrgVendorsWithSenders = async ({
     .select('*')
     .eq('organization_id', organization_id)
 
-  console.log('🚀 3 senders:', senders)
+  // console.log('🚀 3 senders:', senders)
 
   // Format the content for OpenAI
   const content = {
@@ -54,7 +55,7 @@ export const mapOrgVendorsWithSenders = async ({
       name: vendor.name,
     })),
   }
-  console.log('🚀 4 content:', content)
+  // console.log('🚀 4 content:', content)
 
   // Use OpenAI to map the senders to the vendors
   const completion = await openai.beta.chat.completions.parse({
@@ -88,7 +89,7 @@ export const mapOrgVendorsWithSenders = async ({
 
   // Get the matched org_vendors
   const matchedVendorsSenders = completion.choices[0].message.parsed.children
-  console.log('🚀 5 matchedVendorsSenders:', matchedVendorsSenders)
+  // console.log('🚀 5 matchedVendorsSenders:', matchedVendorsSenders)
 
   // Map the org_vendor ids to the real data, and create the new tools
   const newTools =
@@ -104,7 +105,7 @@ export const mapOrgVendorsWithSenders = async ({
         sender_id: matchedVendorsSenders.find(
           (matchedOrgVendor) => matchedOrgVendor.vendor_id === org_vendor.id
         )?.sender_id,
-        owner_org_user_id: 9,
+        owner_org_user_id,
 
         name: org_vendor.name,
         description: org_vendor.description,
@@ -118,7 +119,7 @@ export const mapOrgVendorsWithSenders = async ({
         link_to_pricing_page: org_vendor.link_to_pricing_page,
       })) || []
 
-  console.log('🚀 6 newTools:', newTools)
+  // console.log('🚀 6 newTools:', newTools)
 
   for (const tool of newTools) {
     const existing_tool = await supabase
@@ -128,32 +129,31 @@ export const mapOrgVendorsWithSenders = async ({
       .eq('sender_id', tool.sender_id)
       .single()
 
-    console.log('🚀 7 existing_sender:', existing_tool)
+    //  console.log('🚀 7 existing_sender:', existing_tool)
 
     if (existing_tool.data) {
       const res = await supabase
         .from('tool')
         .update(tool)
         .eq('id', existing_tool.data.id)
+      // console.log('🚀 8 tool updated:', res)
 
-      console.log('🚀 8 res:', res)
+      await supabase
+        .from('org_vendor')
+        .update({
+          status: 'in_stack',
+        })
+        .in(
+          'id',
+          matchedVendorsSenders.map((vendor) => vendor.vendor_id)
+        )
     } else {
       const res = await supabase.from('tool').upsert(tool, {
         onConflict: 'root_domain',
         ignoreDuplicates: true,
       })
 
-      console.log('🚀 9 res:', res)
+      // console.log('🚀 9 new tool upserted:', res)
     }
   }
-
-  await supabase
-    .from('org_vendor')
-    .update({
-      status: 'in_stack',
-    })
-    .in(
-      'id',
-      matchedVendorsSenders.map((vendor) => vendor.vendor_id)
-    )
 }

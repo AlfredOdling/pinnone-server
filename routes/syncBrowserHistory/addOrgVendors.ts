@@ -15,7 +15,11 @@ const supabase = createClient<Database>(
  * If there is a match between the user browser history and the vendor list,
  * add new org_vendors (from the official vendor list) with status: not_in_stack
  */
-export const addOrgVendors = async ({ browserHistory, organization_id }) => {
+export const addOrgVendors = async ({
+  browserHistory,
+  organization_id,
+  owner_org_user_id,
+}) => {
   const detectedRootDomains = getVendorRootDomains(browserHistory)
 
   if (!detectedRootDomains.length) {
@@ -57,5 +61,9 @@ export const addOrgVendors = async ({ browserHistory, organization_id }) => {
     })
   }
 
-  await mapOrgVendorsWithSenders({ organization_id, newOrgVendors })
+  await mapOrgVendorsWithSenders({
+    organization_id,
+    newOrgVendors,
+    owner_org_user_id,
+  })
 }

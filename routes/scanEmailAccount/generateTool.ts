@@ -72,8 +72,8 @@ const matchSenderWithOrgVendor = async (
       name: vendor.name,
     })),
   }
-  console.log('🚀 --- Matching the new sender to a vendor ---')
-  console.log('🚀 1 content:', content)
+  // console.log('🚀 --- Matching the new sender to a vendor ---')
+  // console.log('🚀 1 content:', content)
 
   // Use OpenAI to map the senders to the vendors
   const completion = await openai.beta.chat.completions.parse({
@@ -105,7 +105,7 @@ const matchSenderWithOrgVendor = async (
     ),
   })
 
-  console.log('🚀 4 completion:', completion.choices[0].message.parsed.children)
+  // console.log('🚀 4 completion:', completion.choices[0].message.parsed.children)
 
   return completion.choices[0].message.parsed.children?.[0]?.vendor_id || null
 }

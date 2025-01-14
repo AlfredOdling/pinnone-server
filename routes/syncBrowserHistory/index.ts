@@ -16,6 +16,7 @@ export const syncBrowserHistory = async ({
   await addOrgVendors({
     browserHistory,
     organization_id,
+    owner_org_user_id: org_user_id,
   })
 
   await pushNewUserActivity({

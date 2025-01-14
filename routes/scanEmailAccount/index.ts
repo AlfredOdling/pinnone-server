@@ -88,7 +88,9 @@ export const scanEmailAccount = async ({
         tag: 'email',
         dataObject: `Analyzing email ${messages.indexOf(message) + 1} of ${
           messages.length
-        }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`,
+        }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value} from ${
+          payload?.headers?.find((h) => h.name === 'From')?.value
+        }`,
       })
 
       if (hasAttachments) {
