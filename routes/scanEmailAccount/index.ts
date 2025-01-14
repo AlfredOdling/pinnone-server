@@ -57,6 +57,8 @@ export const scanEmailAccount = async ({
     const receiptsLabelId = await createLabel(gmail)
 
     const query = `(invoice | receipt | faktura | kvitto) after:${after} before:${before}`
+    console.log('🚀  query:', query)
+
     const response = await gmail.users.messages.list({
       userId: 'me',
       q: query,
@@ -141,7 +143,7 @@ export const scanEmailAccount = async ({
 
     await updateNotification({
       organization_id,
-      title: 'EMAIL_SCAN_ACCOUNT_FINISHED',
+      title: 'Finished scanning emails',
       tag: 'email_finished',
       dataObject: `Finished scanning ${messages.length}/${messages.length} emails`,
     })

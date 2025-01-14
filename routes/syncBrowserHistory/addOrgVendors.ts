@@ -46,14 +46,16 @@ export const addOrgVendors = async ({ browserHistory, organization_id }) => {
     }))
     .filter((tool) => tool.status !== 'blocked')
 
-  await updateNotification({
-    organization_id,
-    title: 'New vendors detected',
-    tag: 'activity_finished',
-    dataObject: `Detected: ${[
-      ...new Set(newOrgVendors.map((v) => v.root_domain)),
-    ].join(', ')}`,
-  })
+  if (newOrgVendors.length) {
+    await updateNotification({
+      organization_id,
+      title: 'New vendors detected',
+      tag: 'activity_finished',
+      dataObject: `Detected: ${[
+        ...new Set(newOrgVendors.map((v) => v.root_domain)),
+      ].join(', ')}`,
+    })
+  }
 
   await mapOrgVendorsWithSenders({ organization_id, newOrgVendors })
 }
