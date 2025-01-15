@@ -84,13 +84,13 @@ export const scanEmailAccount = async ({
 
       await updateNotification({
         organization_id,
-        title: 'Analyzing email',
+        title: `Analyzing email from ${
+          payload?.headers?.find((h) => h.name === 'From')?.value
+        }`,
         tag: 'email',
         dataObject: `Analyzing email ${messages.indexOf(message) + 1} of ${
           messages.length
-        }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value} from ${
-          payload?.headers?.find((h) => h.name === 'From')?.value
-        }`,
+        }: "${payload?.headers?.find((h) => h.name === 'Subject')?.value}"`,
       })
 
       if (hasAttachments) {
@@ -145,7 +145,7 @@ export const scanEmailAccount = async ({
 
     await updateNotification({
       organization_id,
-      title: 'Finished scanning emails',
+      title: `Finished scanning ${messages.length} emails`,
       tag: 'email_finished',
       dataObject: `Finished scanning ${messages.length}/${messages.length} emails`,
     })

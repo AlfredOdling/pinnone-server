@@ -12,6 +12,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 const log = false
+
 /**
  * If there is a match between the user browser history and the vendor list,
  * add new org_vendors (from the official vendor list) with status: not_in_stack
@@ -45,7 +46,7 @@ export const addOrgVendors = async ({
     log && console.log('🚀 4 No new vendors detected')
     return await updateNotification({
       organization_id,
-      title: 'Finished scanning new vendors',
+      title: `Scanning done. No new tools detected.`,
       dataObject: 'No new vendors detected',
       tag: 'activity_finished',
     })
@@ -69,7 +70,7 @@ export const addOrgVendors = async ({
 
     await updateNotification({
       organization_id,
-      title: 'New vendors detected',
+      title: `Scanning done. ${newOrgVendors.length} new tools detected.`,
       tag: 'activity_finished',
       dataObject: `Detected: ${[
         ...new Set(newOrgVendors.map((v) => v.root_domain)),

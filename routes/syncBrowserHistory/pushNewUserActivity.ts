@@ -46,7 +46,7 @@ export const pushNewUserActivity = async ({
   if (userActivities.length === 0) {
     return await updateNotification({
       organization_id,
-      title: 'No new user activities detected',
+      title: 'No new activity detected',
       tag: 'activity_finished',
     })
   }
@@ -65,13 +65,14 @@ export const pushNewUserActivity = async ({
         ignoreDuplicates: true,
       }
     )
+    .select('*')
     .throwOnError()
 
   await updateNotification({
     organization_id,
-    title: 'New user activities detected',
+    title: `Scanning done. New user activities detected.`,
     tag: 'activity_finished',
-    dataObject: `Detected: ${userActivities.length} new user activities from ${[
+    dataObject: `Detected new user activities from ${[
       ...new Set(userActivities.map((activity) => activity.root_domain)),
     ].join(', ')}`,
   })
