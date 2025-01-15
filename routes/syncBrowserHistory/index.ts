@@ -24,18 +24,10 @@ export const syncBrowserHistory = async ({
 }) => {
   const browserHistory = decrypt(encryptedData)
 
-  const res = await supabase
-    .from('user_activity')
-    .select('last_visited')
-    .eq('org_user_id', org_user_id)
-    .order('last_visited', { ascending: false })
-    .limit(1)
-    .single()
-  const last_visited_in_ms = new Date(res.data.last_visited).getTime()
-
-  const unvisited_browser_history = browserHistory.filter(
-    (item) => Number(item.lastVisitTime) > last_visited_in_ms
-  )
+  const unvisited_browser_history = await filterUnvisitedBrowserHistory({
+    browserHistory,
+    org_user_id,
+  })
 
   await updateOfficialVendors({
     browserHistory: unvisited_browser_history,
@@ -53,4 +45,24 @@ export const syncBrowserHistory = async ({
     organization_id,
     org_user_id,
   })
+}
+
+const filterUnvisitedBrowserHistory = async ({
+  browserHistory,
+  org_user_id,
+}) => {
+  const res = await supabase
+    .from('user_activity')
+    .select('last_visited')
+    .eq('org_user_id', org_user_id)
+    .order('last_visited', { ascending: false })
+    .limit(1)
+    .single()
+  const last_visited_in_ms = new Date(res.data.last_visited).getTime()
+
+  const unvisited_browser_history = browserHistory.filter(
+    (item) => Number(item.lastVisitTime) > last_visited_in_ms
+  )
+
+  return unvisited_browser_history
 }
