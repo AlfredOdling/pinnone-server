@@ -119,28 +119,6 @@ router.post('/addToolsManually', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/updateVendors', async (req: Request, res: Response) => {
-  const { data } = req.body
-  console.log('--------⏳ updateVendors starting...')
-
-  try {
-    const orgUsers = await getOrgUsers({ user_id: data.user_id })
-
-    for (const orgUser of orgUsers) {
-      await updateOfficialVendors({
-        encryptedData: data.encryptedData,
-        organization_id: orgUser.organization_id,
-      })
-    }
-
-    console.info('--------updateVendors done ✅')
-    res.status(200).send({ data: 'History retrieved' })
-  } catch (error) {
-    console.error(error)
-    res.status(500).send({ error: 'Failed', msg: error.message })
-  }
-})
-
 router.post(
   '/generateOverlappingTools',
   async (req: Request, res: Response) => {

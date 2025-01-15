@@ -50,35 +50,32 @@ export const insertReceipt = async ({
     bank_number,
   } = res
 
-  await supabase
-    .from('receipt')
-    .upsert({
-      sender_id: senderId,
-      currency,
-      renewal_frequency,
+  const res2 = await supabase.from('receipt').upsert({
+    sender_id: senderId,
+    currency,
+    renewal_frequency,
 
-      renewal_start_date: renewal_start_date || null,
-      renewal_next_date: renewal_next_date || null,
-      due_date: due_date || null,
-      date_of_invoice: date_of_invoice || null,
-      email_received: new Date(email_info.date).toISOString(),
+    renewal_start_date: renewal_start_date || null,
+    renewal_next_date: renewal_next_date || null,
+    due_date: due_date || null,
+    date_of_invoice: date_of_invoice || null,
+    email_received: new Date(email_info.date).toISOString(),
 
-      receipt_file: attachmentUrl,
-      pricing_model,
-      flat_fee_cost,
-      number_of_seats,
-      price_per_seat,
-      other_cost,
-      usage_based_cost,
-      source: 'gmail',
-      email_recipient: email,
-      warning_info,
-      email_info,
-      type: type_res,
-      total_cost,
-      email_id: messageId,
-      ocr,
-      bank_number,
-    })
-    .throwOnError()
+    receipt_file: attachmentUrl,
+    pricing_model,
+    flat_fee_cost,
+    number_of_seats,
+    price_per_seat,
+    other_cost,
+    usage_based_cost,
+    source: 'gmail',
+    email_recipient: email,
+    warning_info,
+    email_info,
+    type: type_res,
+    total_cost,
+    email_id: messageId,
+    ocr,
+    bank_number,
+  })
 }

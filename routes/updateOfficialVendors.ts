@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { decrypt, getB2BSaasDomains, updateNotification } from './utils'
+import { getB2BSaasDomains, updateNotification } from './utils'
 import { NewVendors } from './types'
 
 dotenv.config()
@@ -21,14 +21,13 @@ const openai = new OpenAI({
  * Update the official vendor list with new vendors
  */
 export const updateOfficialVendors = async ({
-  encryptedData,
+  browserHistory,
   organization_id,
 }: {
-  encryptedData: any
+  browserHistory: any
   organization_id: string
 }) => {
-  const decryptedData = decrypt(encryptedData)
-  const visitedRootDomains = await getB2BSaasDomains(decryptedData)
+  const visitedRootDomains = await getB2BSaasDomains(browserHistory)
 
   try {
     const completion = await openai.beta.chat.completions.parse({

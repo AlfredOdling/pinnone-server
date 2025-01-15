@@ -121,10 +121,7 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               Analyze the provided document and determine if it is a complete invoice. A complete invoice must include the following details:
               - Invoice number
               - Date of issue
-              - Due date
               - Billing information (e.g., sender and recipient details)
-              - Itemized breakdown of charges (description, quantity, unit price, total)
-              - Total amount due
 
               **ocr**
               This is the OCR number from the image. Should be a string of numbers, and look something like this: 506101435042358.

@@ -31,7 +31,6 @@ export const pushNewUserActivity = async ({
     tools: tools.data,
     org_user_id,
   })
-  console.log('🚀  userActivities:', userActivities)
 
   if (userActivities.length === 0) {
     return await updateNotification({
