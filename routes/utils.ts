@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import * as dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../types/supabase'
+import { extractB2BRootDomain } from './syncBrowserHistory/utils'
 
 dotenv.config()
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-secret-key'
@@ -68,10 +69,7 @@ export const getUserActivities = ({
 }) => {
   return browserHistory
     .map((visit) => {
-      const rootDomain = getRootDomain({
-        url: visit.url,
-        shouldFilterB2B: false,
-      })
+      const rootDomain = extractB2BRootDomain(visit.url)
 
       const matchingTool = tools?.find(
         (tool) => tool.root_domain === rootDomain
