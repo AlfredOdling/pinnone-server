@@ -65,11 +65,11 @@ export const addOrgVendors = async ({
         ...new Set(newOrgVendors.map((v) => v.root_domain)),
       ].join(', ')}`,
     })
-  }
 
-  await mapOrgVendorsWithSenders({
-    organization_id,
-    newOrgVendors,
-    owner_org_user_id,
-  })
+    await mapOrgVendorsWithSenders({
+      organization_id,
+      newOrgVendors,
+      owner_org_user_id,
+    })
+  }
 }
