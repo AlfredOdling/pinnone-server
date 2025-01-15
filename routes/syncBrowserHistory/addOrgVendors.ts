@@ -11,7 +11,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
-
+const log = false
 /**
  * If there is a match between the user browser history and the vendor list,
  * add new org_vendors (from the official vendor list) with status: not_in_stack
@@ -25,17 +25,24 @@ export const addOrgVendors = async ({
     .map(({ url }) => extractB2BRootDomain(url))
     .filter((domain) => domain) // Remove null values
     .filter((domain, index, self) => self.indexOf(domain) === index) // Remove duplicates
+  log && console.log('🚀 ----> addOrgVendors()', detectedRootDomains)
+  log && console.log('🚀 1 detectedRootDomains:', detectedRootDomains)
 
   const officialVendors_ = await supabase
     .from('vendor')
     .select('*')
     .in('root_domain', detectedRootDomains)
 
+  log && console.log('🚀 2 officialVendors_:', officialVendors_)
+
   const officialVendors = officialVendors_.data.filter(
     (vendor) => vendor.status !== 'blocked'
   )
 
+  log && console.log('🚀 3 officialVendors:', officialVendors)
+
   if (!officialVendors.length) {
+    log && console.log('🚀 4 No new vendors detected')
     return await updateNotification({
       organization_id,
       title: 'Finished scanning new vendors',
@@ -55,8 +62,11 @@ export const addOrgVendors = async ({
     organization_id,
     status: 'not_in_stack',
   }))
+  log && console.log('🚀 4 newOrgVendors:', newOrgVendors)
 
   if (newOrgVendors.length > 0) {
+    log && console.log('🚀 5 New vendors detected')
+
     await updateNotification({
       organization_id,
       title: 'New vendors detected',

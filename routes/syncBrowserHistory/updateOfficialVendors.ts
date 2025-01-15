@@ -13,10 +13,10 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY // Needed for admin rights
 )
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
+const log = false
 
 /**
  * Update the official vendor list with new vendors
@@ -29,6 +29,9 @@ export const updateOfficialVendors = async ({
   organization_id: string
 }) => {
   const newRootDomains = await detectNewDomains(browserHistory)
+
+  log && console.log('🚀 ----> updateOfficialVendors()', newRootDomains)
+  log && console.log('🚀 1 newRootDomains:', newRootDomains)
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -71,6 +74,8 @@ export const updateOfficialVendors = async ({
       response_format: zodResponseFormat(NewVendors, 'newVendors'),
     })
 
+    log && console.log('🚀 2 completion:', completion.choices[0].message.parsed)
+
     const vendors = await supabase
       .from('vendor')
       .upsert(
@@ -90,7 +95,11 @@ export const updateOfficialVendors = async ({
       )
       .select('id, root_domain')
 
+    log && console.log('🚀 3 vendors:', vendors)
+
     if (!vendors?.data.length) {
+      log && console.log('🚀 4 No new vendors detected')
+
       await updateNotification({
         organization_id,
         title: 'Finished scanning new vendors',
@@ -98,6 +107,8 @@ export const updateOfficialVendors = async ({
         tag: 'activity_finished',
       })
     } else {
+      log && console.log('🚀 5 New vendors detected')
+
       await updateNotification({
         organization_id,
         title: 'New vendors added',
@@ -108,6 +119,8 @@ export const updateOfficialVendors = async ({
       })
     }
   } catch (error) {
+    log && console.log('🚀 6 Error processing vendors', error)
+
     await updateNotification({
       organization_id,
       title: 'Error processing vendors',

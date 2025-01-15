@@ -1,5 +1,4 @@
 import CryptoJS from 'crypto-js'
-import OpenAI from 'openai'
 import * as dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../types/supabase'
@@ -8,7 +7,6 @@ import { extractB2BRootDomain } from './syncBrowserHistory/utils'
 dotenv.config()
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'your-secret-key'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
