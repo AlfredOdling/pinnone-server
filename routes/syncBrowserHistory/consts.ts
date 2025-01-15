@@ -447,15 +447,15 @@ export const personalUrls = [
 ]
 
 export const b2bPaths = [
-  'dashboard',
   'app',
-  'project',
-  'projects',
+  'console',
+  'dashboard',
+
   'team',
-  'account',
-  'accounts',
   'sales',
   'billing',
-  'team',
-  'console',
+  'project',
+  'projects',
+  'account',
+  'accounts',
 ]

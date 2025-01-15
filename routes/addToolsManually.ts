@@ -5,7 +5,7 @@ import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { NewVendors } from './types'
 import { sendEmail } from './sendEmail'
-import { getVendorRootDomains } from './syncBrowserHistory/utils'
+import { extractB2BRootDomain } from './syncBrowserHistory/utils'
 
 dotenv.config()
 
@@ -23,19 +23,20 @@ export const addToolsManually = async ({
   organization_id,
   owner_org_user_id,
 }) => {
-  const rootDomains = getVendorRootDomains(
-    vendors.map((vendor) => ({ url: vendor }))
-  )
+  const detectedRootDomains = vendors
+    .map(({ url }) => extractB2BRootDomain(url))
+    .filter((domain) => domain) // Remove null values
+    .filter((domain, index, self) => self.indexOf(domain) === index) // Remove duplicates
 
   const existingVendors = await supabase
     .from('vendor')
     .select('root_domain')
-    .in('root_domain', rootDomains)
+    .in('root_domain', detectedRootDomains)
 
-  const oldVendors = rootDomains.filter((domain) =>
+  const oldVendors = detectedRootDomains.filter((domain) =>
     existingVendors.data.map((vendor) => vendor.root_domain).includes(domain)
   )
-  const newVendors = rootDomains.filter(
+  const newVendors = detectedRootDomains.filter(
     (domain) =>
       !existingVendors.data.map((vendor) => vendor.root_domain).includes(domain)
   )

@@ -5,7 +5,7 @@ import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { updateNotification } from '../utils'
 import { NewVendors } from '../types'
-import { getB2BSaasDomains } from './utils'
+import { detectNewDomains } from './utils'
 
 dotenv.config()
 
@@ -28,9 +28,8 @@ export const updateOfficialVendors = async ({
   browserHistory: any
   organization_id: string
 }) => {
-  const visitedRootDomains = await getB2BSaasDomains(browserHistory)
+  const newRootDomains = await detectNewDomains(browserHistory)
 
-  return
   try {
     const completion = await openai.beta.chat.completions.parse({
       model: 'gpt-4o',
@@ -66,7 +65,7 @@ export const updateOfficialVendors = async ({
         },
         {
           role: 'user',
-          content: JSON.stringify(visitedRootDomains),
+          content: JSON.stringify(newRootDomains),
         },
       ],
       response_format: zodResponseFormat(NewVendors, 'newVendors'),
@@ -109,7 +108,12 @@ export const updateOfficialVendors = async ({
       })
     }
   } catch (error) {
-    console.error('Error processing vendors:', error)
-    throw new Error('Failed to process and update vendors')
+    await updateNotification({
+      organization_id,
+      title: 'Error processing vendors',
+      dataObject: error,
+      tag: 'activity_finished_error',
+    })
+    throw new Error(error)
   }
 }

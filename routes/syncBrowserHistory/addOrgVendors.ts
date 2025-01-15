@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import { Database } from '../../types/supabase'
 import { updateNotification } from '../utils'
 import { mapOrgVendorsWithSenders } from './mapOrgVendorsWithSenders'
-import { getVendorRootDomains } from './utils'
+import { extractB2BRootDomain } from './utils'
 
 dotenv.config()
 
@@ -21,7 +21,10 @@ export const addOrgVendors = async ({
   organization_id,
   owner_org_user_id,
 }) => {
-  const detectedRootDomains = getVendorRootDomains(browserHistory)
+  const detectedRootDomains = browserHistory
+    .map(({ url }) => extractB2BRootDomain(url))
+    .filter((domain) => domain) // Remove null values
+    .filter((domain, index, self) => self.indexOf(domain) === index) // Remove duplicates
 
   const officialVendors_ = await supabase
     .from('vendor')
@@ -53,7 +56,7 @@ export const addOrgVendors = async ({
     status: 'not_in_stack',
   }))
 
-  if (newOrgVendors.length) {
+  if (newOrgVendors.length > 0) {
     await updateNotification({
       organization_id,
       title: 'New vendors detected',

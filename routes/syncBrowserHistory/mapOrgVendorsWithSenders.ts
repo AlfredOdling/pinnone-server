@@ -4,6 +4,7 @@ import { Database } from '../../types/supabase'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { MatchedVendorsSenders } from '../types'
+import { updateNotification } from '../utils'
 
 dotenv.config()
 
@@ -136,6 +137,7 @@ export const mapOrgVendorsWithSenders = async ({
         .from('tool')
         .update(tool)
         .eq('id', existing_tool.data.id)
+        .select('*, sender(*)')
       // console.log('🚀 8 tool updated:', res)
 
       await supabase
@@ -147,13 +149,29 @@ export const mapOrgVendorsWithSenders = async ({
           'id',
           matchedVendorsSenders.map((vendor) => vendor.vendor_id)
         )
-    } else {
-      const res = await supabase.from('tool').upsert(tool, {
-        onConflict: 'root_domain',
-        ignoreDuplicates: true,
-      })
 
+      await updateNotification({
+        organization_id,
+        title: `${res.data[0].name} connected with cost data`,
+        tag: 'activity_finished',
+        dataObject: `${res.data[0].name} connected with ${res.data[0].sender.name}`,
+      })
+    } else {
+      const res = await supabase
+        .from('tool')
+        .upsert(tool, {
+          onConflict: 'root_domain',
+          ignoreDuplicates: true,
+        })
+        .select('*, sender(*)')
       // console.log('🚀 9 new tool upserted:', res)
+
+      await updateNotification({
+        organization_id,
+        title: `New tool added: ${res.data[0].name} with cost data`,
+        tag: 'activity_finished',
+        dataObject: `${res.data[0].name} connected with ${res.data[0].sender.name}`,
+      })
     }
   }
 }

@@ -17,7 +17,7 @@ const supabase = createClient<Database>(
 /**
  * Filter in the domains that includes any of the "b2bPaths"
  */
-export function getRootDomain(url: string): string | null {
+export function extractB2BRootDomain(url: string): string | null {
   if (!URL.canParse(url)) return url
   if (['localhost', '127.0.0.1'].includes(new URL(url).hostname)) return null
   if (personalUrls.includes(url)) return null
@@ -38,19 +38,12 @@ export function getRootDomain(url: string): string | null {
   }
 }
 
-// We get the root domains of the vendors that the user has visited
-export const getVendorRootDomains = (browserHistory_) =>
-  browserHistory_
-    .map(({ url }) => getRootDomain(url))
-    .filter((domain) => domain) // Remove null values
-    .filter((domain, index, self) => self.indexOf(domain) === index) // Remove duplicates
-
 /**
- * Get the root domains of B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
+ * Get the root domains of new B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
  */
-export const getB2BSaasDomains = async (browserHistory_) => {
+export const detectNewDomains = async (browserHistory_) => {
   let browserHistory = browserHistory_
-    .map(({ url }) => getRootDomain(url))
+    .map(({ url }) => extractB2BRootDomain(url))
     .filter((domain) => domain) // Remove null values
     .filter((domain, index, self) => self.indexOf(domain) === index) // Dedupe
 
@@ -114,7 +107,7 @@ export const getB2BSaasDomains = async (browserHistory_) => {
 
     console.info(
       '\x1b[34m%s\x1b[0m',
-      '✅ Approved domains (certaintyScore > 40%):',
+      '✅ Approved domains (certaintyScore > 35%):',
       filteredDomains.map((d) => d)
     )
 
