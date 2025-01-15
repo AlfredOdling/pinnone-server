@@ -18,28 +18,23 @@ const supabase = createClient<Database>(
  * Filter in the domains that includes any of the "b2bPaths"
  */
 export function getRootDomain(url: string): string | null {
-  // Initial filters
-  if (['localhost', '127.0.0.1'].includes(url) || personalUrls.includes(url))
-    return null
+  if (!URL.canParse(url)) return url
+  if (['localhost', '127.0.0.1'].includes(new URL(url).hostname)) return null
+  if (personalUrls.includes(url)) return null
 
-  try {
-    if (!URL.canParse(url)) return url
+  /**
+   * Example:
+   * Split up domain: https://supabase.com/dashboard/project/rynaksbbtajovnsdwrlg
+   * into ['supabase', 'com', 'dashboard', 'project', 'rynaksbbtajovnsdwrlg']
+   */
+  const domainParts = splitURL(url)
 
-    /**
-     * Example:
-     * Split up domain: https://supabase.com/dashboard/project/rynaksbbtajovnsdwrlg
-     * into ['supabase', 'com', 'dashboard', 'project', 'rynaksbbtajovnsdwrlg']
-     */
-    const domainParts = splitURL(url)
+  // Check if ['app', 'supabase', 'com'] includes "console" or "app", etc.
+  const hasB2BPath = b2bPaths.some((path) => domainParts.includes(path))
 
-    // Check if ['app', 'supabase', 'com'] includes ['console', 'app', etc.]
-    const hasB2BPath = b2bPaths.some((path) => domainParts.includes(path))
-
-    if (hasB2BPath) return new URL(url).hostname
-  } catch (error) {
-    // Handle invalid URLs gracefully
-    console.error('Invalid URL:', url)
-    return null
+  if (hasB2BPath) {
+    // Remove www for edge case such as: "https://www.twilio.com/console/ahoy"
+    return new URL(url).hostname.replace('www.', '')
   }
 }
 
@@ -47,10 +42,8 @@ export function getRootDomain(url: string): string | null {
 export const getVendorRootDomains = (browserHistory_) =>
   browserHistory_
     .map(({ url }) => getRootDomain(url))
-    // Remove null values
-    .filter((domain) => domain)
-    // Remove duplicates
-    .filter((domain, index, self) => self.indexOf(domain) === index)
+    .filter((domain) => domain) // Remove null values
+    .filter((domain, index, self) => self.indexOf(domain) === index) // Remove duplicates
 
 /**
  * Get the root domains of B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
@@ -58,10 +51,8 @@ export const getVendorRootDomains = (browserHistory_) =>
 export const getB2BSaasDomains = async (browserHistory_) => {
   let browserHistory = browserHistory_
     .map(({ url }) => getRootDomain(url))
-    // Remove null values
-    .filter((domain) => domain)
-    // Dedupe
-    .filter((domain, index, self) => self.indexOf(domain) === index)
+    .filter((domain) => domain) // Remove null values
+    .filter((domain, index, self) => self.indexOf(domain) === index) // Dedupe
 
   const existingVendors = await supabase
     .from('vendor')
@@ -92,17 +83,6 @@ export const getB2BSaasDomains = async (browserHistory_) => {
 
             Example of B2B SaaS tools: hubspot, salesforce, zendesk, intercom, helpscout, freshdesk, teamwork, salesforce, zendesk, intercom, freshdesk, teamwork
             Example of non-B2B SaaS tools: amazon, twitter, facebook, instagram, youtube, pinterest, reddit, quora, medium, banks, healthcare, post offices, etc.
-
-            Additional instructions:
-            vxvmqkhdpwkxttmkuaxk.supabase.co
-            console.twilio.com
-            login.twilio.com
-            console.cloud.google.com
-            developers.google.com
-            support.google.com
-            icflorescu.github.io
-            arifszn.github.io
-            react-arborist.netlify.app
           `,
         },
         {
