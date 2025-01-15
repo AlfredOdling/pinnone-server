@@ -134,45 +134,66 @@ export const mapOrgVendorsWithSenders = async ({
     log && console.log('🚀 7 existing_sender:', existing_tool)
 
     if (existing_tool.data) {
-      const res = await supabase
-        .from('tool')
-        .update(tool)
-        .eq('id', existing_tool.data.id)
-        .select('*, sender(*)')
-      log && console.log('🚀 8 tool updated:', res)
-
-      await supabase
-        .from('org_vendor')
-        .update({
-          status: 'in_stack',
-        })
-        .in(
-          'id',
-          matchedVendorsSenders.map((vendor) => vendor.vendor_id)
-        )
-
-      await updateNotification({
+      await updateExistingTool({
+        tool,
+        existing_tool,
+        matchedVendorsSenders,
         organization_id,
-        title: `${res.data[0].name} connected with cost data`,
-        tag: 'activity_finished',
-        dataObject: `${res.data[0].name} connected with ${res.data[0].sender.name}`,
       })
     } else {
-      const res = await supabase
-        .from('tool')
-        .upsert(tool, {
-          onConflict: 'root_domain',
-          ignoreDuplicates: true,
-        })
-        .select('*, sender(*)')
-      log && console.log('🚀 9 new tool upserted:', res)
-
-      await updateNotification({
+      await createNewTool({
+        tool,
         organization_id,
-        title: `New tool added: ${res.data[0].name} with cost data`,
-        tag: 'activity_finished',
-        dataObject: `${res.data[0].name} connected with ${res.data[0].sender.name}`,
       })
     }
   }
+}
+
+const updateExistingTool = async ({
+  tool,
+  existing_tool,
+  matchedVendorsSenders,
+  organization_id,
+}) => {
+  const res = await supabase
+    .from('tool')
+    .update(tool)
+    .eq('id', existing_tool.data.id)
+    .select('*, sender(*)')
+  log && console.log('🚀 8 tool updated:', res)
+
+  await supabase
+    .from('org_vendor')
+    .update({
+      status: 'in_stack',
+    })
+    .in(
+      'id',
+      matchedVendorsSenders.map((vendor) => vendor.vendor_id)
+    )
+
+  await updateNotification({
+    organization_id,
+    title: `${res.data[0].name} connected with cost data`,
+    tag: 'activity_finished_update_tool',
+    dataObject: `${res.data[0].name} connected with ${res.data[0].sender.name}`,
+  })
+}
+
+const createNewTool = async ({ tool, organization_id }) => {
+  const res = await supabase
+    .from('tool')
+    .upsert(tool, {
+      onConflict: 'root_domain',
+      ignoreDuplicates: true,
+    })
+    .select('*, sender(*)')
+  log && console.log('🚀 9 new tool upserted:', res)
+
+  await updateNotification({
+    organization_id,
+    title: `New tool added: ${res.data[0].name} with cost data`,
+    tag: 'activity_finished_create_tool',
+    dataObject: `${res.data[0].name} connected with ${res.data[0].sender.name}`,
+  })
 }
