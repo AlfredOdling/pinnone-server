@@ -9,7 +9,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
-const log = false
+const log = true
 
 /**
  * If there is a match between the user browser history and the tools
@@ -21,6 +21,12 @@ export const pushNewUserActivity = async ({
   org_user_id,
 }) => {
   log && console.log('🚀 ----> pushNewUserActivity()')
+
+  await updateNotification({
+    organization_id,
+    title: 'Analyzing user activity',
+    tag: 'activity_starting',
+  })
 
   const tools = await supabase
     .from('tool')

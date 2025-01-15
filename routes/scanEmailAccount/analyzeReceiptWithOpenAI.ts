@@ -30,11 +30,8 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               
               IMPORTANT 1: If you are unsure about the pricing model at all, just set the pricing model to FLAT_FEE,
               and set the flat_fee_cost to the total cost of the invoice.
-
               IMPORTANT 2: If you are unsure of the renewal_frequency at all, just set it to MONTHLY.
-              
               IMPORTANT 3: Keep in mind that the invoice can be in Swedish. So for example Invoice = "Faktura", receipt = "Kvitto".
-              
               IMPORTANT 4: To be able to calculate everything correctly, make up a plan on what order you need to do things.
 
               --This is the instructions for the JSON fields--
@@ -120,8 +117,6 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               Also, if the document is stating that it is page 2 or 3 or similar, then it is not a complete invoice. I just want the first page.
               Analyze the provided document and determine if it is a complete invoice. A complete invoice must include the following details:
               - Invoice number
-              - Date of issue
-              - Billing information (e.g., sender and recipient details)
 
               **ocr**
               This is the OCR number from the image. Should be a string of numbers, and look something like this: 506101435042358.
