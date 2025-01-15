@@ -3,9 +3,9 @@ import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { getVendorRootDomains } from './utils'
 import { NewVendors } from './types'
 import { sendEmail } from './sendEmail'
+import { getVendorRootDomains } from './syncBrowserHistory/utils'
 
 dotenv.config()
 

@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
-import { Database } from '../types/supabase'
+import { Database } from '../../types/supabase'
 import OpenAI from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod'
-import { getB2BSaasDomains, updateNotification } from './utils'
-import { NewVendors } from './types'
+import { updateNotification } from '../utils'
+import { NewVendors } from '../types'
+import { getB2BSaasDomains } from './utils'
 
 dotenv.config()
 
@@ -29,6 +30,7 @@ export const updateOfficialVendors = async ({
 }) => {
   const visitedRootDomains = await getB2BSaasDomains(browserHistory)
 
+  return
   try {
     const completion = await openai.beta.chat.completions.parse({
       model: 'gpt-4o',

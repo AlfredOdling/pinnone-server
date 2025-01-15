@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
 import { Database } from '../../types/supabase'
-import { getVendorRootDomains, updateNotification } from '../utils'
+import { updateNotification } from '../utils'
 import { mapOrgVendorsWithSenders } from './mapOrgVendorsWithSenders'
+import { getVendorRootDomains } from './utils'
 
 dotenv.config()
 
@@ -22,7 +23,16 @@ export const addOrgVendors = async ({
 }) => {
   const detectedRootDomains = getVendorRootDomains(browserHistory)
 
-  if (!detectedRootDomains.length) {
+  const officialVendors_ = await supabase
+    .from('vendor')
+    .select('*')
+    .in('root_domain', detectedRootDomains)
+
+  const officialVendors = officialVendors_.data.filter(
+    (vendor) => vendor.status !== 'blocked'
+  )
+
+  if (!officialVendors.length) {
     return await updateNotification({
       organization_id,
       title: 'Finished scanning new vendors',
@@ -31,24 +41,17 @@ export const addOrgVendors = async ({
     })
   }
 
-  const officialVendors = await supabase
-    .from('vendor')
-    .select('*')
-    .in('root_domain', detectedRootDomains)
-
-  const newOrgVendors = officialVendors.data
-    .map((vendor) => ({
-      name: vendor.name,
-      description: vendor.description,
-      url: vendor.url,
-      category: vendor.category,
-      logo_url: vendor.logo_url,
-      link_to_pricing_page: vendor.link_to_pricing_page,
-      root_domain: vendor.root_domain,
-      organization_id,
-      status: 'not_in_stack',
-    }))
-    .filter((tool) => tool.status !== 'blocked')
+  const newOrgVendors = officialVendors.map((vendor) => ({
+    name: vendor.name,
+    description: vendor.description,
+    url: vendor.url,
+    category: vendor.category,
+    logo_url: vendor.logo_url,
+    link_to_pricing_page: vendor.link_to_pricing_page,
+    root_domain: vendor.root_domain,
+    organization_id,
+    status: 'not_in_stack',
+  }))
 
   if (newOrgVendors.length) {
     await updateNotification({

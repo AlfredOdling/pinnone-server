@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { updateOfficialVendors } from '../updateOfficialVendors'
+import { updateOfficialVendors } from './updateOfficialVendors'
 import { decrypt } from '../utils'
 import { addOrgVendors } from './addOrgVendors'
 import { pushNewUserActivity } from './pushNewUserActivity'
@@ -34,17 +34,17 @@ export const syncBrowserHistory = async ({
     organization_id,
   })
 
-  await addOrgVendors({
-    browserHistory: unvisited_browser_history,
-    organization_id,
-    owner_org_user_id: org_user_id,
-  })
+  // await addOrgVendors({
+  //   browserHistory: unvisited_browser_history,
+  //   organization_id,
+  //   owner_org_user_id: org_user_id,
+  // })
 
-  await pushNewUserActivity({
-    browserHistory: unvisited_browser_history,
-    organization_id,
-    org_user_id,
-  })
+  // await pushNewUserActivity({
+  //   browserHistory: unvisited_browser_history,
+  //   organization_id,
+  //   org_user_id,
+  // })
 }
 
 const filterUnvisitedBrowserHistory = async ({
@@ -58,11 +58,15 @@ const filterUnvisitedBrowserHistory = async ({
     .order('last_visited', { ascending: false })
     .limit(1)
     .single()
-  const last_visited_in_ms = new Date(res.data.last_visited).getTime()
 
-  const unvisited_browser_history = browserHistory.filter(
-    (item) => Number(item.lastVisitTime) > last_visited_in_ms
-  )
+  let unvisited_browser_history = browserHistory
+  if (res.data) {
+    const last_visited_in_ms = new Date(res.data.last_visited).getTime()
+    console.log('🚀  last_visited_in_ms:', last_visited_in_ms)
+    unvisited_browser_history = browserHistory.filter(
+      (item) => Number(item.lastVisitTime) > last_visited_in_ms
+    )
+  }
 
   return unvisited_browser_history
 }
