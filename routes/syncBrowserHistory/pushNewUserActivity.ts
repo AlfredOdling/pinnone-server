@@ -70,7 +70,7 @@ export const pushNewUserActivity = async ({
 
   await updateNotification({
     organization_id,
-    title: `Scanning done. New user activities detected.`,
+    title: `New user activities detected.`,
     tag: 'activity_finished',
     dataObject: `Detected new user activities from ${[
       ...new Set(userActivities.map((activity) => activity.root_domain)),

@@ -46,7 +46,7 @@ export const addOrgVendors = async ({
     log && console.log('🚀 4 No new vendors detected')
     return await updateNotification({
       organization_id,
-      title: `Scanning done. No new tools detected.`,
+      title: `No new tools detected.`,
       dataObject: 'No new vendors detected',
       tag: 'activity_finished',
     })
@@ -70,11 +70,11 @@ export const addOrgVendors = async ({
 
     await updateNotification({
       organization_id,
-      title: `Scanning done. ${newOrgVendors.length} new tools detected.`,
+      title: `${newOrgVendors.length} new tools detected.`,
       tag: 'activity_finished',
       dataObject: `Detected: ${[
         ...new Set(newOrgVendors.map((v) => v.root_domain)),
-      ].join(', ')}`,
+      ].join(', ')}. Find them under "Software/Detected"`,
     })
 
     await mapOrgVendorsWithSenders({
