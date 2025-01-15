@@ -3,7 +3,7 @@ import OpenAI from 'openai'
 import * as dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
-import { personalUrls } from './consts'
+import { personalUrls, b2bPaths } from './consts'
 import { RootDomains } from '../types'
 
 dotenv.config()
@@ -13,27 +13,6 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
-
-const b2bPaths = [
-  'dashboard',
-  'app',
-  'project',
-  'projects',
-  'team',
-  'account',
-  'accounts',
-  'sales',
-  'billing',
-  'team',
-  'console',
-]
-
-const splitURL = (url: string) => {
-  // Remove the protocol (http, https) and split by slashes
-  let parts = url.replace(/https?:\/\//, '').split('/')
-  // Split the domain into its parts and merge with the rest of the path
-  return parts[0].split('.').concat(parts.slice(1))
-}
 
 /**
  * Filter in the domains that includes any of the "b2bPaths"
@@ -65,16 +44,13 @@ export function getRootDomain(url: string): string | null {
 }
 
 // We get the root domains of the vendors that the user has visited
-export const getVendorRootDomains = (browserHistory) => {
-  return (
-    browserHistory
-      .map((entry) => getRootDomain(entry.url))
-      // Remove null values
-      .filter((domain) => domain)
-      // Remove duplicates
-      .filter((domain, index, self) => self.indexOf(domain) === index)
-  )
-}
+export const getVendorRootDomains = (browserHistory_) =>
+  browserHistory_
+    .map(({ url }) => getRootDomain(url))
+    // Remove null values
+    .filter((domain) => domain)
+    // Remove duplicates
+    .filter((domain, index, self) => self.indexOf(domain) === index)
 
 /**
  * Get the root domains of B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
@@ -173,4 +149,11 @@ export const getB2BSaasDomains = async (browserHistory_) => {
     console.error('Error calling OpenAI API:', error)
     throw new Error('Failed to filter business domains')
   }
+}
+
+const splitURL = (url: string) => {
+  // Remove the protocol (http, https) and split by slashes
+  let parts = url.replace(/https?:\/\//, '').split('/')
+  // Split the domain into its parts and merge with the rest of the path
+  return parts[0].split('.').concat(parts.slice(1))
 }

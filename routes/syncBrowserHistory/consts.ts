@@ -445,3 +445,17 @@ export const personalUrls = [
   'justfor.fans',
   'fansly.com',
 ]
+
+export const b2bPaths = [
+  'dashboard',
+  'app',
+  'project',
+  'projects',
+  'team',
+  'account',
+  'accounts',
+  'sales',
+  'billing',
+  'team',
+  'console',
+]
