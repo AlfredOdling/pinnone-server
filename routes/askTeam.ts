@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv'
 import { Database } from '../types/supabase'
 import { sendEmail } from './sendEmail'
 
-function dedupeArray(array) {
+export function dedupeArray(array) {
   const seen = new Set()
   return array?.filter((item) => {
     const uniqueId = item.org_user.id // Using tool.id for deduplication
