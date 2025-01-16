@@ -43,15 +43,7 @@ export const pushNewUserActivity = async ({
 
   log && console.log('🚀 1 userActivities:', userActivities)
 
-  if (userActivities.length === 0) {
-    return await updateNotification({
-      organization_id,
-      title: 'No new activity detected',
-      tag: 'activity_finished',
-    })
-  }
-
-  await supabase
+  const res = await supabase
     .from('user_activity')
     .upsert(
       // Just to filter out root_domain from the array
@@ -65,15 +57,23 @@ export const pushNewUserActivity = async ({
         ignoreDuplicates: true,
       }
     )
-    .select('*')
+    .select('*, tool(*)')
     .throwOnError()
 
-  await updateNotification({
-    organization_id,
-    title: `New user activities detected.`,
-    tag: 'activity_finished',
-    dataObject: `Detected new user activities from ${[
-      ...new Set(userActivities.map((activity) => activity.root_domain)),
-    ].join(', ')}`,
-  })
+  if (res.data?.length > 0) {
+    await updateNotification({
+      organization_id,
+      title: `New user activities detected.`,
+      tag: 'activity_finished',
+      dataObject: `Detected new user activities from ${[
+        ...new Set(res.data.map((activity) => activity.tool.name)),
+      ].join(', ')}`,
+    })
+  } else {
+    return await updateNotification({
+      organization_id,
+      title: 'No new activity detected',
+      tag: 'activity_finished',
+    })
+  }
 }

@@ -42,16 +42,6 @@ export const addOrgVendors = async ({
 
   log && console.log('🚀 3 officialVendors:', officialVendors)
 
-  if (!officialVendors.length) {
-    log && console.log('🚀 4 No new vendors detected')
-    return await updateNotification({
-      organization_id,
-      title: `No new tools detected.`,
-      dataObject: 'No new vendors detected',
-      tag: 'activity_finished',
-    })
-  }
-
   const newOrgVendors = officialVendors.map((vendor) => ({
     name: vendor.name,
     description: vendor.description,
@@ -68,19 +58,42 @@ export const addOrgVendors = async ({
   if (newOrgVendors.length > 0) {
     log && console.log('🚀 5 New vendors detected')
 
-    await updateNotification({
-      organization_id,
-      title: `${newOrgVendors.length} new tools detected.`,
-      tag: 'activity_finished',
-      dataObject: `Detected: ${[
-        ...new Set(newOrgVendors.map((v) => v.root_domain)),
-      ].join(', ')}. Find them under "Software/Detected"`,
-    })
+    // Upsert and get the new org_vendors
+    const org_vendors = await supabase
+      .from('org_vendor')
+      .upsert(newOrgVendors, {
+        onConflict: 'root_domain',
+        ignoreDuplicates: true,
+      })
+      .select('*')
 
-    await mapOrgVendorsWithSenders({
-      organization_id,
-      newOrgVendors,
-      owner_org_user_id,
-    })
+    console.log('🚀 6 org_vendors:', org_vendors)
+
+    if (org_vendors.data?.length > 0) {
+      await updateNotification({
+        organization_id,
+        title: `${newOrgVendors.length} new tools detected.`,
+        tag: 'activity_finished',
+        dataObject: `Detected: ${[
+          ...new Set(org_vendors.data.map((v) => v.root_domain)),
+        ].join(', ')}. Find them under Software -> Detected`,
+      })
+
+      await mapOrgVendorsWithSenders({
+        organization_id,
+        newOrgVendors,
+        owner_org_user_id,
+        org_vendors,
+      })
+    } else {
+      log && console.log('🚀 7 No new vendors detected')
+
+      return await updateNotification({
+        organization_id,
+        title: `No new tools detected.`,
+        dataObject: 'No new vendors detected',
+        tag: 'activity_finished',
+      })
+    }
   }
 }

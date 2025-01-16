@@ -24,19 +24,9 @@ export const mapOrgVendorsWithSenders = async ({
   organization_id,
   newOrgVendors,
   owner_org_user_id,
+  org_vendors,
 }) => {
   log && console.log('🚀 1 newOrgVendors:', newOrgVendors)
-
-  // Upsert and get the new org_vendors
-  const org_vendors = await supabase
-    .from('org_vendor')
-    .upsert(newOrgVendors, {
-      onConflict: 'root_domain',
-      ignoreDuplicates: true,
-    })
-    .select('*')
-
-  log && console.log('🚀 2 org_vendors:', org_vendors)
 
   // Get the organization's senders
   const senders = await supabase
@@ -133,6 +123,7 @@ export const mapOrgVendorsWithSenders = async ({
 
     log && console.log('🚀 7 existing_sender:', existing_tool)
 
+    // Vi kanske vill skippa och sender + vendor redan finns. alltså bara uppdatera om det finns nåt att uppdatera
     if (existing_tool.data) {
       await updateExistingTool({
         tool,
