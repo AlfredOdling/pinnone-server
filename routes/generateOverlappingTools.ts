@@ -23,11 +23,11 @@ export const generateOverlappingTools = async ({
 }) => {
   const tools = await supabase
     .from('tool')
-    .select(`*, vendor(*)`)
+    .select(`*`)
     .eq('organization_id', organization_id)
     .eq('status', 'in_stack')
 
-  const toolsList = tools.data.map((tool) => tool.vendor.name)
+  const toolsList = tools.data.map((tool) => tool.name)
 
   try {
     const completion = await openai.beta.chat.completions.parse({
