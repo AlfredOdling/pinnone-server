@@ -4,40 +4,74 @@ import { Database } from '../types/supabase'
 
 dotenv.config()
 
+// THANKS AI for this workable but ugly code
+
 const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY // Needed for admin rights
 )
 
-export const cleanupActivity = async () => {
-  const { data: userActivities } = await supabase
-    .from('user_activity')
+export const cleanupNotifications = async () => {
+  const { data: notifications } = await supabase
+    .from('notification')
     .select('*')
 
-  // Group activities by org_user_id
-  const groupedActivities = userActivities.reduce((acc, activity) => {
-    if (!acc[activity.org_user_id]) {
-      acc[activity.org_user_id] = []
+  // Group notifications by organization_id and tag
+  const groupedNotifications = notifications.reduce((acc, notification) => {
+    if (!acc[notification.organization_id]) {
+      acc[notification.organization_id] = {
+        activity: [],
+        email: [],
+      }
     }
-    acc[activity.org_user_id].push(activity)
+    if (notification.tag === 'activity') {
+      acc[notification.organization_id].activity.push(notification)
+    } else if (notification.tag === 'email') {
+      acc[notification.organization_id].email.push(notification)
+    }
     return acc
   }, {})
 
-  // For each group with more than 15 activities, delete the oldest ones
-  for (const orgUserId in groupedActivities) {
-    const activities = groupedActivities[orgUserId]
-    if (activities.length > 15) {
-      // Sort by created_at descending to keep the most recent
-      const sortedActivities = activities.sort(
+  // For each organization, handle activity and email notifications separately
+  for (const organizationId in groupedNotifications) {
+    const orgNotifications = groupedNotifications[organizationId]
+
+    // Handle activity notifications
+    if (orgNotifications.activity.length > 10) {
+      const sortedActivityNotifications = orgNotifications.activity.sort(
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
 
-      // Get IDs of activities to delete (all after index 14)
-      const activitiesToDelete = sortedActivities.slice(15).map((act) => act.id)
+      const activityNotificationsToDelete = sortedActivityNotifications
+        .slice(10)
+        .map((not) => not.id)
 
-      // Delete the overflow activities
-      await supabase.from('user_activity').delete().in('id', activitiesToDelete)
+      if (activityNotificationsToDelete.length > 0) {
+        await supabase
+          .from('notification')
+          .delete()
+          .in('id', activityNotificationsToDelete)
+      }
+    }
+
+    // Handle email notifications
+    if (orgNotifications.email.length > 10) {
+      const sortedEmailNotifications = orgNotifications.email.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+
+      const emailNotificationsToDelete = sortedEmailNotifications
+        .slice(10)
+        .map((not) => not.id)
+
+      if (emailNotificationsToDelete.length > 0) {
+        await supabase
+          .from('notification')
+          .delete()
+          .in('id', emailNotificationsToDelete)
+      }
     }
   }
 }

@@ -17,7 +17,7 @@ import { scanEmailAccount } from './scanEmailAccount'
 import { emailReceipts } from './emailReceipts'
 import { googleAuth } from './scanEmailAccount/authGoogle'
 import { sendSMS } from './sendSMS'
-import { cleanupActivity } from './cleanupActivity'
+import { cleanupNotifications } from './cleanupActivity'
 
 const router = Router()
 
@@ -191,8 +191,8 @@ cron.schedule(`0 12 * * *`, async () => {
 
 // Runs every day at 13:00
 cron.schedule(`0 13 * * *`, async () => {
-  console.log('🚀 Cleaning up user_activity data starting...')
-  await cleanupActivity()
+  console.log('🚀 Cleaning up notifications data starting...')
+  await cleanupNotifications()
 })
 
 export default router
