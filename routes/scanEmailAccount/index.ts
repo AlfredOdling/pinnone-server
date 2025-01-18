@@ -65,89 +65,82 @@ export const scanEmailAccount = async ({
     })
     const messages = response.data.messages || []
 
-    // Process messages in chunks of 4
-    for (let i = 0; i < messages.length; i += 4) {
-      const chunk = messages.slice(i, i + 4)
+    for (const message of messages) {
+      const msg = await gmail.users.messages.get({
+        userId: 'me',
+        id: message.id!,
+      })
 
-      await Promise.all(
-        chunk.map(async (message) => {
-          const msg = await gmail.users.messages.get({
-            userId: 'me',
-            id: message.id!,
-          })
+      const emailId = await supabase
+        .from('receipt')
+        .select('email_id')
+        .eq('email_id', message.id!)
 
-          const emailId = await supabase
-            .from('receipt')
-            .select('email_id')
-            .eq('email_id', message.id!)
+      if (emailId.data.length > 0) continue
 
-          if (emailId.data.length > 0) return
+      const payload = msg.data.payload
+      const parts = payload?.parts || []
+      const hasAttachments = parts.length > 0
 
-          const payload = msg.data.payload
-          const parts = payload?.parts || []
-          const hasAttachments = parts.length > 0
+      await updateNotification({
+        organization_id,
+        title: `Analyzing email from ${
+          payload?.headers?.find((h) => h.name === 'From')?.value
+        }`,
+        tag: 'email',
+        dataObject: `Analyzing email ${messages.indexOf(message) + 1} of ${
+          messages.length
+        }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`,
+      })
 
-          await updateNotification({
-            organization_id,
-            title: `Analyzing email from ${
-              payload?.headers?.find((h) => h.name === 'From')?.value
-            }`,
-            tag: 'email',
-            dataObject: `Analyzing email ${messages.indexOf(message) + 1} of ${
-              messages.length
-            }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`,
-          })
+      if (hasAttachments) {
+        let foundPdf = false
 
-          if (hasAttachments) {
-            let foundPdf = false
+        for (const part of parts) {
+          if (foundPdf) break
 
-            for (const part of parts) {
-              if (foundPdf) break
-
-              if (
-                part.filename !== '' &&
-                part.body &&
-                part.body.attachmentId &&
-                !part.filename.includes('zip')
-              ) {
-                await analyzeReceipt({
-                  gmail,
-                  tasksApi,
-                  messageId: message.id!,
-                  part,
-                  organization_id,
-                  email,
-                  msg,
-                  owner_org_user_id,
-                  type: part.filename.includes('pdf') ? 'pdf' : 'html',
-                })
-                foundPdf = true
-              }
-            }
-          } else if (!hasAttachments) {
+          if (
+            part.filename !== '' &&
+            part.body &&
+            part.body.attachmentId &&
+            !part.filename.includes('zip')
+          ) {
             await analyzeReceipt({
               gmail,
               tasksApi,
               messageId: message.id!,
+              part,
               organization_id,
               email,
               msg,
               owner_org_user_id,
-              type: 'html_no_attachments',
+              type: part.filename.includes('pdf') ? 'pdf' : 'html',
             })
+            foundPdf = true
           }
-
-          // Move message to Receipts label
-          await gmail.users.messages.modify({
-            userId: 'me',
-            id: message.id!,
-            requestBody: {
-              addLabelIds: [receiptsLabelId],
-              removeLabelIds: ['INBOX'],
-            },
-          })
+        }
+      } else if (!hasAttachments) {
+        await analyzeReceipt({
+          gmail,
+          tasksApi,
+          messageId: message.id!,
+          organization_id,
+          email,
+          msg,
+          owner_org_user_id,
+          type: 'html_no_attachments',
         })
-      )
+      }
+
+      // Move message to Receipts label
+      await gmail.users.messages.modify({
+        userId: 'me',
+        id: message.id!,
+        requestBody: {
+          addLabelIds: [receiptsLabelId],
+          removeLabelIds: ['INBOX'],
+        },
+      })
     }
 
     await updateNotification({
