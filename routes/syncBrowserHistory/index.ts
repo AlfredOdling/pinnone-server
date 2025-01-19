@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { updateOfficialVendors } from './updateOfficialVendors'
 import { decrypt } from '../utils'
 import { addOrgVendors } from './addOrgVendors'
-import { pushNewUserActivity } from './pushNewUserActivity'
+import { updateUserActivity } from './pushNewUserActivity'
 import * as dotenv from 'dotenv'
 import { Database } from '../../types/supabase'
 
@@ -28,7 +28,6 @@ export const syncBrowserHistory = async ({
     browserHistory,
     org_user_id,
   })
-  console.log('🚀  unvisited_browser_history:', unvisited_browser_history)
 
   await updateOfficialVendors({
     browserHistory: unvisited_browser_history,
@@ -41,7 +40,7 @@ export const syncBrowserHistory = async ({
     owner_org_user_id: org_user_id,
   })
 
-  await pushNewUserActivity({
+  await updateUserActivity({
     browserHistory: unvisited_browser_history,
     organization_id,
     org_user_id,

@@ -15,7 +15,7 @@ const log = true
  * If there is a match between the user browser history and the tools
  * that the org is tracking, push new user_activity
  */
-export const pushNewUserActivity = async ({
+export const updateUserActivity = async ({
   organization_id,
   browserHistory,
   org_user_id,
