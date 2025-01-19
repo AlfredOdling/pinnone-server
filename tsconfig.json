@@ -6,8 +6,10 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "dist",
+    "skipLibCheck": true
   },
   "lib": [
-    "es2015"
+    "es2015",
+    "ESNext.Promise"
   ],
 }
