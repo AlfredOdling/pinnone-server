@@ -76,6 +76,7 @@ export const detectNewDomains = async (browserHistory_) => {
 
             Example of B2B SaaS tools: hubspot, salesforce, zendesk, intercom, helpscout, freshdesk, teamwork, salesforce, zendesk, intercom, freshdesk, teamwork
             Example of non-B2B SaaS tools: amazon, twitter, facebook, instagram, youtube, pinterest, reddit, quora, medium, banks, healthcare, post offices, etc.
+            Do not evaluate the example domains, just use them as a reference.
           `,
         },
         {
