@@ -21,6 +21,8 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@sparticuz/chromium": "123.0.1",
+    "puppeteer-core": "22.7.1",
     "@supabase/supabase-js": "^2.45.4",
     "adm-zip": "^0.5.16",
     "body-parser": "^1.20.2",
@@ -38,7 +40,6 @@
     "nodemailer": "^6.9.7",
     "openai": "^4.67.3",
     "pdf-to-img": "^4.3.0",
-    "puppeteer": "^23.11.1",
     "sharp": "^0.33.5",
     "stripe": "^17.2.1",
     "twilio": "^5.4.1",
