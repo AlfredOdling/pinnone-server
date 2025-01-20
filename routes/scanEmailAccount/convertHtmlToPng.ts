@@ -29,7 +29,10 @@ export const convertHtmlToPng = async ({ msg, type }) => {
   }
 
   // Launch browser and create new page
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    ignoreDefaultArgs: ['--disable-extensions'],
+  })
   const page = await browser.newPage()
 
   // Set content and wait for network idle
