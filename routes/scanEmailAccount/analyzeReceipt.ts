@@ -7,6 +7,7 @@ import { updateEmailAccountLastScannedDate } from './updateEmailAccountLastScann
 import { generateSender } from './generateSender'
 import { insertReceipt } from './insertReceipt'
 import { generateTool } from './generateTool'
+import { updateNotification } from '../utils'
 
 export const analyzeReceipt = async ({
   gmail,
@@ -93,6 +94,13 @@ export const analyzeReceipt = async ({
     }
   } catch (error) {
     console.error('Error in analyzeReceipt:', error)
+
+    await updateNotification({
+      organization_id,
+      title: `Error analyzing email`,
+      tag: 'email_finished',
+      dataObject: `Error analyzing email ${messageId}`,
+    })
     throw error
   }
 }

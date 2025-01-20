@@ -30,7 +30,6 @@ export const generateSender = async ({
         organization_id,
       })
       .select('*')
-      .throwOnError()
     sender = newSender
   } else {
     sender = existingSender
