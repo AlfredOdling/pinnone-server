@@ -35,5 +35,5 @@ export const generateSender = async ({
     sender = existingSender
   }
 
-  return sender.data[0]
+  return sender?.data?.[0] || null
 }

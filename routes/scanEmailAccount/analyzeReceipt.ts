@@ -51,6 +51,10 @@ export const analyzeReceipt = async ({
       organization_id,
     })
 
+    if (!sender) {
+      return new Error('Sender not found')
+    }
+
     if (res.type === 'software') {
       await generateTool({
         organization_id,
