@@ -17,10 +17,10 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 export const handleStripeWebhooks = async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature']
   let event
+  console.log('🚀  event:', event)
 
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret)
-    console.log('🚀  event:', event)
   } catch (err) {
     console.log('🚀  err:', err)
     res.status(400).send('Webhook Error' + err.message)
