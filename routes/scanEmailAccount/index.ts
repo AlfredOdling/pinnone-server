@@ -6,7 +6,7 @@ import { OAuth2Client } from 'google-auth-library'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { analyzeReceipt } from './analyzeReceipt'
-// import { createLabel } from './createLabel'
+import { createLabel } from './createLabel'
 import { refreshToken } from './refreshToken'
 import { updateNotification } from '../utils'
 
@@ -54,7 +54,7 @@ export const scanEmailAccount = async ({
     })
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
     const tasksApi = google.tasks({ version: 'v1', auth: oAuth2Client })
-    // const receiptsLabelId = await createLabel(gmail)
+    const receiptsLabelId = await createLabel(gmail)
 
     const query = `(invoice | receipt | faktura | kvitto) after:${after} before:${before}`
     console.log('🚀  query:', query)
@@ -133,14 +133,14 @@ export const scanEmailAccount = async ({
       }
 
       // Move message to Receipts label
-      // await gmail.users.messages.modify({
-      //   userId: 'me',
-      //   id: message.id!,
-      //   requestBody: {
-      //     addLabelIds: [receiptsLabelId],
-      //     removeLabelIds: ['INBOX'],
-      //   },
-      // })
+      await gmail.users.messages.modify({
+        userId: 'me',
+        id: message.id!,
+        requestBody: {
+          addLabelIds: [receiptsLabelId],
+          removeLabelIds: ['INBOX'],
+        },
+      })
     }
 
     await updateNotification({
