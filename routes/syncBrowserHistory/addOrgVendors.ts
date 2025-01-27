@@ -35,20 +35,22 @@ export const addOrgVendors = async ({
     .filter((domain) => domain) // Remove null values
     .filter((domain, index, self) => self.indexOf(domain) === index) // Remove duplicates
 
-  log && console.log('🚀 1 detectedRootDomains:', detectedRootDomains)
+  log &&
+    console.log('🚀 1 detectedRootDomains:', detectedRootDomains.slice(0, 5))
 
   const officialVendors_ = await supabase
     .from('vendor')
     .select('*')
     .in('root_domain', detectedRootDomains)
 
-  log && console.log('🚀 2 officialVendors_:', officialVendors_)
+  log &&
+    console.log('🚀 2 officialVendors_:', officialVendors_.data.slice(0, 2))
 
   const officialVendors = officialVendors_.data.filter(
     (vendor) => vendor.status !== 'blocked'
   )
 
-  log && console.log('🚀 3 officialVendors:', officialVendors)
+  log && console.log('🚀 3 officialVendors:', officialVendors.slice(0, 2))
 
   const newOrgVendors = officialVendors.map((vendor) => ({
     name: vendor.name,
