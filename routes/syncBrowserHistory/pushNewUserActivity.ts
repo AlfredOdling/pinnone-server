@@ -20,7 +20,13 @@ export const updateUserActivity = async ({
   browserHistory,
   org_user_id,
 }) => {
-  log && console.log('🚀 ----> pushNewUserActivity()')
+  log &&
+    console.log(
+      '🚀 ----> pushNewUserActivity(): organization_id, org_user_id, browserHistory',
+      organization_id,
+      org_user_id,
+      browserHistory.slice(0, 2)
+    )
 
   await updateNotification({
     organization_id,

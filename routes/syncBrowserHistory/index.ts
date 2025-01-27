@@ -57,8 +57,6 @@ const filterInUnvisitedBrowserHistory = async ({
     .eq('org_user_id', org_user_id)
     .order('last_visited', { ascending: false })
 
-  console.log('🚀 filterInUnvisitedBrowserHistory:', res)
-
   let unvisited_browser_history = browserHistory
   if (res.data?.length) {
     const last_visited_in_ms = new Date(res.data[0].last_visited).getTime()
