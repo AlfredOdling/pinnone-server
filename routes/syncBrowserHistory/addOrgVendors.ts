@@ -22,6 +22,14 @@ export const addOrgVendors = async ({
   organization_id,
   owner_org_user_id,
 }) => {
+  log &&
+    console.log(
+      '🚀 0 addOrgVendors(): organization_id, owner_org_user_id, browserHistory',
+      organization_id,
+      owner_org_user_id,
+      browserHistory.slice(0, 2)
+    )
+
   const detectedRootDomains = browserHistory
     .map(({ url }) => extractB2BRootDomain(url))
     .filter((domain) => domain) // Remove null values
