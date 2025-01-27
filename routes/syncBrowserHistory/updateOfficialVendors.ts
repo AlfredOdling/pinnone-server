@@ -16,7 +16,7 @@ const supabase = createClient<Database>(
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
-const log = false
+const log = true
 
 /**
  * Update the official vendor list with new vendors

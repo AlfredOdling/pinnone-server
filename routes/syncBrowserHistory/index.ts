@@ -29,6 +29,8 @@ export const syncBrowserHistory = async ({
     org_user_id,
   })
 
+  console.log('🚀  unvisited_browser_history:', unvisited_browser_history)
+
   await updateOfficialVendors({
     browserHistory: unvisited_browser_history,
     organization_id,
@@ -58,6 +60,8 @@ const filterInUnvisitedBrowserHistory = async ({
     .order('last_visited', { ascending: false })
     .limit(1)
     .single()
+
+  console.log('🚀 filterInUnvisitedBrowserHistory:', res)
 
   let unvisited_browser_history = browserHistory
   if (res.data) {
