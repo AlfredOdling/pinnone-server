@@ -34,7 +34,7 @@ export const addOrgVendors = async ({
     .map(({ url }) => extractB2BRootDomain(url))
     .filter((domain) => domain) // Remove null values
     .filter((domain, index, self) => self.indexOf(domain) === index) // Remove duplicates
-  log && console.log('🚀 ----> addOrgVendors()', detectedRootDomains)
+
   log && console.log('🚀 1 detectedRootDomains:', detectedRootDomains)
 
   const officialVendors_ = await supabase
