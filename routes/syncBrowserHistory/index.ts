@@ -56,14 +56,12 @@ const filterInUnvisitedBrowserHistory = async ({
     .select('last_visited')
     .eq('org_user_id', org_user_id)
     .order('last_visited', { ascending: false })
-    .limit(1)
-    .single()
 
   console.log('🚀 filterInUnvisitedBrowserHistory:', res)
 
   let unvisited_browser_history = browserHistory
   if (res.data) {
-    const last_visited_in_ms = new Date(res.data.last_visited).getTime()
+    const last_visited_in_ms = new Date(res.data[0].last_visited).getTime()
 
     unvisited_browser_history = browserHistory.filter(
       (item) => Number(item.lastVisitTime) > last_visited_in_ms
