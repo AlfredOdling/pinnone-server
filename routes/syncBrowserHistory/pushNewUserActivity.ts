@@ -35,6 +35,8 @@ export const updateUserActivity = async ({
     .eq('status', 'in_stack')
     .eq('organization_id', organization_id)
 
+  log && console.log('🚀 0 tools:', tools)
+
   const userActivities: any = getUserActivities({
     browserHistory,
     tools: tools.data,
@@ -59,6 +61,8 @@ export const updateUserActivity = async ({
     )
     .select('*, tool(*)')
     .throwOnError()
+
+  log && console.log('🚀 2 user_activity:', res)
 
   if (res.data?.length > 0) {
     await updateNotification({

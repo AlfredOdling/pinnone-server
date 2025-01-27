@@ -29,8 +29,6 @@ export const syncBrowserHistory = async ({
     org_user_id,
   })
 
-  console.log('🚀  unvisited_browser_history:', unvisited_browser_history)
-
   await updateOfficialVendors({
     browserHistory: unvisited_browser_history,
     organization_id,
