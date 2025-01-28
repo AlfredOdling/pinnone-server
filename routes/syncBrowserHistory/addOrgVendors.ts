@@ -74,7 +74,7 @@ export const addOrgVendors = async ({
     const org_vendors = await supabase
       .from('org_vendor')
       .upsert(newOrgVendors, {
-        onConflict: 'root_domain',
+        onConflict: 'root_domain, organization_id',
         ignoreDuplicates: true,
       })
       .select('*')
