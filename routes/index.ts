@@ -1,11 +1,8 @@
 import { Router, Request, Response } from 'express'
 import { inviteAdmins } from './inviteAdmins'
 import { inviteExtensionUsers } from './inviteExtensionUsers'
-import { syncBrowserHistory } from './syncBrowserHistory'
 import { deleteExtensionUser } from './deleteExtensionUser'
 import { addToolsManually } from './addToolsManually'
-import { updateOfficialVendors } from './syncBrowserHistory/updateOfficialVendors'
-import { getOrgUsers } from './utils'
 import { generateOverlappingTools } from './generateOverlappingTools'
 import express from 'express'
 import { handleStripeWebhooks } from './handleStripeWebhooks'
@@ -18,6 +15,16 @@ import { emailReceipts } from './emailReceipts'
 import { googleAuth } from './scanEmailAccount/authGoogle'
 import { sendSMS } from './sendSMS'
 import { cleanupNotifications } from './cleanupActivity'
+import { Piscina } from 'piscina'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const syncBrowserHistoryPool = new Piscina({
+  filename: path.resolve(__dirname, '../workers/syncBrowserHistoryWorker.ts'),
+})
 
 const router = Router()
 
@@ -68,23 +75,15 @@ router.post('/sendExtensionInvite', async (req: Request, res: Response) => {
 
 router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   const { data } = req.body
-  console.log('--------⏳ syncBrowserHistory starting')
+
+  const props = {
+    user_id: data.user_id,
+    encryptedData: data.encryptedData,
+  }
+
   try {
-    const orgUsers = await getOrgUsers({ user_id: data.user_id })
+    await syncBrowserHistoryPool.run(props)
 
-    console.log('🚀 syncBrowserHistory / orgUsers:', orgUsers)
-
-    await Promise.all(
-      orgUsers.map((orgUser) =>
-        syncBrowserHistory({
-          encryptedData: data.encryptedData,
-          org_user_id: orgUser.id,
-          organization_id: orgUser.organization_id,
-        })
-      )
-    )
-
-    console.info('--------syncBrowserHistory done ✅')
     res.status(200).send()
   } catch (error) {
     console.error(error)
