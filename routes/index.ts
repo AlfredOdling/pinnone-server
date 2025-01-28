@@ -18,6 +18,7 @@ import { cleanupNotifications } from './cleanupActivity'
 import { Piscina } from 'piscina'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { refreshTokens } from './scanEmailAccount/refreshToken'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -194,6 +195,12 @@ cron.schedule(`0 12 * * *`, async () => {
 cron.schedule(`0 13 * * *`, async () => {
   console.log('🚀 Cleaning up notifications data starting...')
   await cleanupNotifications()
+})
+
+// Runs every day at 09:00
+cron.schedule(`0 09 * * *`, async () => {
+  console.log('🚀 refreshTokens starting...')
+  await refreshTokens()
 })
 
 export default router

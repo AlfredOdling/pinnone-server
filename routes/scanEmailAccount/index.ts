@@ -7,7 +7,6 @@ import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { analyzeReceipt } from './analyzeReceipt'
 import { createLabel } from './createLabel'
-import { refreshToken } from './refreshToken'
 import { updateNotification } from '../utils'
 
 dotenv.config()
@@ -150,16 +149,7 @@ export const scanEmailAccount = async ({
       dataObject: `Finished scanning ${messages.length}/${messages.length} emails`,
     })
   } catch (error) {
-    const invalid_grant = error.message === 'invalid_grant'
-
-    if (invalid_grant) {
-      await refreshToken({
-        refreshToken: emailAccount.refresh_token,
-        email: emailAccount.email,
-      })
-    } else {
-      throw error
-    }
+    throw error
   } finally {
     // Remove all files in temp folder
     const attachmentsFolder = 'temp/attachments'
