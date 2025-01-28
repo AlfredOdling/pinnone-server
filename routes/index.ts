@@ -30,6 +30,16 @@ const syncBrowserHistoryPool = new Piscina({
   maxThreads: os.cpus().length,
 })
 
+const { utilization, duration, queueSize, completed } = syncBrowserHistoryPool
+
+console.log('------ 💻 pool stats ------')
+console.log({
+  utilization,
+  duration,
+  queueSize,
+  completed,
+})
+
 const router = Router()
 
 router.post(
