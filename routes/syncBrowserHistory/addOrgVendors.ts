@@ -45,24 +45,27 @@ export const addOrgVendors = async ({
   log &&
     console.log('🚀 2 officialVendors_:', officialVendors_.data.slice(0, 2))
 
-  const officialVendors = officialVendors_.data.filter(
-    (vendor) => vendor.status !== 'blocked'
+  const officialVendors = await Promise.resolve(
+    officialVendors_.data.filter((vendor) => vendor.status !== 'blocked')
   )
 
   log && console.log('🚀 3 officialVendors:', officialVendors.slice(0, 2))
 
-  const newOrgVendors = officialVendors.map((vendor) => ({
-    name: vendor.name,
-    description: vendor.description,
-    url: vendor.url,
-    category: vendor.category,
-    logo_url: vendor.logo_url,
-    link_to_pricing_page: vendor.link_to_pricing_page,
-    root_domain: vendor.root_domain,
-    organization_id,
-    status: 'not_in_stack',
-  }))
-  log && console.log('🚀 4 newOrgVendors:', newOrgVendors)
+  const newOrgVendors = await Promise.resolve(
+    officialVendors.map((vendor) => ({
+      name: vendor.name,
+      description: vendor.description,
+      url: vendor.url,
+      category: vendor.category,
+      logo_url: vendor.logo_url,
+      link_to_pricing_page: vendor.link_to_pricing_page,
+      root_domain: vendor.root_domain,
+      organization_id,
+      status: 'not_in_stack',
+    }))
+  )
+
+  log && console.log('🚀 4 newOrgVendors:', newOrgVendors.slice(0, 2))
 
   if (newOrgVendors.length > 0) {
     log && console.log('🚀 5 New vendors detected')
