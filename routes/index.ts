@@ -19,12 +19,15 @@ import { Piscina } from 'piscina'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { refreshTokens } from './scanEmailAccount/refreshToken'
+import os from 'os'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const syncBrowserHistoryPool = new Piscina({
   filename: path.resolve(__dirname, '../workers/syncBrowserHistoryWorker.ts'),
+  minThreads: os.cpus().length,
+  maxThreads: os.cpus().length,
 })
 
 const router = Router()
