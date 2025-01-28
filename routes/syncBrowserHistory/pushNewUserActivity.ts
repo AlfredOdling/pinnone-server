@@ -9,7 +9,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
-const log = false
+const log = true
 
 /**
  * If there is a match between the user browser history and the tools
@@ -41,7 +41,7 @@ export const updateUserActivity = async ({
     .eq('status', 'in_stack')
     .eq('organization_id', organization_id)
 
-  log && console.log('🚀 0 tools:', tools)
+  log && console.log('🚀 0 tools:', tools.data.slice(0, 2))
 
   const userActivities: any = getUserActivities({
     browserHistory,
@@ -49,7 +49,7 @@ export const updateUserActivity = async ({
     org_user_id,
   })
 
-  log && console.log('🚀 1 userActivities:', userActivities)
+  log && console.log('🚀 1 userActivities:', userActivities.slice(0, 2))
 
   const res = await supabase
     .from('user_activity')
@@ -68,7 +68,7 @@ export const updateUserActivity = async ({
     .select('*, tool(*)')
     .throwOnError()
 
-  log && console.log('🚀 2 user_activity:', res)
+  log && console.log('🚀 2 user_activity:', res.data.slice(0, 2))
 
   if (res.data?.length > 0) {
     await updateNotification({
@@ -80,6 +80,8 @@ export const updateUserActivity = async ({
       ].join(', ')}`,
     })
   } else {
+    log && console.log('🚀 3 No new activity detected', res)
+
     return await updateNotification({
       organization_id,
       title: 'No new activity detected',

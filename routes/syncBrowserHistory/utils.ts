@@ -42,6 +42,8 @@ export function extractB2BRootDomain(url: string): string | null {
  * Get the root domains of new B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
  */
 export const detectNewDomains = async (browserHistory_) => {
+  const log = false
+
   let browserHistory = browserHistory_
     .map(({ url }) => extractB2BRootDomain(url))
     .filter((domain) => domain) // Remove null values
@@ -99,24 +101,27 @@ export const detectNewDomains = async (browserHistory_) => {
       (d) => d.is_b2b_tool_certainty_score <= 35
     )
 
-    console.info('--------------')
-    console.info(
-      '\x1b[33m%s\x1b[0m',
-      '🔍 Visited domains:',
-      domains.map((d) => d.domain)
-    )
+    log && console.info('--------------')
+    log &&
+      console.info(
+        '\x1b[33m%s\x1b[0m',
+        '🔍 Visited domains:',
+        domains.map((d) => d.domain)
+      )
 
-    console.info(
-      '\x1b[34m%s\x1b[0m',
-      '✅ Approved domains (certaintyScore > 35%):',
-      filteredDomains.map((d) => d)
-    )
+    log &&
+      console.info(
+        '\x1b[34m%s\x1b[0m',
+        '✅ Approved domains (certaintyScore > 35%):',
+        filteredDomains.map((d) => d)
+      )
 
-    console.info(
-      '\x1b[31m%s\x1b[0m',
-      '🚨 Skipped domains:',
-      skippedDomains.map((d) => d)
-    )
+    log &&
+      console.info(
+        '\x1b[31m%s\x1b[0m',
+        '🚨 Skipped domains:',
+        skippedDomains.map((d) => d)
+      )
 
     return filteredDomains.map((d) => d.domain)
   } catch (error) {

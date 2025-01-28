@@ -100,23 +100,23 @@ export const updateOfficialVendors = async ({
     if (!vendors?.data.length) {
       log && console.log('🚀 4 No new vendors detected')
 
-      // await updateNotification({
-      //   organization_id,
-      //   title: 'Done! No new vendors detected',
-      //   dataObject: 'No new vendors detected',
-      //   tag: 'activity_finished',
-      // })
+      await updateNotification({
+        organization_id,
+        title: 'Done! No new vendors detected',
+        dataObject: 'No new vendors detected',
+        tag: 'activity_finished',
+      })
     } else {
       log && console.log('🚀 5 New vendors detected')
 
-      // await updateNotification({
-      //   organization_id,
-      //   title: `Done! Added ${vendors?.data?.length} new vendors.`,
-      //   tag: 'activity_finished',
-      //   dataObject: `New vendors: ${vendors?.data
-      //     ?.map((v) => v.root_domain)
-      //     .join(', ')}`,
-      // })
+      await updateNotification({
+        organization_id,
+        title: `Done! Added ${vendors?.data?.length} new vendors.`,
+        tag: 'activity_finished',
+        dataObject: `New vendors: ${vendors?.data
+          ?.map((v) => v.root_domain)
+          .join(', ')}`,
+      })
     }
   } catch (error) {
     log && console.log('🚀 6 Error processing vendors', error)
