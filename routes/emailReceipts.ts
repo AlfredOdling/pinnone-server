@@ -18,10 +18,12 @@ export const emailReceipts = async ({
   fromEmail,
   toEmail,
   fileUrls,
+  sendType,
 }: {
   fromEmail: string
   toEmail: string
   fileUrls: string[]
+  sendType: string
 }) => {
   // Create temp directory if it doesn't exist
   const tempDir = path.join(process.cwd(), 'temp')
@@ -41,39 +43,53 @@ export const emailReceipts = async ({
 
   const downloadedFiles = await Promise.all(downloadPromises)
 
-  // Create zip file
-  const zip = new AdmZip()
-  downloadedFiles.forEach((filePath) => {
-    zip.addLocalFile(filePath)
-  })
+  if (sendType === 'package') {
+    // Create zip file
+    const zip = new AdmZip()
+    downloadedFiles.forEach((filePath) => {
+      zip.addLocalFile(filePath)
+    })
 
-  const zipPath = path.join(tempDir, 'receipts.zip')
-  zip.writeZip(zipPath)
+    const zipPath = path.join(tempDir, 'receipts.zip')
+    zip.writeZip(zipPath)
 
-  // Upload zip to Supabase storage
-  const zipBuffer = fs.readFileSync(zipPath)
-  const { data, error } = await supabase.storage
-    .from('receipts')
-    .upload(`${Date.now()}_receipts.zip`, zipBuffer)
+    // Upload zip to Supabase storage
+    const zipBuffer = fs.readFileSync(zipPath)
+    const { data, error } = await supabase.storage
+      .from('receipts')
+      .upload(`${Date.now()}_receipts.zip`, zipBuffer)
 
-  if (error) throw error
+    if (error) throw error
 
-  // Get download URL
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from('receipts').getPublicUrl(data.path)
+    // Get download URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('receipts').getPublicUrl(data.path)
+
+    // Clean up temp files
+    fs.unlinkSync(zipPath)
+
+    sendEmail({
+      fromEmail,
+      toEmail,
+      emailSubject: '[PinnOne] Receipts',
+      emailText: `Here are your receipts. Download them here: ${publicUrl}
+      
+      Created by https://pinn.one/
+      `,
+    })
+  } else if (sendType === 'one-by-one') {
+    for (const fileUrl of fileUrls) {
+      await sendEmail({
+        fromEmail,
+        toEmail,
+        emailSubject: '[PinnOne] Receipt',
+        emailText: `Receipts from PinnOne.`,
+        attachments: [{ filename: 'receipt.pdf', path: fileUrl }],
+      })
+    }
+  }
 
   // Clean up temp files
   downloadedFiles.forEach((filePath) => fs.unlinkSync(filePath))
-  fs.unlinkSync(zipPath)
-
-  sendEmail({
-    fromEmail,
-    toEmail,
-    emailSubject: '[PinnOne] Receipts',
-    emailText: `Here are your receipts. Download them here: ${publicUrl}
-    
-    Created by https://pinn.one/
-    `,
-  })
 }

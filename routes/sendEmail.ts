@@ -9,6 +9,16 @@ export const sendEmail = async ({
   toEmail,
   emailText,
   emailSubject,
+  attachments,
+}: {
+  fromEmail: string
+  toEmail: string
+  emailText: string
+  emailSubject: string
+  attachments?: {
+    filename: string
+    path: string
+  }[]
 }) => {
   // Create a transporter using SMTP or an email service
   const transporter = nodemailer.createTransport({
@@ -28,6 +38,7 @@ export const sendEmail = async ({
     to: toEmail,
     subject: emailSubject,
     text: emailText,
+    attachments: attachments || [],
   }
   console.log('🚀  mailOptions:', mailOptions)
 

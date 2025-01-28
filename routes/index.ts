@@ -173,8 +173,8 @@ router.post('/scanEmailAccount', async (req, res) => {
 })
 
 router.post('/emailReceipts', async (req, res) => {
-  const { fromEmail, toEmail, fileUrls } = req.body
-  await emailReceipts({ fromEmail, toEmail, fileUrls })
+  const { fromEmail, toEmail, fileUrls, sendType } = req.body
+  await emailReceipts({ fromEmail, toEmail, fileUrls, sendType })
   res.json({ data: 'Receipts emailed' })
 })
 
