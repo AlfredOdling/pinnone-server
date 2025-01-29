@@ -126,16 +126,18 @@ export const scanEmailAccount = async ({
           }
         }
       } else if (!hasAttachments) {
-        // await analyzeReceipt({
-        //   gmail,
-        //   tasksApi,
-        //   messageId: message.id!,
-        //   organization_id,
-        //   email,
-        //   msg,
-        //   owner_org_user_id,
-        //   type: 'html_no_attachments',
-        // })
+        if (process.env.NODE_ENV !== 'development') {
+          await analyzeReceipt({
+            gmail,
+            tasksApi,
+            messageId: message.id!,
+            organization_id,
+            email,
+            msg,
+            owner_org_user_id,
+            type: 'html_no_attachments',
+          })
+        }
       }
 
       // Move message to Receipts label
