@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { updateOfficialVendors } from './updateOfficialVendors'
-import { decrypt } from '../utils'
+import { decrypt, updateNotification } from '../utils'
 import { addOrgVendors } from './addOrgVendors'
 import { updateUserActivity } from './pushNewUserActivity'
 import * as dotenv from 'dotenv'
@@ -22,6 +22,13 @@ export const syncBrowserHistory = async ({
   org_user_id: number
   organization_id: string
 }) => {
+  await updateNotification({
+    organization_id,
+    title: 'Started analyzing activity',
+    dataObject: 'Syncing user activity. Might take a few minutes.',
+    tag: 'activity_started',
+  })
+
   const browserHistory = decrypt(encryptedData)
 
   const unvisited_browser_history = await filterInUnvisitedBrowserHistory({
