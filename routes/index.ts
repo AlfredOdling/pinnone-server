@@ -26,11 +26,13 @@ const __dirname = path.dirname(__filename)
 
 const syncBrowserHistoryPool = new Piscina({
   filename: path.resolve(__dirname, '../workers/syncBrowserHistoryWorker.ts'),
+  minThreads: 4,
   maxThreads: os.cpus().length,
 })
 
 // Function to log pool stats every 5 seconds
 setInterval(async () => {
+  console.log('------ 💻 Pool stats:')
   console.table({
     maxThreads: syncBrowserHistoryPool.maxThreads,
     minThreads: syncBrowserHistoryPool.minThreads,
@@ -39,6 +41,14 @@ setInterval(async () => {
     needsDrain: syncBrowserHistoryPool.needsDrain,
     utilization: Math.round(syncBrowserHistoryPool.utilization * 100),
     taskMeanWait: syncBrowserHistoryPool.waitTime.mean,
+  })
+
+  syncBrowserHistoryPool.threads.forEach((thread, index) => {
+    console.log(
+      '🧵 Thread',
+      index + 1,
+      thread.performance.eventLoopUtilization()
+    )
   })
 }, 20000)
 
