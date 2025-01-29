@@ -113,6 +113,8 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               - other: If the vendor is something else.
 
               **is_a_receipt_or_invoice**
+              First of all, if the image is not a receipt or invoice, set this to false.
+              Do not hallucinate. If the image is empty, set this to false. Be sure to not make stuff up if you are unsure, or if the image is empty, or if the image is not a receipt or invoice.
               This is true if you find evidence that the this image is a COMPLETE receipt or invoice (not just a partial invoice).
               Also, if the document is stating that it is page 2 or 3 or similar, then it is not a complete invoice. I just want the first page.
               Analyze the provided document and determine if it is a complete invoice. A complete invoice must include the following details:
