@@ -35,6 +35,13 @@ export const scanEmailAccount = async ({
   after: string
   before: string
 }) => {
+  await updateNotification({
+    organization_id,
+    title: `Scan started`,
+    tag: 'email_scanning',
+    dataObject: `Scanning emails`,
+  })
+
   const { data: emailAccount } = await supabase
     .from('email_account')
     .select()
