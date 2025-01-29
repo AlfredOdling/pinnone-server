@@ -15,32 +15,32 @@ import { emailReceipts } from './emailReceipts'
 import { googleAuth } from './scanEmailAccount/authGoogle'
 import { sendSMS } from './sendSMS'
 import { cleanupNotifications } from './cleanupActivity'
-// import { Piscina } from 'piscina'
-// import path from 'path'
-// import { fileURLToPath } from 'url'
+import { Piscina } from 'piscina'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { refreshTokens } from './scanEmailAccount/refreshToken'
-// import os from 'os'
-import { getOrgUsers } from './utils'
-import { syncBrowserHistory } from './syncBrowserHistory'
+import os from 'os'
 
-// const __filename = fileURLToPath(import.meta.url)
-// const __dirname = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-// const syncBrowserHistoryPool = new Piscina({
-//   filename: path.resolve(__dirname, '../workers/syncBrowserHistoryWorker.ts'),
-//   minThreads: os.cpus().length,
-//   maxThreads: os.cpus().length,
-// })
+const syncBrowserHistoryPool = new Piscina({
+  filename: path.resolve(__dirname, '../workers/syncBrowserHistoryWorker.ts'),
+  maxThreads: os.cpus().length,
+})
 
-// const { utilization, duration, queueSize, completed } = syncBrowserHistoryPool
-
-// console.log('------ 💻 pool stats ------')
-// console.log({
-//   utilization,
-//   duration,
-//   queueSize,
-//   completed,
-// })
+// Function to log pool stats every 5 seconds
+setInterval(async () => {
+  console.table({
+    maxThreads: syncBrowserHistoryPool.maxThreads,
+    minThreads: syncBrowserHistoryPool.minThreads,
+    threads: syncBrowserHistoryPool.threads.length,
+    queueSize: syncBrowserHistoryPool.queueSize,
+    needsDrain: syncBrowserHistoryPool.needsDrain,
+    utilization: Math.round(syncBrowserHistoryPool.utilization * 100),
+    taskMeanWait: syncBrowserHistoryPool.waitTime.mean,
+  })
+}, 5000)
 
 const router = Router()
 
@@ -89,47 +89,48 @@ router.post('/sendExtensionInvite', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
-  const { data } = req.body
-  try {
-    const orgUsers = await getOrgUsers({ user_id: data.user_id })
-    console.log('--------⏳ syncBrowserHistory starting', orgUsers)
-
-    await Promise.all(
-      orgUsers.map((orgUser) =>
-        syncBrowserHistory({
-          encryptedData: data.encryptedData,
-          org_user_id: orgUser.id,
-          organization_id: orgUser.organization_id,
-        })
-      )
-    )
-
-    console.info('--------syncBrowserHistory done ✅')
-    res.status(200).send()
-  } catch (error) {
-    console.error(error)
-    res.status(500).send({ error: 'Failed', msg: error.message })
-  }
-})
-
 // router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
 //   const { data } = req.body
-
-//   const props = {
-//     user_id: data.user_id,
-//     encryptedData: data.encryptedData,
-//   }
-
 //   try {
-//     await syncBrowserHistoryPool.run(props)
+//     const orgUsers = await getOrgUsers({ user_id: data.user_id })
+//     console.log('--------⏳ syncBrowserHistory starting', orgUsers)
 
+//     await Promise.all(
+//       orgUsers.map((orgUser) =>
+//         syncBrowserHistory({
+//           encryptedData: data.encryptedData,
+//           org_user_id: orgUser.id,
+//           organization_id: orgUser.organization_id,
+//         })
+//       )
+//     )
+
+//     console.info('--------syncBrowserHistory done ✅')
 //     res.status(200).send()
 //   } catch (error) {
 //     console.error(error)
 //     res.status(500).send({ error: 'Failed', msg: error.message })
 //   }
 // })
+
+router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
+  const { data } = req.body
+  const props = {
+    user_id: data.user_id,
+    encryptedData: data.encryptedData,
+  }
+
+  try {
+    console.log('🔥 --- syncBrowserHistory starting for: ', data.user_id)
+    await syncBrowserHistoryPool.run(props)
+    console.log('✅ --- syncBrowserHistory done!')
+
+    res.status(200).send()
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ error: 'Failed', msg: error.message })
+  }
+})
 
 router.post('/deleteExtensionUser', async (req: Request, res: Response) => {
   const { id } = req.body

@@ -47,7 +47,7 @@ export const syncBrowserHistory = async ({
     owner_org_user_id: org_user_id,
   })
 
-  await updateUserActivity({
+  return await updateUserActivity({
     browserHistory: unvisited_browser_history,
     organization_id,
     org_user_id,
