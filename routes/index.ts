@@ -40,7 +40,7 @@ setInterval(async () => {
     utilization: Math.round(syncBrowserHistoryPool.utilization * 100),
     taskMeanWait: syncBrowserHistoryPool.waitTime.mean,
   })
-}, 5000)
+}, 20000)
 
 const router = Router()
 
