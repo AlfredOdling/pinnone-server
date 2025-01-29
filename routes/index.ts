@@ -26,7 +26,7 @@ const __dirname = path.dirname(__filename)
 
 const syncBrowserHistoryPool = new Piscina({
   filename: path.resolve(__dirname, '../workers/syncBrowserHistoryWorker.ts'),
-  minThreads: 4,
+  minThreads: 3,
   maxThreads: os.cpus().length,
 })
 
