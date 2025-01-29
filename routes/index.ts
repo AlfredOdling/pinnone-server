@@ -42,15 +42,7 @@ setInterval(async () => {
     utilization: Math.round(syncBrowserHistoryPool.utilization * 100),
     taskMeanWait: syncBrowserHistoryPool.waitTime.mean,
   })
-
-  syncBrowserHistoryPool.threads.forEach((thread, index) => {
-    console.log(
-      '🧵 Thread',
-      index + 1,
-      thread.performance.eventLoopUtilization()
-    )
-  })
-}, 20000)
+}, 25000)
 
 const router = Router()
 
