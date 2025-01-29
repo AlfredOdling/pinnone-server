@@ -36,6 +36,7 @@ export const googleAuth = async ({
     .from('email_account')
     .select()
     .eq('email', userInfo.email)
+    .eq('organization_id', organization_id)
     .single()
 
   // If no existing account, create new one
