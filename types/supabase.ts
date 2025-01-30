@@ -83,7 +83,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "notifications_organization_id_fkey"
+            foreignKeyName: "notification_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
@@ -93,29 +93,47 @@ export type Database = {
       }
       org_user: {
         Row: {
+          auto_accounting: boolean
+          calendar_reminders: boolean
           created_at: string
+          email_filter: string | null
+          filter_emails: boolean | null
           id: number
           organization_id: string
           removed: boolean
           role_id: number
+          sms_reminders: boolean
+          sort_gmail: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          auto_accounting?: boolean
+          calendar_reminders?: boolean
           created_at?: string
+          email_filter?: string | null
+          filter_emails?: boolean | null
           id?: number
           organization_id: string
           removed?: boolean
           role_id: number
+          sms_reminders?: boolean
+          sort_gmail?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          auto_accounting?: boolean
+          calendar_reminders?: boolean
           created_at?: string
+          email_filter?: string | null
+          filter_emails?: boolean | null
           id?: number
           organization_id?: string
           removed?: boolean
           role_id?: number
+          sms_reminders?: boolean
+          sort_gmail?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -188,7 +206,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "untracked_vendor_organization_id_fkey"
+            foreignKeyName: "org_vendor_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"

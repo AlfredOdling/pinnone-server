@@ -20,14 +20,14 @@ export const sendSMS = async () => {
   const org_users = await supabase
     .from('org_user')
     .select(`*, user!org_user_user_id_fkey(*), role(*), organization(*)`)
-    .eq('organization_id', '0848f99b-2644-44e2-828f-ab6580973890')
 
-  const phoneNumbers = org_users.data?.map((org_user) => org_user.user.phone)
+  const phoneNumbers = org_users.data
+    ?.filter((org_user) => org_user.sms_reminders)
+    .map((org_user) => org_user.user.phone)
 
   const { data: senders } = await supabase
     .from('sender')
     .select('*, receipt(*)')
-    .eq('organization_id', '0848f99b-2644-44e2-828f-ab6580973890')
 
   const receipts = senders?.flatMap(
     (sender) =>
@@ -45,6 +45,7 @@ export const sendSMS = async () => {
     ) {
       const dueDate = receiptObject.due_date.split('T')[0]
       const today = new Date().toISOString().split('T')[0]
+
       if (dueDate !== today) {
         phoneNumbers.forEach((phoneNumber) => {
           if (phoneNumber.includes('+')) {

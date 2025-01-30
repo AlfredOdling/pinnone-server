@@ -20,6 +20,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { refreshTokens } from './scanEmailAccount/refreshToken'
 import os from 'os'
+// import { autoAccounting } from './autoAccounting'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -227,22 +228,28 @@ router.post('/emailReceipts', async (req, res) => {
 //   await autoAudit()
 // })
 
-// Runs every day at 12:00
+// Runs every day at 12:00 -- Send SMS reminders
 cron.schedule(`0 12 * * *`, async () => {
   console.log('🚀 scheduleSMS starting...')
   await sendSMS()
 })
 
-// Runs every day at 13:00
+// Runs every day at 13:00 -- Cleanup notifications data
 cron.schedule(`0 13 * * *`, async () => {
   console.log('🚀 Cleaning up notifications data starting...')
   await cleanupNotifications()
 })
 
-// Runs every day at 09:00
+// Runs every day at 09:00 -- Refresh tokens
 cron.schedule(`0 09 * * *`, async () => {
   console.log('🚀 refreshTokens starting...')
   await refreshTokens()
 })
+
+// Runs 12:00 last of every month -- Auto-accounting
+// cron.schedule(`0 12 * * 31`, async () => {
+//   console.log('🚀 Auto-accounting starting...')
+//   await autoAccounting()
+// })
 
 export default router

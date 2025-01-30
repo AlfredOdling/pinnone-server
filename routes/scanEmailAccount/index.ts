@@ -42,6 +42,13 @@ export const scanEmailAccount = async ({
     dataObject: `Scanning emails`,
   })
 
+  const { data: orgUser } = await supabase
+    .from('org_user')
+    .select()
+    .eq('organization_id', organization_id)
+    .eq('id', owner_org_user_id)
+    .single()
+
   const { data: emailAccount } = await supabase
     .from('email_account')
     .select()
@@ -112,6 +119,7 @@ export const scanEmailAccount = async ({
             !part.filename.includes('zip')
           ) {
             await analyzeReceipt({
+              orgUser,
               gmail,
               tasksApi,
               messageId: message.id!,
@@ -128,6 +136,7 @@ export const scanEmailAccount = async ({
       } else if (!hasAttachments) {
         if (process.env.NODE_ENV !== 'development') {
           await analyzeReceipt({
+            orgUser,
             gmail,
             tasksApi,
             messageId: message.id!,
@@ -140,15 +149,17 @@ export const scanEmailAccount = async ({
         }
       }
 
-      // Move message to Receipts label
-      await gmail.users.messages.modify({
-        userId: 'me',
-        id: message.id!,
-        requestBody: {
-          addLabelIds: [receiptsLabelId],
-          removeLabelIds: ['INBOX'],
-        },
-      })
+      if (orgUser?.sort_gmail) {
+        // Move message to Receipts label
+        await gmail.users.messages.modify({
+          userId: 'me',
+          id: message.id!,
+          requestBody: {
+            addLabelIds: [receiptsLabelId],
+            removeLabelIds: ['INBOX'],
+          },
+        })
+      }
     }
 
     await updateNotification({

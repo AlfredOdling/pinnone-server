@@ -10,6 +10,7 @@ import { generateTool } from './generateTool'
 import { updateNotification } from '../utils'
 
 export const analyzeReceipt = async ({
+  orgUser,
   gmail,
   tasksApi,
   messageId,
@@ -20,6 +21,7 @@ export const analyzeReceipt = async ({
   owner_org_user_id,
   type,
 }: {
+  orgUser: any
   gmail: any
   tasksApi: any
   messageId: string
@@ -75,7 +77,12 @@ export const analyzeReceipt = async ({
 
     await updateEmailAccountLastScannedDate({ email, organization_id })
 
-    if (res.ocr && res.bank_number && res.due_date) {
+    if (
+      orgUser.calendar_reminders &&
+      res.ocr &&
+      res.bank_number &&
+      res.due_date
+    ) {
       const task = {
         title: `💳 Payment due for ${res.vendor_name} of ${res.total_cost} ${res.currency}`,
         notes: `
