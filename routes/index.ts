@@ -217,8 +217,22 @@ router.post('/scanEmailAccount', async (req, res) => {
 })
 
 router.post('/emailReceipts', async (req, res) => {
-  const { fromEmail, toEmail, fileUrls, sendType } = req.body
-  await emailReceipts({ fromEmail, toEmail, fileUrls, sendType })
+  const {
+    fromEmail,
+    toEmail,
+    fileUrls,
+    sendType,
+    organization_id,
+    org_user_id,
+  } = req.body
+  await emailReceipts({
+    fromEmail,
+    toEmail,
+    fileUrls,
+    sendType,
+    organization_id,
+    org_user_id,
+  })
   res.json({ data: 'Receipts emailed' })
 })
 
