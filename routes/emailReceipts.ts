@@ -81,6 +81,7 @@ export const emailReceipts = async ({
     } = supabase.storage.from('receipts').getPublicUrl(data.path)
 
     // Clean up temp files
+    downloadedFiles.forEach((filePath) => fs.unlinkSync(filePath))
     fs.unlinkSync(zipPath)
 
     sendEmail({
@@ -103,7 +104,4 @@ export const emailReceipts = async ({
       })
     }
   }
-
-  // Clean up temp files
-  downloadedFiles.forEach((filePath) => fs.unlinkSync(filePath))
 }
