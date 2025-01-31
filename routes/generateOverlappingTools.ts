@@ -27,7 +27,14 @@ export const generateOverlappingTools = async ({
     .eq('organization_id', organization_id)
     .eq('status', 'in_stack')
 
-  const toolsList = tools.data.map((tool) => tool.name)
+  const toolsList = tools.data
+    .filter((tool) => tool.description)
+    .map((tool) => ({
+      name: tool.name,
+      description: tool.description,
+      category: tool.department,
+      website: tool.website,
+    }))
 
   try {
     const completion = await openai.beta.chat.completions.parse({
