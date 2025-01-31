@@ -19,12 +19,26 @@ export const emailReceipts = async ({
   toEmail,
   fileUrls,
   sendType,
+  organization_id,
+  org_user_id,
 }: {
   fromEmail: string
   toEmail: string
   fileUrls: string[]
-  sendType: string
+  sendType?: string
+  organization_id: string
+  org_user_id: number
 }) => {
+  const { data: orgUser } = await supabase
+    .from('org_user')
+    .select()
+    .eq('organization_id', organization_id)
+    .eq('id', org_user_id)
+    .single()
+
+  const sendType_ = sendType || orgUser?.auto_accounting_send_type
+  console.log('🚀  sendType_:', sendType_)
+
   // Create temp directory if it doesn't exist
   const tempDir = path.join(process.cwd(), 'temp')
   if (!fs.existsSync(tempDir)) {
@@ -43,7 +57,7 @@ export const emailReceipts = async ({
 
   const downloadedFiles = await Promise.all(downloadPromises)
 
-  if (sendType === 'package') {
+  if (sendType_ === 'to_accountant') {
     // Create zip file
     const zip = new AdmZip()
     downloadedFiles.forEach((filePath) => {
@@ -78,7 +92,7 @@ export const emailReceipts = async ({
       Created by https://pinn.one/
       `,
     })
-  } else if (sendType === 'one-by-one') {
+  } else if (sendType_ === 'to_system') {
     for (const fileUrl of fileUrls) {
       await sendEmail({
         fromEmail,

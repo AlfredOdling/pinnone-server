@@ -94,6 +94,8 @@ export type Database = {
       org_user: {
         Row: {
           auto_accounting: boolean
+          auto_accounting_send_type: string | null
+          auto_accounting_to_email: string | null
           calendar_reminders: boolean
           created_at: string
           email_filter: string | null
@@ -109,6 +111,8 @@ export type Database = {
         }
         Insert: {
           auto_accounting?: boolean
+          auto_accounting_send_type?: string | null
+          auto_accounting_to_email?: string | null
           calendar_reminders?: boolean
           created_at?: string
           email_filter?: string | null
@@ -124,6 +128,8 @@ export type Database = {
         }
         Update: {
           auto_accounting?: boolean
+          auto_accounting_send_type?: string | null
+          auto_accounting_to_email?: string | null
           calendar_reminders?: boolean
           created_at?: string
           email_filter?: string | null
