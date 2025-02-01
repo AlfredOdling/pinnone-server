@@ -85,7 +85,8 @@ export const emailReceipts = async ({
     console.log('🚀  zipPath:', zipPath)
 
     // Clean up temp files
-    downloadedFiles.forEach((filePath) => fs.unlinkSync(filePath))
+    const dedupedDownloadedFiles = [...new Set(downloadedFiles)]
+    dedupedDownloadedFiles.forEach((filePath) => fs.unlinkSync(filePath))
     fs.unlinkSync(zipPath)
 
     sendEmail({
