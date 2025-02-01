@@ -1,5 +1,4 @@
 import { analyzeReceiptWithOpenAI } from './analyzeReceiptWithOpenAI'
-
 import { convertFileAndUpload } from './convertFileAndUpload'
 import { convertHtmlToPng } from './convertHtmlToPng'
 import { downloadFile } from './downloadFile'
@@ -8,6 +7,8 @@ import { generateSender } from './generateSender'
 import { insertReceipt } from './insertReceipt'
 import { generateTool } from './generateTool'
 import { updateNotification } from '../utils'
+import { checkForDuplicates } from './checkForDuplicates'
+import { createDuplicateLabel } from './createLabel'
 
 export const analyzeReceipt = async ({
   orgUser,
@@ -42,6 +43,24 @@ export const analyzeReceipt = async ({
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
     if (!res.is_a_receipt_or_invoice) return
+
+    const hasDuplicates = await checkForDuplicates({
+      res,
+    })
+
+    if (hasDuplicates) {
+      const duplicateLabelId = await createDuplicateLabel(gmail)
+
+      await gmail.users.messages.modify({
+        userId: 'me',
+        id: messageId,
+        requestBody: {
+          addLabelIds: [duplicateLabelId],
+        },
+      })
+
+      return
+    }
 
     const attachmentUrl = await downloadFile({
       res,

@@ -6,7 +6,7 @@ import { OAuth2Client } from 'google-auth-library'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { analyzeReceipt } from './analyzeReceipt'
-import { createLabel } from './createLabel'
+import { createReceiptsLabel } from './createLabel'
 import { updateNotification } from '../utils'
 
 dotenv.config()
@@ -67,7 +67,7 @@ export const scanEmailAccount = async ({
     })
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
     const tasksApi = google.tasks({ version: 'v1', auth: oAuth2Client })
-    const receiptsLabelId = await createLabel(gmail)
+    const receiptsLabelId = await createReceiptsLabel(gmail)
 
     const query = `(invoice | receipt | faktura | kvitto) after:${after} before:${before} ${
       orgUser.filter_emails ? `-${orgUser.email_filter}` : ''

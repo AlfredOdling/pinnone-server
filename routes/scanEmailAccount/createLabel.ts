@@ -1,4 +1,4 @@
-export const createLabel = async (gmail) => {
+export const createReceiptsLabel = async (gmail) => {
   let receiptsLabelId: string
   const labels = await gmail.users.labels.list({ userId: 'me' })
 
@@ -25,4 +25,33 @@ export const createLabel = async (gmail) => {
   }
 
   return receiptsLabelId
+}
+
+export const createDuplicateLabel = async (gmail) => {
+  let duplicateLabelId: string
+  const labels = await gmail.users.labels.list({ userId: 'me' })
+
+  const duplicateLabel = labels.data.labels?.find(
+    (label) => label.name === 'Duplicate'
+  )
+
+  if (!duplicateLabel) {
+    const newLabel = await gmail.users.labels.create({
+      userId: 'me',
+      requestBody: {
+        name: 'Duplicate',
+        labelListVisibility: 'labelShow',
+        messageListVisibility: 'show',
+        color: {
+          textColor: '#ffffff',
+          backgroundColor: '#fb4c2f',
+        },
+      },
+    })
+    duplicateLabelId = newLabel.data.id!
+  } else {
+    duplicateLabelId = duplicateLabel.id!
+  }
+
+  return duplicateLabelId
 }

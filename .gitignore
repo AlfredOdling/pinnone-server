@@ -8,3 +8,5 @@ build/
 *.test.*
 merged_dataset_2.json
 /other/*
+temp/attachments/file
+temp/receipts/file

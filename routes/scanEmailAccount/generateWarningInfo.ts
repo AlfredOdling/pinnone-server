@@ -21,8 +21,6 @@ export const generateWarningInfo = async ({
     .select('*')
     .eq('sender_id', senderId)
 
-  console.log('🚀  existing_subscriptions:', existing_subscriptions)
-
   let same_starts_at = false
   let same_next_renewal_date = false
   let same_flat_fee_cost = false
