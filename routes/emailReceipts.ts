@@ -36,28 +36,29 @@ export const emailReceipts = async ({
     .eq('id', org_user_id)
     .single()
 
+  // If request is from client, we have a sendType. If its from the cronjob, we look for the orgUser config
   const sendType_ = sendType || orgUser?.auto_accounting_send_type
-  console.log('🚀  sendType_:', sendType_)
-
-  // Create temp directory if it doesn't exist
-  const tempDir = path.join(process.cwd(), 'temp')
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir)
-  }
-
-  // Download all files to temp directory
-  const downloadPromises = fileUrls.map(async (url) => {
-    const response = await fetch(url)
-    const buffer = await response.arrayBuffer()
-    const originalName = url.split('/').pop()
-    const filePath = path.join(tempDir, originalName)
-    fs.writeFileSync(filePath, Buffer.from(buffer))
-    return filePath
-  })
-
-  const downloadedFiles = await Promise.all(downloadPromises)
 
   if (sendType_ === 'to_accountant') {
+    // Create temp directory if it doesn't exist
+    const tempDir = path.join(process.cwd(), 'temp')
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir)
+    }
+
+    // Download all files to temp directory
+    const downloadPromises = fileUrls.map(async (url) => {
+      const response = await fetch(url)
+      const buffer = await response.arrayBuffer()
+      const originalName = url.split('/').pop()
+      const filePath = path.join(tempDir, originalName)
+      fs.writeFileSync(filePath, Buffer.from(buffer))
+      return filePath
+    })
+
+    const downloadedFiles = await Promise.all(downloadPromises)
+    console.log('🚀  downloadedFiles:', downloadedFiles)
+
     // Create zip file
     const zip = new AdmZip()
     downloadedFiles.forEach((filePath) => {
@@ -79,6 +80,9 @@ export const emailReceipts = async ({
     const {
       data: { publicUrl },
     } = supabase.storage.from('receipts').getPublicUrl(data.path)
+
+    console.log('🚀  publicUrl:', publicUrl)
+    console.log('🚀  zipPath:', zipPath)
 
     // Clean up temp files
     downloadedFiles.forEach((filePath) => fs.unlinkSync(filePath))
