@@ -72,7 +72,6 @@ export const scanEmailAccount = async ({
     const query = `(invoice | receipt | faktura | kvitto) after:${after} before:${before} ${
       orgUser.filter_emails ? `-${orgUser.email_filter}` : ''
     }`
-
     console.log('🚀  query:', query)
 
     const response = await gmail.users.messages.list({

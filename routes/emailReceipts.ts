@@ -81,9 +81,6 @@ export const emailReceipts = async ({
       data: { publicUrl },
     } = supabase.storage.from('receipts').getPublicUrl(data.path)
 
-    console.log('🚀  publicUrl:', publicUrl)
-    console.log('🚀  zipPath:', zipPath)
-
     // Clean up temp files
     const dedupedDownloadedFiles = [...new Set(downloadedFiles)]
     dedupedDownloadedFiles.forEach((filePath) => fs.unlinkSync(filePath))

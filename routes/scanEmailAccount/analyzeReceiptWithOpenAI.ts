@@ -94,6 +94,7 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
 
               **total_cost**
               This is the total cost of the invoice.
+              Look for there keywords firstly and in this order: "Amount due", "Total", "To pay".
 
               **company_website**
               This is the website of the company that is providing the service.
