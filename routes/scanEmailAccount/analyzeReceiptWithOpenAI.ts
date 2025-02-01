@@ -33,6 +33,7 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               IMPORTANT 2: If you are unsure of the renewal_frequency at all, just set it to MONTHLY.
               IMPORTANT 3: Keep in mind that the invoice can be in Swedish. So for example Invoice = "Faktura", receipt = "Kvitto".
               IMPORTANT 4: To be able to calculate everything correctly, make up a plan on what order you need to do things.
+              IMPORTANT 5: NEVER HALLUCINATE OR MAKE STUFF UP. If you are unsure, set the field to empty string.
 
               --This is the instructions for the JSON fields--
 
