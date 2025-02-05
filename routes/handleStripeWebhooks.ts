@@ -18,13 +18,8 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature']
   let event
 
-  console.log('🚀 ------------ handleStripeWebhooks')
-
   try {
-    console.log('🚀 req.body:', req.body)
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret)
-
-    console.log('💳 handleStripeWebhooks event:', event)
   } catch (err) {
     console.log('🚀  err:', err)
     return res.status(400).send('Webhook Error' + err.message)
@@ -43,15 +38,14 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
 }
 
 const CheckoutSessionCompleted = async (event: any) => {
+  console.log('🚀  ----:', event.data.object)
   const customer: any = await stripe.customers.retrieve(
     event.data.object.customer
   )
-  const subscriptionItemId = event.data.object.subscription_items[0].id
-  const subscriptionItemId2 = event.data.object.subscription
-
   console.log('🚀  customer:', customer)
+
+  const subscriptionItemId = event.data.object.subscription
   console.log('🚀  subscriptionItemId:', subscriptionItemId)
-  console.log('🚀  subscriptionItemId2:', subscriptionItemId2)
 
   const res = await supabase
     .from('user')
@@ -64,7 +58,7 @@ const CheckoutSessionCompleted = async (event: any) => {
     .from('organization')
     .update({
       stripe_status: 'paid',
-      stripe_subscription_id: subscriptionItemId2,
+      stripe_subscription_id: subscriptionItemId,
       stripe_email: customer.email,
     })
     .eq('id', res.data.current_org_id)

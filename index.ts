@@ -5,8 +5,8 @@ import router from './routes'
 
 const app = express()
 const port = process.env.PORT || 3001
+
 app.use(cors())
-app.use(bodyParser.json({ limit: '50mb' }))
 
 app.use((req, res, next) => {
   req.setTimeout(240000) // Set timeout to 120 seconds
@@ -26,12 +26,12 @@ app.use(
        */
       next()
     } else {
-      bodyParser.json()(req, res, next)
+      bodyParser.json({ limit: '50mb' })(req, res, next)
     }
   }
 )
 
-// Ensure express.raw is applied specifically for the /webhook route
+// Ensure express.raw is applied specifically for the "/webhook" route
 app.use('/webhook', express.raw({ type: 'application/json' }))
 
 app.use('/', router)
