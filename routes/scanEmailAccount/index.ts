@@ -76,10 +76,9 @@ export const scanEmailAccount = async ({
             .map((email) => `-from:${email.trim()}`)
             .join(' ')
         : ''
-
     console.log('🚀  filter:', filter)
 
-    const query = `(invoice OR receipt OR faktura OR kvitto) (in:receipts OR in:inbox) after:${after} before:${before} ${filter}`
+    const query = `(invoice OR receipt OR faktura OR kvitto) in:(receipts OR inbox) after:${after} before:${before} ${filter}`
     console.log('🚀  query:', query)
 
     const response = await gmail.users.messages.list({
