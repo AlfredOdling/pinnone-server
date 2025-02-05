@@ -162,19 +162,17 @@ export const scanEmailAccount = async ({
           }
         }
       } else if (!hasAttachments) {
-        if (process.env.NODE_ENV !== 'development') {
-          await analyzeReceipt({
-            orgUser,
-            gmail,
-            tasksApi,
-            messageId: message.id!,
-            organization_id,
-            email,
-            msg,
-            owner_org_user_id,
-            type: 'html_no_attachments',
-          })
-        }
+        await analyzeReceipt({
+          orgUser,
+          gmail,
+          tasksApi,
+          messageId: message.id!,
+          organization_id,
+          email,
+          msg,
+          owner_org_user_id,
+          type: 'html_no_attachments',
+        })
       }
 
       if (orgUser?.sort_gmail) {

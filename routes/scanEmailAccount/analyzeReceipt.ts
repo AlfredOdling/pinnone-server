@@ -37,6 +37,14 @@ export const analyzeReceipt = async ({
   await updateEmailAccountLastScannedDate({ email, organization_id })
 
   try {
+    if (
+      process.env.NODE_ENV === 'development' &&
+      (type === 'html' || type === 'html_no_attachments')
+    ) {
+      console.log('💻 skipping convertHtmlToPng in dev')
+      return
+    }
+
     let fileUrl
     if (type === 'html' || type === 'html_no_attachments') {
       fileUrl = await convertHtmlToPng({ msg, type })
@@ -50,6 +58,7 @@ export const analyzeReceipt = async ({
 
     const hasDuplicates = await checkForDuplicates({
       res,
+      organization_id,
     })
 
     if (hasDuplicates) {

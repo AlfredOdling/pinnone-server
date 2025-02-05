@@ -14,14 +14,17 @@ const formatDate = (date: string) => {
   return new Date(date).toISOString().split('T')[0]
 }
 
-export const checkForDuplicates = async ({ res }) => {
+export const checkForDuplicates = async ({ res, organization_id }) => {
   const sendersWithReceipts = await supabase
     .from('sender')
     .select('*, receipt(*)')
     .eq('name', res.vendor_name_raw)
+    .eq('organization_id', organization_id)
 
   const receipts = sendersWithReceipts.data?.[0]?.receipt
   if (!receipts) return false
+
+  console.log('🚀  sendersWithReceipts:', sendersWithReceipts)
 
   let isDuplicate = false
   for (const receipt of receipts) {
