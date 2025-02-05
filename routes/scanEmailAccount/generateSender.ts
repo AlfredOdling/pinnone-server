@@ -25,11 +25,17 @@ export const generateSender = async ({
   if (!existingSender.data?.length) {
     const newSender = await supabase
       .from('sender')
-      .insert({
-        name: senderName,
-        category: 'Other',
-        organization_id,
-      })
+      .upsert(
+        {
+          name: senderName,
+          category: 'Other',
+          organization_id,
+        },
+        {
+          onConflict: 'name, organization_id',
+          ignoreDuplicates: true,
+        }
+      )
       .select('*')
     console.log('🚀  newSender:', newSender)
     sender = newSender
