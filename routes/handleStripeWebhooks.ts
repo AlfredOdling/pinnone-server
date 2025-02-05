@@ -19,11 +19,14 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
   let event
 
   try {
+    console.log('🚀  req.body:', req.body)
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret)
   } catch (err) {
     console.log('🚀  err:', err)
     return res.status(400).send('Webhook Error' + err.message)
   }
+
+  console.log('🚀  event:', event)
 
   if (event.type === 'checkout.session.completed') {
     await CheckoutSessionCompleted(event)
