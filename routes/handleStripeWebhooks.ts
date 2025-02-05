@@ -22,14 +22,7 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
 
   try {
     console.log('🚀 req.body:', req.body)
-
-    const rawBody =
-      req.body instanceof Buffer
-        ? req.body.toString()
-        : JSON.stringify(req.body)
-    console.log('🚀  rawBody:', rawBody)
-
-    event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret)
 
     console.log('💳 handleStripeWebhooks event:', event)
   } catch (err) {
