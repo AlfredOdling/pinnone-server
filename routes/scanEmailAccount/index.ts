@@ -69,9 +69,17 @@ export const scanEmailAccount = async ({
     const tasksApi = google.tasks({ version: 'v1', auth: oAuth2Client })
     const receiptsLabelId = await createReceiptsLabel(gmail)
 
-    const query = `(invoice | receipt | faktura | kvitto) (in:receipts | in:inbox) after:${after} before:${before} ${
-      orgUser.filter_emails ? `-${orgUser.email_filter}` : ''
-    }`
+    const filter =
+      orgUser.filter_emails && orgUser.email_filter
+        ? orgUser.email_filter
+            .split(',')
+            .map((email) => `-from:${email.trim()}`)
+            .join(' ')
+        : ''
+
+    console.log('🚀  filter:', filter)
+
+    const query = `(invoice OR receipt OR faktura OR kvitto) (in:receipts OR in:inbox) after:${after} before:${before} ${filter}`
     console.log('🚀  query:', query)
 
     const response = await gmail.users.messages.list({
