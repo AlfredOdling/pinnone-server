@@ -101,12 +101,16 @@ export const scanEmailAccount = async ({
         id: message.id!,
       })
 
-      const emailId = await supabase
+      const receipt = await supabase
         .from('receipt')
-        .select('email_id')
+        .select('*, sender(*)')
         .eq('email_id', message.id!)
+        .eq('sender.organization_id', organization_id)
 
-      if (emailId.data.length > 0) continue
+      if (receipt.data.length > 0) {
+        console.log('🪂 Skipping receipt:', receipt)
+        continue
+      }
 
       const payload = msg.data.payload
       const parts = payload?.parts || []
