@@ -9,6 +9,11 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+// 2025-01-01T00:00:00+00:00 should be 2025-01-01
+const formatDate = (date: string) => {
+  return new Date(date).toISOString().split('T')[0]
+}
+
 export const checkForDuplicates = async ({ res }) => {
   const sendersWithReceipts = await supabase
     .from('sender')
@@ -21,8 +26,8 @@ export const checkForDuplicates = async ({ res }) => {
   let isDuplicate = false
   for (const receipt of receipts) {
     isDuplicate =
-      receipt.renewal_start_date === res.renewal_start_date &&
-      receipt.renewal_next_date === res.renewal_next_date &&
+      formatDate(receipt.renewal_start_date) === res.renewal_start_date &&
+      formatDate(receipt.renewal_next_date) === res.renewal_next_date &&
       receipt.ocr === res.ocr &&
       receipt.total_cost === res.total_cost
 
@@ -31,7 +36,7 @@ export const checkForDuplicates = async ({ res }) => {
 
       isDuplicate,
       res.vendor_name_raw,
-      receipt.renewal_start_date,
+      formatDate(receipt.renewal_start_date),
       res.renewal_start_date
     )
 

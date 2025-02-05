@@ -7,20 +7,16 @@ import { generateOverlappingTools } from './generateOverlappingTools'
 import express from 'express'
 import { handleStripeWebhooks } from './handleStripeWebhooks'
 import { askTeam } from './askTeam'
-import cron from 'node-cron'
-// import { autoAudit } from './autoAudit'
 import { sendExtensionInvite } from './sendExtensionInvite'
 import { scanEmailAccount } from './scanEmailAccount'
 import { emailReceipts } from './emailReceipts'
 import { googleAuth } from './scanEmailAccount/authGoogle'
-import { sendSMS } from './sendSMS'
-import { cleanupNotifications } from './cleanupActivity'
 import { Piscina } from 'piscina'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { refreshTokens } from './scanEmailAccount/refreshToken'
 import os from 'os'
-// import { autoAccounting } from './autoAccounting'
+import { createCheckoutSession } from './stripeFunctions'
+import { scheduledTasks } from './scheduledTasks'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -45,6 +41,9 @@ setInterval(async () => {
   })
 }, 25000)
 
+// Runs all cron-jobs
+scheduledTasks()
+
 const router = Router()
 
 router.post(
@@ -55,7 +54,7 @@ router.post(
   }
 )
 
-router.post('/inviteAdmins', async (req: Request, res: Response) => {
+router.post('/invite-admins', async (req: Request, res: Response) => {
   const { emails, organization_id } = req.body
 
   try {
@@ -67,7 +66,7 @@ router.post('/inviteAdmins', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
+router.post('/invite-extension-users', async (req: Request, res: Response) => {
   const { emails, organization_id } = req.body
 
   try {
@@ -79,7 +78,7 @@ router.post('/inviteExtensionUsers', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/sendExtensionInvite', async (req: Request, res: Response) => {
+router.post('/send-extension-invite', async (req: Request, res: Response) => {
   const { emails } = req.body
   console.log('🚀 sendExtensionInvite  emails:', emails)
 
@@ -91,30 +90,6 @@ router.post('/sendExtensionInvite', async (req: Request, res: Response) => {
     res.status(500).send({ error: 'Failed', msg: error.message })
   }
 })
-
-// router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
-//   const { data } = req.body
-//   try {
-//     const orgUsers = await getOrgUsers({ user_id: data.user_id })
-//     console.log('--------⏳ syncBrowserHistory starting', orgUsers)
-
-//     await Promise.all(
-//       orgUsers.map((orgUser) =>
-//         syncBrowserHistory({
-//           encryptedData: data.encryptedData,
-//           org_user_id: orgUser.id,
-//           organization_id: orgUser.organization_id,
-//         })
-//       )
-//     )
-
-//     console.info('--------syncBrowserHistory done ✅')
-//     res.status(200).send()
-//   } catch (error) {
-//     console.error(error)
-//     res.status(500).send({ error: 'Failed', msg: error.message })
-//   }
-// })
 
 router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   const { data } = req.body
@@ -135,10 +110,11 @@ router.post('/syncBrowserHistory', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/deleteExtensionUser', async (req: Request, res: Response) => {
+router.post('/delete-extension-user', async (req: Request, res: Response) => {
   const { id } = req.body
   try {
     await deleteExtensionUser({ id })
+
     res.status(200).send()
   } catch (error) {
     console.error(error)
@@ -146,7 +122,7 @@ router.post('/deleteExtensionUser', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/addToolsManually', async (req: Request, res: Response) => {
+router.post('/add-tools-manually', async (req: Request, res: Response) => {
   const { vendors, organization_id, owner_org_user_id } = req.body
   console.log('⏳ addToolsManually loading...')
 
@@ -166,7 +142,7 @@ router.post('/addToolsManually', async (req: Request, res: Response) => {
 })
 
 router.post(
-  '/generateOverlappingTools',
+  '/generate-overlapping-tools',
   async (req: Request, res: Response) => {
     const { organization_id } = req.body
     console.log('--------⏳ generateOverlappingTools starting...')
@@ -185,7 +161,7 @@ router.post(
   }
 )
 
-router.post('/askTeam', async (req: Request, res: Response) => {
+router.post('/ask-team', async (req: Request, res: Response) => {
   const { message, organization_id } = req.body
 
   try {
@@ -205,7 +181,7 @@ router.post('/auth/google', async (req, res) => {
   res.json(tokens)
 })
 
-router.post('/scanEmailAccount', async (req, res) => {
+router.post('/scan-email-account', async (req, res) => {
   const tokens = await scanEmailAccount({
     email: req.body.email,
     organization_id: req.body.organization_id,
@@ -216,13 +192,14 @@ router.post('/scanEmailAccount', async (req, res) => {
   res.json(tokens)
 })
 
-router.post('/emailReceipts', async (req, res) => {
+router.post('/email-receipts', async (req, res) => {
   const {
     fromEmail,
     toEmail,
     fileUrls,
     sendType,
     organization_id,
+
     org_user_id,
   } = req.body
   await emailReceipts({
@@ -236,34 +213,16 @@ router.post('/emailReceipts', async (req, res) => {
   res.json({ data: 'Receipts emailed' })
 })
 
-// Runs every day at 12:00
-// cron.schedule(`0 12 * * *`, async () => {
-//   console.log('🚀 autoAudit starting...')
-//   await autoAudit()
-// })
+router.post('/create-checkout-session', async (req, res) => {
+  const { email } = req.body
 
-// Runs every day at 12:00 -- Send SMS reminders
-cron.schedule(`0 12 * * *`, async () => {
-  console.log('🚀 scheduleSMS starting...')
-  await sendSMS()
+  try {
+    const url = await createCheckoutSession(email)
+    res.json({ url })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: error.message })
+  }
 })
-
-// Runs every day at 13:00 -- Cleanup notifications data
-cron.schedule(`0 13 * * *`, async () => {
-  console.log('🚀 Cleaning up notifications data starting...')
-  await cleanupNotifications()
-})
-
-// Runs every day at 09:00 -- Refresh tokens
-cron.schedule(`0 09 * * *`, async () => {
-  console.log('🚀 refreshTokens starting...')
-  await refreshTokens()
-})
-
-// Runs 12:00 last of every month -- Auto-accounting
-// cron.schedule(`0 12 * * 31`, async () => {
-//   console.log('🚀 Auto-accounting starting...')
-//   await autoAccounting()
-// })
 
 export default router

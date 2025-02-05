@@ -9,6 +9,7 @@ import { generateTool } from './generateTool'
 import { updateNotification } from '../utils'
 import { checkForDuplicates } from './checkForDuplicates'
 import { createDuplicateLabel } from './createLabel'
+import { updateUsage } from './updateUsage'
 
 export const analyzeReceipt = async ({
   orgUser,
@@ -95,6 +96,7 @@ export const analyzeReceipt = async ({
     })
 
     await updateEmailAccountLastScannedDate({ email, organization_id })
+    await updateUsage({ organization_id })
 
     if (
       orgUser.calendar_reminders &&

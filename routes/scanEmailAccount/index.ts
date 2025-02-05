@@ -81,6 +81,21 @@ export const scanEmailAccount = async ({
     const messages = response.data.messages || []
 
     for (const message of messages) {
+      const organization = await supabase
+        .from('organization')
+        .select('*')
+        .eq('id', organization_id)
+        .single()
+
+      if (
+        organization.data.stripe_status !== 'paid' &&
+        organization.data.scanned_emails >= 20
+      ) {
+        return {
+          error: 'No scans left',
+        }
+      }
+
       const msg = await gmail.users.messages.get({
         userId: 'me',
         id: message.id!,
