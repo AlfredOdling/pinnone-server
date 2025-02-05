@@ -1,12 +1,13 @@
 node_modules/
 build/
+temp/
+/other/*
+
 .env
 .env.*
 .DS_Store
 .turbo
 .cache
 *.test.*
-merged_dataset_2.json
-/other/*
-temp/attachments/file
-temp/receipts/file
+temp/attachments/hej
+temp/receipts/hej

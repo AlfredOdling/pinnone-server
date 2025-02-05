@@ -20,6 +20,7 @@ export const generateSender = async ({
     .eq('name', senderName)
     .eq('organization_id', organization_id)
     .throwOnError()
+  console.log('🚀  existingSender:', existingSender)
 
   if (!existingSender.data?.length) {
     const newSender = await supabase
@@ -30,6 +31,7 @@ export const generateSender = async ({
         organization_id,
       })
       .select('*')
+    console.log('🚀  newSender:', newSender)
     sender = newSender
   } else {
     sender = existingSender
