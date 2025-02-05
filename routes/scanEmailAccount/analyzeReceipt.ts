@@ -34,6 +34,8 @@ export const analyzeReceipt = async ({
   owner_org_user_id: number
   type: string
 }) => {
+  await updateEmailAccountLastScannedDate({ email, organization_id })
+
   try {
     let fileUrl
     if (type === 'html' || type === 'html_no_attachments') {
@@ -43,6 +45,7 @@ export const analyzeReceipt = async ({
     }
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
+    console.log('🚀  res.is_a_receipt_or_invoice:', res.is_a_receipt_or_invoice)
     if (!res.is_a_receipt_or_invoice) return
 
     const hasDuplicates = await checkForDuplicates({
@@ -50,6 +53,8 @@ export const analyzeReceipt = async ({
     })
 
     if (hasDuplicates) {
+      console.log('🚀  hasDuplicates:', hasDuplicates)
+
       const duplicateLabelId = await createDuplicateLabel(gmail)
 
       await gmail.users.messages.modify({
@@ -74,6 +79,7 @@ export const analyzeReceipt = async ({
     })
 
     if (!sender) {
+      console.log('🚀  sender:', sender)
       return new Error('Sender not found')
     }
 
@@ -95,7 +101,6 @@ export const analyzeReceipt = async ({
       type,
     })
 
-    await updateEmailAccountLastScannedDate({ email, organization_id })
     await updateUsage({ organization_id })
 
     if (
