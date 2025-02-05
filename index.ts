@@ -20,12 +20,19 @@ app.use(
     next: express.NextFunction
   ): void => {
     if (req.originalUrl === '/webhook') {
+      /*
+       * Skip bodyParser.json() for "/webhook" so that we can
+       * get the raw body for stripe webhooks
+       */
       next()
     } else {
       bodyParser.json()(req, res, next)
     }
   }
 )
+
+// Ensure express.raw is applied specifically for the /webhook route
+app.use('/webhook', express.raw({ type: 'application/json' }))
 
 app.use('/', router)
 

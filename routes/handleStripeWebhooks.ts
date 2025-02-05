@@ -21,11 +21,12 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
   console.log('🚀 ------------ handleStripeWebhooks')
 
   try {
-    console.log('🚀 sig:', sig)
     console.log('🚀 req.body:', req.body)
-    console.log('🚀 endpointSecret:', endpointSecret)
 
-    const rawBody = req.body instanceof Buffer ? req.body.toString() : req.body
+    const rawBody =
+      req.body instanceof Buffer
+        ? req.body.toString()
+        : JSON.stringify(req.body)
     console.log('🚀  rawBody:', rawBody)
 
     event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)

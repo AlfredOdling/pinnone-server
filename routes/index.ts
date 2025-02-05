@@ -4,7 +4,6 @@ import { inviteExtensionUsers } from './inviteExtensionUsers'
 import { deleteExtensionUser } from './deleteExtensionUser'
 import { addToolsManually } from './addToolsManually'
 import { generateOverlappingTools } from './generateOverlappingTools'
-import express from 'express'
 import { handleStripeWebhooks } from './handleStripeWebhooks'
 import { askTeam } from './askTeam'
 import { sendExtensionInvite } from './sendExtensionInvite'
@@ -46,13 +45,9 @@ scheduledTasks()
 
 const router = Router()
 
-router.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  async (req: Request, res: Response) => {
-    await handleStripeWebhooks(req, res)
-  }
-)
+router.post('/webhook', async (req: Request, res: Response) => {
+  await handleStripeWebhooks(req, res)
+})
 
 router.post('/invite-admins', async (req: Request, res: Response) => {
   const { emails, organization_id } = req.body
