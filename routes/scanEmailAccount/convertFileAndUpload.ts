@@ -12,6 +12,11 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+const sanitizeKey = (key: string) => {
+  // Replace spaces and special characters with underscores
+  return key.replace(/[^a-zA-Z0-9]/g, '_')
+}
+
 export const convertFileAndUpload = async ({ gmail, messageId, part }) => {
   const attachment = await gmail.users.messages.attachments.get({
     userId: 'me',
@@ -20,8 +25,11 @@ export const convertFileAndUpload = async ({ gmail, messageId, part }) => {
   })
 
   const base64 = Buffer.from(attachment.data.data, 'base64')
+  const filename_ = part.filename.replace('/', '')
+  console.log('🚀  filename_:', filename_)
+  const filename = sanitizeKey(filename_)
+  console.log('🚀  filename:', filename)
 
-  const filename = part.filename.replace('/', '')
   fs.writeFileSync('temp/attachments/' + filename, base64)
 
   const document = await pdf('temp/attachments/' + filename, { scale: 3 })
