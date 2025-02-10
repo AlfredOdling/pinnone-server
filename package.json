@@ -41,6 +41,7 @@
     "openai": "^4.67.3",
     "pdf-to-img": "^4.3.0",
     "piscina": "^5.0.0-alpha.0",
+    "puppeteer": "^24.2.0",
     "puppeteer-core": "22.7.1",
     "sharp": "^0.33.5",
     "stripe": "^17.2.1",

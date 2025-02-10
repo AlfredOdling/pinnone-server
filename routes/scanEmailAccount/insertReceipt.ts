@@ -48,6 +48,7 @@ export const insertReceipt = async ({
     type_res,
     ocr,
     bank_number,
+    document_type,
   } = res
 
   const res2 = await supabase.from('receipt').upsert({
@@ -77,5 +78,6 @@ export const insertReceipt = async ({
     email_id: messageId,
     ocr,
     bank_number,
+    document_type,
   })
 }

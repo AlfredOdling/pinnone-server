@@ -70,3 +70,14 @@ export const sendSMS = async () => {
 }
 
 // sendSMS()
+
+// client.messages
+//   .create({
+//     body:
+//       'Hi! The following invoice is due in three days:' +
+//       `AB Consulting - 900 USD
+//       Invoice: https://shorturl.at/bxE5L`,
+//     from: '+12765301433',
+//     to: '+46736868686',
+//   })
+//   .then((message) => console.log(message.sid))

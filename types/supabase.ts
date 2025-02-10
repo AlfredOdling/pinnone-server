@@ -303,6 +303,7 @@ export type Database = {
           created_at: string
           currency: string
           date_of_invoice: string | null
+          document_type: string | null
           due_date: string | null
           email_id: string | null
           email_info: Json | null
@@ -331,6 +332,7 @@ export type Database = {
           created_at?: string
           currency: string
           date_of_invoice?: string | null
+          document_type?: string | null
           due_date?: string | null
           email_id?: string | null
           email_info?: Json | null
@@ -359,6 +361,7 @@ export type Database = {
           created_at?: string
           currency?: string
           date_of_invoice?: string | null
+          document_type?: string | null
           due_date?: string | null
           email_id?: string | null
           email_info?: Json | null
