@@ -97,12 +97,14 @@ export const emailReceipts = async ({
     })
   } else if (sendType_ === 'to_system') {
     for (const fileUrl of fileUrls) {
+      const filename = fileUrl.split('/').pop()
+
       await sendEmail({
         fromEmail,
         toEmail,
         emailSubject: '[PinnOne] Receipt',
         emailText: `Receipts from PinnOne.`,
-        attachments: [{ filename: 'receipt.pdf', path: fileUrl }],
+        attachments: [{ filename, path: fileUrl }],
       })
     }
   }
