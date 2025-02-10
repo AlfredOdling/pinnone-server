@@ -30,11 +30,11 @@ export const generateSender = async ({
           name: senderName,
           category: 'Other',
           organization_id,
+        },
+        {
+          onConflict: 'name, organization_id',
+          ignoreDuplicates: true,
         }
-        // {
-        //   onConflict: 'name, organization_id',
-        //   ignoreDuplicates: true,
-        // }
       )
       .select('*')
     console.log('🚀  newSender:', newSender)

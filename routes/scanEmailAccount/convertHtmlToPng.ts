@@ -1,4 +1,5 @@
-import puppeteer from 'puppeteer'
+import puppeteer from 'puppeteer-core'
+import chromium from '@sparticuz/chromium'
 import { v4 as uuidv4 } from 'uuid'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
@@ -11,6 +12,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+chromium.setGraphicsMode = true
 export const convertHtmlToPng = async ({ msg, type }) => {
   let htmlBody = ''
   if (type === 'html_no_attachments') {
@@ -29,7 +31,15 @@ export const convertHtmlToPng = async ({ msg, type }) => {
   }
 
   // Launch browser and create new page
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    args: [...chromium.args, '--disable-dev-shm-usage'],
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(
+      'https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar'
+    ),
+    protocolTimeout: 240_000,
+    ignoreHTTPSErrors: true,
+  })
   const page = await browser.newPage()
 
   // Set content and wait for network idle
