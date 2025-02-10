@@ -47,7 +47,14 @@ const CheckoutSessionCompleted = async (event: any) => {
   )
   console.log('🚀  customer:', customer)
 
-  const subscriptionItemId = event.data.object.subscription
+  const subscriptionId = event.data.object.subscription
+  console.log('🚀  subscriptionId:', subscriptionId)
+  const subscriptionItems = await stripe.subscriptionItems.list({
+    subscription: subscriptionId,
+  })
+  console.log('🚀  subscriptionItems:', subscriptionItems)
+
+  const subscriptionItemId = subscriptionItems.data[1].id
   console.log('🚀  subscriptionItemId:', subscriptionItemId)
 
   const res = await supabase

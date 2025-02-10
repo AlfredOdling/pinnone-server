@@ -23,6 +23,13 @@ export const updateUsage = async ({ organization_id }) => {
   if (organization.error) throw organization.error
   if (!onboarded) return
 
+  if (scanned_emails > 20) {
+    await reportUsage({
+      usageQuantity: 1,
+      stripe_subscription_id,
+    })
+  }
+
   await supabase
     .from('organization')
     .update({
@@ -30,11 +37,4 @@ export const updateUsage = async ({ organization_id }) => {
     })
     .eq('id', organization_id)
     .throwOnError()
-
-  if (scanned_emails > 20) {
-    await reportUsage({
-      usageQuantity: 1,
-      stripe_subscription_id,
-    })
-  }
 }
