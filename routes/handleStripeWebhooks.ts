@@ -19,14 +19,11 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
   let event
 
   try {
-    console.log('🚀  req.body:', req.body)
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret)
   } catch (err) {
     console.log('🚀  err:', err)
     return res.status(400).send('Webhook Error' + err.message)
   }
-
-  console.log('🚀  event:', event)
 
   if (event.type === 'checkout.session.completed') {
     await CheckoutSessionCompleted(event)
@@ -41,6 +38,27 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
 }
 
 const CheckoutSessionCompleted = async (event: any) => {
+  console.log('🚀  event:', event)
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object
+
+    // Retrieve full subscription details
+    const subscription = await stripe.subscriptions.retrieve(
+      session.subscription
+    )
+
+    // Store customer & subscription in your database
+    console.log('🚀  subscription:', {
+      email: session.customer_email,
+      stripeCustomerId: session.customer,
+      stripeSubscriptionId: subscription.id,
+      stripeSubscriptionItemId: subscription.items.data[1].id, // Needed for metering
+    })
+  }
+}
+
+const CheckoutSessionCompleted2 = async (event: any) => {
   console.log('🚀  ----:', event.data.object)
   const customer: any = await stripe.customers.retrieve(
     event.data.object.customer
