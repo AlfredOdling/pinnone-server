@@ -16,8 +16,9 @@ export const updateUsage = async ({ organization_id }) => {
     .select('*')
     .eq('id', organization_id)
     .single()
-  console.log('🚀  organization:', organization)
-  const { scanned_emails, stripe_subscription_id, onboarded } =
+  console.log('🚀 updateUsage organization:', organization)
+
+  const { scanned_emails, stripe_customer_id, onboarded } =
     organization?.data || {}
 
   if (organization.error) throw organization.error
@@ -25,8 +26,9 @@ export const updateUsage = async ({ organization_id }) => {
 
   if (scanned_emails > 20) {
     await reportUsage({
-      usageQuantity: 1,
-      stripe_subscription_id,
+      event_name: 'email_scans',
+      stripe_customer_id,
+      value: 1,
     })
   }
 
