@@ -38,9 +38,7 @@ export const handleStripeWebhooks = async (req: Request, res: Response) => {
 }
 
 const CheckoutSessionCompleted = async (event: any) => {
-  console.log('🚀  event:', event)
-
-  if (event.type === 'checkout.session.completed') {
+  try {
     const session = event.data.object
 
     // Retrieve full subscription details
@@ -48,51 +46,29 @@ const CheckoutSessionCompleted = async (event: any) => {
       session.subscription
     )
 
-    // Store customer & subscription in your database
-    console.log('🚀  subscription:', {
-      email: session.customer_email,
-      stripeCustomerId: session.customer,
-      stripeSubscriptionId: subscription.id,
-      stripeSubscriptionItemId: subscription.items.data[1].id, // Needed for metering
-    })
+    const current_org_id = await supabase
+      .from('user')
+      .select('current_org_id')
+      .eq('email', session.customer_email)
+      .single()
+
+    await supabase
+      .from('organization')
+      .update({
+        stripe_status: 'paid',
+        stripe_email: session.customer_email,
+        stripe_customer_id: session.customer,
+
+        stripe_subscription_id: subscription.id,
+        stripe_subscription_item_id_1: subscription.items.data[1].id, // Needed for metering
+        stripe_subscription_item_id_2: subscription.items.data[2].id, // Needed for metering
+      })
+      .eq('id', current_org_id.data.current_org_id)
+      .select()
+  } catch (error) {
+    console.error('Error in CheckoutSessionCompleted:', error)
+    throw error
   }
-}
-
-const CheckoutSessionCompleted2 = async (event: any) => {
-  console.log('🚀  ----:', event.data.object)
-  const customer: any = await stripe.customers.retrieve(
-    event.data.object.customer
-  )
-  console.log('🚀  customer:', customer)
-
-  const subscriptionId = event.data.object.subscription
-  console.log('🚀  subscriptionId:', subscriptionId)
-  const subscriptionItems = await stripe.subscriptionItems.list({
-    subscription: subscriptionId,
-  })
-  console.log('🚀  subscriptionItems:', subscriptionItems)
-
-  const subscriptionItemId = subscriptionItems.data[1].id
-  console.log('🚀  subscriptionItemId:', subscriptionItemId)
-
-  const res = await supabase
-    .from('user')
-    .select('current_org_id')
-    .eq('email', customer.email)
-    .single()
-  console.log('🚀 current_org_id res:', res)
-
-  const res2 = await supabase
-    .from('organization')
-    .update({
-      stripe_status: 'paid',
-      stripe_subscription_id: subscriptionItemId,
-      stripe_email: customer.email,
-    })
-    .eq('id', res.data.current_org_id)
-    .select()
-
-  console.log('🚀  res2:', res2)
 }
 
 const CustomerSubscriptionDeleted = async (obj: any) => {

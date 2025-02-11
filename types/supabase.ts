@@ -229,9 +229,12 @@ export type Database = {
           name: string
           onboarded: boolean | null
           scanned_emails: number | null
+          stripe_customer_id: string | null
           stripe_email: string | null
           stripe_status: string
           stripe_subscription_id: string | null
+          stripe_subscription_item_id_1: string | null
+          stripe_subscription_item_id_2: string | null
           updated_at: string
         }
         Insert: {
@@ -242,9 +245,12 @@ export type Database = {
           name: string
           onboarded?: boolean | null
           scanned_emails?: number | null
+          stripe_customer_id?: string | null
           stripe_email?: string | null
           stripe_status?: string
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id_1?: string | null
+          stripe_subscription_item_id_2?: string | null
           updated_at?: string
         }
         Update: {
@@ -255,9 +261,12 @@ export type Database = {
           name?: string
           onboarded?: boolean | null
           scanned_emails?: number | null
+          stripe_customer_id?: string | null
           stripe_email?: string | null
           stripe_status?: string
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id_1?: string | null
+          stripe_subscription_item_id_2?: string | null
           updated_at?: string
         }
         Relationships: []
