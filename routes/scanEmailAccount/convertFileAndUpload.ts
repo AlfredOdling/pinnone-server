@@ -13,8 +13,8 @@ const supabase = createClient<Database>(
 )
 
 const sanitizeKey = (key: string) => {
-  // Replace spaces and special characters with underscores
-  return key.replace(/[^a-zA-Z0-9]/g, '_')
+  // Replace spaces with underscores
+  return key.replace(/\s/g, '_')
 }
 
 export const convertFileAndUpload = async ({ gmail, messageId, part }) => {
