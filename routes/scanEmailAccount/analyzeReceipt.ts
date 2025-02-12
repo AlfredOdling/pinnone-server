@@ -54,7 +54,8 @@ export const analyzeReceipt = async ({
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
     console.log('🚀  res.is_a_receipt_or_invoice:', res.is_a_receipt_or_invoice)
-    if (!res.is_a_receipt_or_invoice) return
+    console.log('🚀  res.number_of_characters:', res.number_of_characters)
+    if (!res.is_a_receipt_or_invoice || res.number_of_characters < 10) return
 
     const hasDuplicates = await checkForDuplicates({
       res,

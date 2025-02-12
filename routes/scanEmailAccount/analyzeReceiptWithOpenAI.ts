@@ -134,6 +134,10 @@ export const analyzeReceiptWithOpenAI = async (base64Image: string) => {
               **bank_number**
               This is the bank account number from the image. Should be a string of numbers, and look something like this: 5020-7042.
               If you are unsure, set it to empty string.
+
+              **number_of_characters**
+              This is the number of characters in the image.
+              If you are unsure, set it to 0.
             `,
           },
           {

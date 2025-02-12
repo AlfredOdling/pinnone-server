@@ -107,6 +107,7 @@ export const MailAnalysis = z.object({
   is_a_receipt_or_invoice: z.boolean(),
   ocr: z.string(),
   bank_number: z.string(),
+  number_of_characters: z.number(),
 })
 
 export const MatchedVendorSender = z.object({
