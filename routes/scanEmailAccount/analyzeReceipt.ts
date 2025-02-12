@@ -46,7 +46,7 @@ export const analyzeReceipt = async ({
     }
 
     let fileUrl
-    if (type === 'html' || type === 'html_no_attachments') {
+    if (type === 'html_no_attachments') {
       fileUrl = await convertHtmlToPng({ msg, type })
     } else if (type === 'pdf') {
       fileUrl = await convertFileAndUpload({ gmail, messageId, part })

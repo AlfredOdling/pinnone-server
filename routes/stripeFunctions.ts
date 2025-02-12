@@ -36,7 +36,7 @@ export const createCheckoutSession = async (email: string) => {
 }
 
 export const reportUsage = async ({
-  event_name,
+  event_name, // email_scans | extension_user
   stripe_customer_id,
   value,
 }: {

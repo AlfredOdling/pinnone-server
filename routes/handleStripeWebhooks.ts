@@ -94,3 +94,5 @@ const CustomerSubscriptionDeleted = async (obj: any) => {
   // await stripe.subscriptions.del(obj.id)
   console.log('🚀  res2:', res2)
 }
+
+//https://chatgpt.com/share/67ab48de-a214-8013-ab37-63bc33ade311

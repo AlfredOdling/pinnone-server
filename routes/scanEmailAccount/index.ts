@@ -144,7 +144,7 @@ export const scanEmailAccount = async ({
             part.filename !== '' &&
             part.body &&
             part.body.attachmentId &&
-            !part.filename.includes('zip')
+            part.filename.includes('pdf')
           ) {
             await analyzeReceipt({
               orgUser,
@@ -156,7 +156,7 @@ export const scanEmailAccount = async ({
               email,
               msg,
               owner_org_user_id,
-              type: part.filename.includes('pdf') ? 'pdf' : 'html',
+              type: 'pdf',
             })
             foundPdf = true
           }
