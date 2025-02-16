@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import { getInfo } from './getInfo'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
-import { generateWarningInfo } from './generateWarningInfo'
+// import { generateWarningInfo } from './generateWarningInfo'
 
 dotenv.config()
 
@@ -29,7 +29,7 @@ export const insertReceipt = async ({
   type: string
 }) => {
   const email_info = await getInfo(msg, type)
-  const warning_info = await generateWarningInfo({ res, senderId })
+  // const warning_info = await generateWarningInfo({ res, senderId })
 
   const {
     renewal_start_date,
@@ -71,7 +71,7 @@ export const insertReceipt = async ({
     usage_based_cost,
     source: 'gmail',
     email_recipient: email,
-    warning_info,
+    // warning_info,
     email_info,
     type: type_res,
     total_cost,
