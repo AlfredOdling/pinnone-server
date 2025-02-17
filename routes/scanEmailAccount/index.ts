@@ -143,13 +143,10 @@ export const scanEmailAccount = async ({
         payload?.headers?.find((h) => h.name === 'From')?.value
       )
 
-      console.log('🚀  hasAttachments:', hasAttachments)
-
       if (hasAttachments) {
         let foundPdf = false
 
         for (const part of parts) {
-          console.log('🚀  part:', part)
           if (foundPdf) break
 
           if (
@@ -158,8 +155,6 @@ export const scanEmailAccount = async ({
             part.body.attachmentId &&
             part.filename.includes('pdf')
           ) {
-            console.log('🚀  filename:', part.filename)
-
             await analyzeReceipt({
               orgUser,
               gmail,
@@ -176,7 +171,6 @@ export const scanEmailAccount = async ({
           }
         }
       } else if (!hasAttachments) {
-        console.log('🚀  no attachments')
         await analyzeReceipt({
           orgUser,
           gmail,

@@ -34,8 +34,6 @@ export const analyzeReceipt = async ({
   owner_org_user_id: number
   type: string
 }) => {
-  console.log('🚀  analyzeReceipt---')
-  console.log('🚀  type:', type)
   await updateEmailAccountLastScannedDate({ email, organization_id })
 
   try {
@@ -66,8 +64,6 @@ export const analyzeReceipt = async ({
     })
 
     if (hasDuplicates) {
-      console.log('🚀  hasDuplicates:', hasDuplicates)
-
       const duplicateLabelId = await createDuplicateLabel(gmail)
 
       await gmail.users.messages.modify({
