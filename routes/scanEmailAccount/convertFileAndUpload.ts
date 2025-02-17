@@ -56,6 +56,8 @@ export const convertFileAndUpload = async ({ gmail, messageId, part }) => {
 
   // Merge all images into one
   const mergedImagePath = 'temp/attachments/' + filename + '_merged.png'
+  console.log('🚀  mergedImagePath:', mergedImagePath)
+
   await sharp({
     create: {
       width: firstImageMetadata.width,
@@ -75,6 +77,8 @@ export const convertFileAndUpload = async ({ gmail, messageId, part }) => {
       contentType: 'image/png',
       upsert: true,
     })
+
+  console.log('🚀  data:', data)
 
   if (error) {
     throw new Error('Failed to upload file:' + error.message)

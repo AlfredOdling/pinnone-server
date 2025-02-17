@@ -134,6 +134,15 @@ export const scanEmailAccount = async ({
         }: ${payload?.headers?.find((h) => h.name === 'Subject')?.value}`,
       })
 
+      console.log(
+        '🚀  subject:',
+        payload?.headers?.find((h) => h.name === 'Subject')?.value
+      )
+      console.log(
+        '🚀  from:',
+        payload?.headers?.find((h) => h.name === 'From')?.value
+      )
+
       if (hasAttachments) {
         let foundPdf = false
 
@@ -146,6 +155,8 @@ export const scanEmailAccount = async ({
             part.body.attachmentId &&
             part.filename.includes('pdf')
           ) {
+            console.log('🚀  filename:', part.filename)
+
             await analyzeReceipt({
               orgUser,
               gmail,

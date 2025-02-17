@@ -34,14 +34,14 @@ export const checkForDuplicates = async ({ res, organization_id }) => {
       receipt.ocr === res.ocr &&
       receipt.total_cost === res.total_cost
 
-    console.log(
-      '🚀  duplication reasoning:',
-
-      isDuplicate,
-      res.vendor_name_raw,
-      formatDate(receipt.renewal_start_date),
-      res.renewal_start_date
-    )
+    if (isDuplicate) {
+      console.log(
+        '🚀  duplication reasoning:',
+        res.vendor_name_raw,
+        formatDate(receipt.renewal_start_date),
+        res.renewal_start_date
+      )
+    }
 
     if (isDuplicate) break
   }

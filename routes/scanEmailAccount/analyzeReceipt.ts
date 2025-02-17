@@ -34,6 +34,8 @@ export const analyzeReceipt = async ({
   owner_org_user_id: number
   type: string
 }) => {
+  console.log('🚀  analyzeReceipt---')
+  console.log('🚀  type:', type)
   await updateEmailAccountLastScannedDate({ email, organization_id })
 
   try {
@@ -51,6 +53,7 @@ export const analyzeReceipt = async ({
     } else if (type === 'pdf') {
       fileUrl = await convertFileAndUpload({ gmail, messageId, part })
     }
+    console.log('🚀  fileUrl:', fileUrl)
 
     const res = await analyzeReceiptWithOpenAI(fileUrl.base64Image)
     console.log('🚀  res.is_a_receipt_or_invoice:', res.is_a_receipt_or_invoice)
