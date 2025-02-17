@@ -22,7 +22,7 @@ export const updateUsage = async ({ organization_id }) => {
     organization?.data || {}
 
   if (organization.error) throw organization.error
-  if (!onboarded) return
+  // if (!onboarded) return
 
   if (scanned_emails > 20) {
     await reportUsage({
