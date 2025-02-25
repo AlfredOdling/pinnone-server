@@ -12,30 +12,20 @@ import { createDuplicateLabel } from './createLabel'
 import { updateUsage } from './updateUsage'
 
 export const analyzeReceipt = async ({
-  orgUser,
   gmail,
-  tasksApi,
   messageId,
   part = [],
-  organization_id,
   email,
   msg,
-  owner_org_user_id,
   type,
 }: {
-  orgUser: any
   gmail: any
-  tasksApi: any
   messageId: string
   part?: any
-  organization_id: string
   email: string
   msg: any
-  owner_org_user_id: number
   type: string
 }) => {
-  await updateEmailAccountLastScannedDate({ email, organization_id })
-
   try {
     if (
       process.env.NODE_ENV === 'development' &&

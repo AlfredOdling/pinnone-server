@@ -18,6 +18,7 @@ import { emailReceipts } from './emailReceipts'
 import { googleAuth } from './scanEmailAccount/authGoogle'
 import { createCheckoutSession } from './stripeFunctions'
 import { scheduledTasks } from './scheduledTasks'
+import { googleAuthLeadGen } from './scanEmailAccount/authGoogleLeadGen'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -172,6 +173,14 @@ router.post('/ask-team', async (req: Request, res: Response) => {
 
 router.post('/auth/google', async (req, res) => {
   const tokens = await googleAuth({
+    code: req.body.code,
+    organization_id: req.body.organization_id,
+  })
+  res.json(tokens)
+})
+
+router.post('/google-auth-lead-gen', async (req, res) => {
+  const tokens = await googleAuthLeadGen({
     code: req.body.code,
     organization_id: req.body.organization_id,
   })
