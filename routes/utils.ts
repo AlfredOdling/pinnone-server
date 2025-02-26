@@ -38,7 +38,6 @@ export const updateNotification = async ({
     .eq('organization_id', organization_id)
 
 export const getOrgUsers = async ({ user_id }) => {
-  console.log('START getOrgUsers ---')
   console.log('🚀  user_id:', user_id)
 
   const { data: org_users, error } = await supabase
@@ -51,7 +50,6 @@ export const getOrgUsers = async ({ user_id }) => {
   if (error) {
     console.error('🚀  error:', error)
   }
-  console.log('END getOrgUsers ---')
 
   return org_users
 }

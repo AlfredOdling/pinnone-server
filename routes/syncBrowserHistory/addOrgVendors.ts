@@ -62,6 +62,7 @@ export const addOrgVendors = async ({
       root_domain: vendor.root_domain,
       organization_id,
       status: 'not_in_stack',
+      source: 'extension_scan',
     }))
   )
 

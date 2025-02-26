@@ -97,7 +97,7 @@ export const updateOfficialVendors = async ({
 
     log && console.log('🚀 3 vendors:', vendors)
 
-    if (!vendors?.data.length) {
+    if (!vendors?.data?.length) {
       log && console.log('🚀 4 No new vendors detected')
 
       await updateNotification({

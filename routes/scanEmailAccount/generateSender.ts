@@ -6,7 +6,7 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export const generateSender = async ({
+export const generateOrFetchSender = async ({
   senderName,
   organization_id,
 }: {

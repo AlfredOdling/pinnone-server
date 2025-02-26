@@ -6,7 +6,6 @@ import { OAuth2Client } from 'google-auth-library'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '../../types/supabase'
 import { analyzeReceipt } from './analyzeReceipt'
-import { createReceiptsLabel } from './createLabel'
 import { updateNotification } from '../utils'
 
 dotenv.config()
@@ -66,8 +65,6 @@ export const scanEmailAccount = async ({
       refresh_token: emailAccount.refresh_token,
     })
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client })
-    const tasksApi = google.tasks({ version: 'v1', auth: oAuth2Client })
-    const receiptsLabelId = await createReceiptsLabel(gmail)
 
     const filter =
       orgUser.filter_emails && orgUser.email_filter
@@ -88,20 +85,20 @@ export const scanEmailAccount = async ({
     const messages = response.data.messages || []
 
     for (const message of messages) {
-      const organization = await supabase
-        .from('organization')
-        .select('*')
-        .eq('id', organization_id)
-        .single()
+      // const organization = await supabase
+      //   .from('organization')
+      //   .select('*')
+      //   .eq('id', organization_id)
+      //   .single()
 
-      if (
-        organization.data.stripe_status !== 'paid' &&
-        organization.data.scanned_emails >= 20
-      ) {
-        return {
-          error: 'No scans left',
-        }
-      }
+      // if (
+      //   organization.data.stripe_status !== 'paid' &&
+      //   organization.data.scanned_emails >= 20
+      // ) {
+      //   return {
+      //     error: 'No scans left',
+      //   }
+      // }
 
       const msg = await gmail.users.messages.get({
         userId: 'me',
@@ -156,15 +153,12 @@ export const scanEmailAccount = async ({
             part.filename.includes('pdf')
           ) {
             await analyzeReceipt({
-              orgUser,
               gmail,
-              tasksApi,
               messageId: message.id!,
               part,
               organization_id,
               email,
               msg,
-              owner_org_user_id,
               type: 'pdf',
             })
             foundPdf = true
@@ -172,27 +166,12 @@ export const scanEmailAccount = async ({
         }
       } else if (!hasAttachments) {
         await analyzeReceipt({
-          orgUser,
           gmail,
-          tasksApi,
           messageId: message.id!,
           organization_id,
           email,
           msg,
-          owner_org_user_id,
           type: 'html_no_attachments',
-        })
-      }
-
-      if (orgUser?.sort_gmail) {
-        // Move message to Receipts label
-        await gmail.users.messages.modify({
-          userId: 'me',
-          id: message.id!,
-          requestBody: {
-            addLabelIds: [receiptsLabelId],
-            removeLabelIds: ['INBOX'],
-          },
         })
       }
     }
