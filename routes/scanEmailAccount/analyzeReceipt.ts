@@ -9,6 +9,7 @@ import { updateNotification } from '../utils'
 import { checkForDuplicates } from './checkForDuplicates'
 // import { updateUsage } from './updateUsage'
 import { insertOrgVendor } from './insertOrgVendor'
+import { generateTool } from './generateTool'
 
 export const analyzeReceipt = async ({
   gmail,
@@ -18,6 +19,7 @@ export const analyzeReceipt = async ({
   email,
   msg,
   type,
+  owner_org_user_id,
 }: {
   gmail: any
   messageId: string
@@ -26,6 +28,7 @@ export const analyzeReceipt = async ({
   email: string
   msg: any
   type: string
+  owner_org_user_id: number
 }) => {
   await updateEmailAccountLastScannedDate({ email, organization_id })
 
@@ -83,11 +86,11 @@ export const analyzeReceipt = async ({
       return new Error('Sender not found')
     }
 
-    // await generateTool({
-    //   organization_id,
-    //   sender,
-    //   owner_org_user_id,
-    // })
+    await generateTool({
+      organization_id,
+      sender,
+      owner_org_user_id,
+    })
 
     await insertReceipt({
       senderId: sender.id,

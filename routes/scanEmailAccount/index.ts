@@ -160,6 +160,7 @@ export const scanEmailAccount = async ({
               email,
               msg,
               type: 'pdf',
+              owner_org_user_id,
             })
             foundPdf = true
           }
@@ -172,6 +173,7 @@ export const scanEmailAccount = async ({
           email,
           msg,
           type: 'html_no_attachments',
+          owner_org_user_id,
         })
       }
     }
