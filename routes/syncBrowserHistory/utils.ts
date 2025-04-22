@@ -38,6 +38,15 @@ export function extractB2BRootDomain(url: string): string | null {
   }
 }
 
+export const getRootDomains = (browserHistory_) => {
+  let browserHistory = browserHistory_
+    .map(({ url }) => extractB2BRootDomain(url))
+    .filter((domain) => domain) // Remove null values
+    .filter((domain, index, self) => self.indexOf(domain) === index) // Dedupe
+
+  return browserHistory
+}
+
 /**
  * Get the root domains of new B2B urls. (app.xxx.com, railway.com/dashboard, etc.)
  */
@@ -130,7 +139,7 @@ export const detectNewDomains = async (browserHistory_) => {
   }
 }
 
-const splitURL = (url: string) => {
+export const splitURL = (url: string) => {
   // Remove the protocol (http, https) and split by slashes
   let parts = url.replace(/https?:\/\//, '').split('/')
   // Split the domain into its parts and merge with the rest of the path

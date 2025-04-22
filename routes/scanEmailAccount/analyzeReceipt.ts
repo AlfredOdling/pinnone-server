@@ -7,9 +7,7 @@ import { generateOrFetchSender } from './generateSender'
 import { insertReceipt } from './insertReceipt'
 import { updateNotification } from '../utils'
 import { checkForDuplicates } from './checkForDuplicates'
-// import { updateUsage } from './updateUsage'
-import { insertOrgVendor } from './insertOrgVendor'
-import { generateTool } from './generateTool'
+import { upsertTool } from './upsertTool'
 
 export const analyzeReceipt = async ({
   gmail,
@@ -86,12 +84,6 @@ export const analyzeReceipt = async ({
       return new Error('Sender not found')
     }
 
-    await generateTool({
-      organization_id,
-      sender,
-      owner_org_user_id,
-    })
-
     await insertReceipt({
       senderId: sender.id,
       res,
@@ -102,12 +94,11 @@ export const analyzeReceipt = async ({
       type,
     })
 
-    await insertOrgVendor({
+    await upsertTool({
       organization_id,
-      res,
+      sender,
+      owner_org_user_id,
     })
-
-    // await updateUsage({ organization_id })
   } catch (error) {
     console.error('Error in analyzeReceipt:', error)
 

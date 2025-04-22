@@ -1,10 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
-import { updateOfficialVendors } from './updateOfficialVendors'
 import { decrypt, updateNotification } from '../utils'
-import { addOrgVendors } from './addOrgVendors'
 import { updateUserActivity } from './pushNewUserActivity'
 import * as dotenv from 'dotenv'
 import { Database } from '../../types/supabase'
+import { enrichEmptyTools } from './enrichEmptyTools'
 
 dotenv.config()
 
@@ -36,15 +35,9 @@ export const syncBrowserHistory = async ({
     org_user_id,
   })
 
-  await updateOfficialVendors({
+  await enrichEmptyTools({
     browserHistory: unvisited_browser_history,
     organization_id,
-  })
-
-  await addOrgVendors({
-    browserHistory: unvisited_browser_history,
-    organization_id,
-    owner_org_user_id: org_user_id,
   })
 
   return await updateUserActivity({

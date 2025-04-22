@@ -37,8 +37,6 @@ export const updateUserActivity = async ({
   const tools = await supabase
     .from('tool')
     .select('*, sender(*)') // Select the vendors associated with the tools
-    .eq('is_tracking', true) // Filter the tools that the org is tracking
-    .eq('status', 'in_stack')
     .eq('organization_id', organization_id)
 
   log && console.log('🚀 0 tools:', tools.data.slice(0, 2))

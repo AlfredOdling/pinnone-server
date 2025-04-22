@@ -1,5 +1,32 @@
 import { z } from 'zod'
 
+export const Tool = z.object({
+  id: z.number(),
+  root_domain: z.string(),
+  name: z.string(),
+  description: z.string(),
+  logo_url: z.string(),
+  category: z.enum([
+    'IT',
+    'Product',
+    'Marketing',
+    'HR',
+    'Sales',
+    'Data & Analytics',
+    'Engineering',
+    'Finance',
+    'Customer Success',
+    'Legal',
+    'Other',
+  ]),
+  link_to_pricing_page: z.string(),
+  website: z.string(),
+})
+
+export const Tools = z.object({
+  children: z.array(Tool),
+})
+
 export const Vendor = z.object({
   name: z.string(),
   description: z.string(),
